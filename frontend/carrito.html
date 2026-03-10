@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fiestalandia | Mi Carrito</title>
+  <meta name="description" content="Revisa los servicios seleccionados para tu evento. Fiestalandia.">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/carrito.css">
+</head>
+
+<body>
+
+<header id="inicio">
+  <h1>🛒 Mi Carrito</h1>
+  <p>Revisa los servicios seleccionados para tu evento</p>
+</header>
+
+<nav>
+  <div class="nav-container">
+    <div class="logo">Fiestalandia</div>
+
+    <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <div class="menu" id="navMenu">
+      <a href="index.html">Inicio</a>
+      <a href="index.html#servicios">Servicios</a>
+      <a href="index.html#contacto">Contacto</a>
+      <a href="carrito.html" class="cart-link">
+        🛒 Carrito <span class="cart-badge" id="cartBadge">0</span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<main class="container">
+
+  <!-- Carrito vacío -->
+  <div id="carritoVacio" class="carrito-empty" style="display:none;">
+    <div class="empty-icon">🛒</div>
+    <h3>Tu carrito está vacío</h3>
+    <p>Agrega servicios desde nuestro catálogo para comenzar a armar tu evento ideal.</p>
+    <a href="index.html#servicios" class="btn-back">Explorar servicios</a>
+  </div>
+
+  <!-- Carrito con items -->
+  <div id="carritoContenido" style="display:none;">
+
+    <div class="carrito-items" id="carritoItems">
+      <!-- Items se renderizan dinámicamente -->
+    </div>
+
+    <div class="carrito-resumen">
+      <div class="resumen-card">
+        <h3>Resumen del pedido</h3>
+
+        <div class="resumen-lines" id="resumenLines">
+          <!-- Líneas dinámicas -->
+        </div>
+
+        <div class="resumen-divider"></div>
+
+        <div class="resumen-total">
+          <span>Total</span>
+          <span id="totalPrecio">$0</span>
+        </div>
+
+        <div class="resumen-actions">
+          <button class="btn-cotizar" onclick="solicitarCotizacion()">📩 Solicitar cotización</button>
+          <button class="btn-vaciar" onclick="vaciarCarrito()">🗑️ Vaciar carrito</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="back-btn-container">
+    <a href="index.html" class="btn-back">← Regresar al inicio</a>
+  </div>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-content">
+    <div class="footer-brand">
+      <h3>🎉 Fiestalandia</h3>
+      <p>Organizamos momentos inolvidables. Desde bodas y XV años hasta eventos corporativos.</p>
+    </div>
+    <div class="footer-links">
+      <h4>Enlaces rápidos</h4>
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="index.html#servicios">Servicios</a></li>
+        <li><a href="decoracion.html">Decoración</a></li>
+        <li><a href="index.html#contacto">Contacto</a></li>
+      </ul>
+    </div>
+    <div class="footer-social">
+      <h4>Redes sociales</h4>
+      <div class="footer-social-icons">
+        <a href="#" class="footer-social-icon" title="Facebook">📘</a>
+        <a href="#" class="footer-social-icon" title="Instagram">📷</a>
+        <a href="#" class="footer-social-icon" title="TikTok">🎵</a>
+        <a href="#" class="footer-social-icon" title="WhatsApp">💬</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 Fiestalandia — Todos los derechos reservados</p>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script src="js/carrito.js"></script>
+
+</body>
+</html>

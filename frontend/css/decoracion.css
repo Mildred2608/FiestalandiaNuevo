@@ -1,0 +1,103 @@
+/* ===== DECORACIÓN PAGE STYLES ===== */
+
+.deco-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 24px;
+}
+
+.deco-card {
+  background: white;
+  border-radius: 20px;
+  padding: 30px 25px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+  transition: all 0.35s ease;
+  border: 2px solid transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.deco-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 40px rgba(124,58,237,0.12);
+  border-color: #c084fc;
+}
+
+.deco-icon {
+  font-size: 2.8rem;
+  margin-bottom: 16px;
+}
+
+.deco-card h3 {
+  color: #7c3aed;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.deco-card p {
+  color: #6b7280;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  margin-bottom: 14px;
+  flex-grow: 1;
+}
+
+.deco-price {
+  color: #374151;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.deco-price span {
+  color: #ec4899;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.deco-card .btn {
+  align-self: stretch;
+  text-align: center;
+  padding: 11px 20px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.3s ease;
+}
+
+/* Back button */
+.back-btn-container {
+  text-align: center;
+  margin-top: 40px;
+  margin-bottom: 20px;
+}
+
+.btn-back {
+  display: inline-block;
+  padding: 14px 36px;
+  background: linear-gradient(135deg, #7c3aed, #ec4899);
+  color: white;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.btn-back:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(124,58,237,0.35);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .deco-grid {
+    grid-template-columns: 1fr;
+  }
+}

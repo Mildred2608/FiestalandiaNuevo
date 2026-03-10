@@ -3,88 +3,240 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fiestalandia | Inicio</title>
-
+  <title>Fiestalandia | Organización de Eventos</title>
+  <meta name="description" content="Fiestalandia — Organiza tu evento ideal en un solo lugar. Servicios de decoración, banquetes, música y más.">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
 
 <header id="inicio">
-  <h1>Fiestalandia</h1>
+  <h1>🎉 Fiestalandia</h1>
   <p>Organiza tu evento ideal en un solo lugar</p>
 </header>
 
 <nav>
   <div class="nav-container">
+    <div class="logo">Fiestalandia</div>
 
-    <div class="logo">
-      Fiestalandia
+    <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+      <span></span>
+      <span></span>
+      <span></span>
     </div>
 
-    <div class="menu">
+    <div class="menu" id="navMenu">
       <a href="#inicio">Inicio</a>
       <a href="#servicios">Servicios</a>
-      <a href="#detalle">Detalle</a>
+      <a href="#contacto">Contacto</a>
+      <a href="carrito.html" class="cart-link">
+        🛒 Carrito <span class="cart-badge" id="cartBadge">0</span>
+      </a>
     </div>
-
   </div>
 </nav>
 
 <main class="container">
 
-<section id="servicios">
+  <!-- ===== SERVICIOS ===== -->
+  <section id="servicios" class="fade-in">
+    <div class="section-title">
+      <h2>Servicios principales</h2>
+      <p>Selecciona una categoría para ver sus opciones y arma tu evento ideal.</p>
+    </div>
 
-<div class="section-title">
-<h2>Servicios principales</h2>
-<p>Selecciona una categoría para ver sus opciones.</p>
-</div>
+    <div class="cards">
 
-<div class="cards">
+      <div class="card">
+        <div class="card-icon">🏛️</div>
+        <h3>Lugar</h3>
+        <p>Salones, jardines y espacios para cualquier tipo de evento.</p>
+        <div class="card-buttons">
+          <button class="btn btn-primary" onclick="mostrarApartado('lugar')">Ver opciones</button>
+          <button class="btn btn-secondary" onclick="agregarServicioCarrito('Lugar para evento', 'Salón o jardín para tu evento', 8000)">🛒 Agregar</button>
+        </div>
+      </div>
 
-<div class="card" onclick="mostrarApartado('lugar')">
-<h3>Lugar</h3>
-<p>Salones, jardines y espacios para cualquier evento.</p>
-<button>Ver opciones</button>
-</div>
+      <div class="card">
+        <div class="card-icon">🎵</div>
+        <h3>Música</h3>
+        <p>DJ, grupos musicales y mariachis para ambientar tu fiesta.</p>
+        <div class="card-buttons">
+          <button class="btn btn-primary" onclick="mostrarApartado('musica')">Ver opciones</button>
+          <button class="btn btn-secondary" onclick="agregarServicioCarrito('Música para evento', 'DJ o grupo musical en vivo', 5000)">🛒 Agregar</button>
+        </div>
+      </div>
 
-<div class="card" onclick="mostrarApartado('musica')">
-<h3>Música</h3>
-<p>DJ, grupos musicales y mariachis.</p>
-<button>Ver opciones</button>
-</div>
+      <div class="card">
+        <div class="card-icon">🍽️</div>
+        <h3>Banquetes</h3>
+        <p>Comida, bebidas y postres deliciosos para tus invitados.</p>
+        <div class="card-buttons">
+          <button class="btn btn-primary" onclick="mostrarApartado('banquetes')">Ver opciones</button>
+          <button class="btn btn-secondary" onclick="agregarServicioCarrito('Banquete completo', 'Comida y bebidas para evento', 12000)">🛒 Agregar</button>
+        </div>
+      </div>
 
-<div class="card" onclick="mostrarApartado('banquetes')">
-<h3>Banquetes</h3>
-<p>Comida, bebidas y postres para tus invitados.</p>
-<button>Ver opciones</button>
-</div>
+      <div class="card">
+        <div class="card-icon">🎈</div>
+        <h3>Decoración</h3>
+        <p>Diseños temáticos y ambientación especial para tu evento.</p>
+        <div class="card-buttons">
+          <a href="decoracion.html" class="btn btn-primary" style="text-align:center;">Ver opciones</a>
+          <button class="btn btn-secondary" onclick="agregarServicioCarrito('Decoración básica', 'Decoración temática para evento', 3500)">🛒 Agregar</button>
+        </div>
+      </div>
 
-<div class="card" onclick="mostrarApartado('decoracion')">
-<h3>Decoración</h3>
-<p>Diseños temáticos y ambientación especial.</p>
-<button>Ver opciones</button>
-</div>
+    </div>
+  </section>
 
-</div>
-</section>
+  <!-- ===== DETALLE ===== -->
+  <section id="detalle" class="details-section">
+    <h3 id="titulo-detalle">Detalle del servicio</h3>
+    <div id="contenido-detalle" class="subcards"></div>
+  </section>
 
+  <!-- ===== CONTACTO ===== -->
+  <section id="contacto" class="contact-section fade-in">
+    <div class="section-title">
+      <h2>✨ Solicita tu evento</h2>
+      <p>Contáctanos y haz realidad la fiesta de tus sueños. ¡Te asesoramos sin compromiso!</p>
+    </div>
 
-<section id="detalle" class="details-section">
+    <div class="contact-grid">
+      <!-- Formulario -->
+      <div class="contact-form-card">
+        <h3>Envíanos un mensaje</h3>
+        <p class="form-subtitle">Completa el formulario y te responderemos en menos de 24 horas.</p>
 
-<h3 id="titulo-detalle">Detalle del servicio</h3>
+        <form id="contactForm" onsubmit="enviarFormulario(event)">
+          <div class="form-group">
+            <label for="nombre">Nombre completo</label>
+            <input type="text" id="nombre" name="nombre" placeholder="Ej: María García" required>
+          </div>
 
-<div id="contenido-detalle" class="subcards"></div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="email">Correo electrónico</label>
+              <input type="email" id="email" name="email" placeholder="correo@ejemplo.com" required>
+            </div>
+            <div class="form-group">
+              <label for="telefono">Teléfono</label>
+              <input type="tel" id="telefono" name="telefono" placeholder="(123) 456-7890" required>
+            </div>
+          </div>
 
-</section>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="tipoEvento">Tipo de evento</label>
+              <select id="tipoEvento" name="tipoEvento" required>
+                <option value="">Selecciona uno...</option>
+                <option value="boda">Boda</option>
+                <option value="xv">XV Años</option>
+                <option value="cumpleanos">Cumpleaños</option>
+                <option value="bautizo">Bautizo</option>
+                <option value="corporativo">Evento Corporativo</option>
+                <option value="graduacion">Graduación</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="fechaEvento">Fecha del evento</label>
+              <input type="date" id="fechaEvento" name="fechaEvento" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="mensaje">Mensaje</label>
+            <textarea id="mensaje" name="mensaje" placeholder="Cuéntanos sobre tu evento ideal..." rows="4"></textarea>
+          </div>
+
+          <button type="submit" class="btn-submit">📩 Enviar solicitud</button>
+        </form>
+      </div>
+
+      <!-- Info de contacto -->
+      <div class="contact-info-card">
+        <div class="info-box">
+          <h4>📍 Información de contacto</h4>
+          <div class="info-item">
+            <div class="info-icon">📞</div>
+            <div class="info-text">
+              <p><strong>Teléfono</strong></p>
+              <p>(123) 456-7890</p>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon">📧</div>
+            <div class="info-text">
+              <p><strong>Correo electrónico</strong></p>
+              <p>contacto@fiestalandia.com</p>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon">📍</div>
+            <div class="info-text">
+              <p><strong>Dirección</strong></p>
+              <p>Av. Celebración #100, Col. Fiesta, CP 01234</p>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon">🕐</div>
+            <div class="info-text">
+              <p><strong>Horario</strong></p>
+              <p>Lunes a Sábado, 9:00 - 19:00</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <h4>🌐 Síguenos en redes</h4>
+          <div class="social-links">
+            <a href="#" class="social-link" title="Facebook">📘</a>
+            <a href="#" class="social-link" title="Instagram">📷</a>
+            <a href="#" class="social-link" title="TikTok">🎵</a>
+            <a href="#" class="social-link" title="WhatsApp">💬</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
 </main>
 
+<!-- ===== FOOTER ===== -->
 <footer>
-<p>© 2026 Fiestalandia</p>
+  <div class="footer-content">
+    <div class="footer-brand">
+      <h3>🎉 Fiestalandia</h3>
+      <p>Organizamos momentos inolvidables. Desde bodas y XV años hasta eventos corporativos, somos tu mejor opción para celebrar.</p>
+    </div>
+    <div class="footer-links">
+      <h4>Enlaces rápidos</h4>
+      <ul>
+        <li><a href="#inicio">Inicio</a></li>
+        <li><a href="#servicios">Servicios</a></li>
+        <li><a href="decoracion.html">Decoración</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+        <li><a href="carrito.html">Mi carrito</a></li>
+      </ul>
+    </div>
+    <div class="footer-social">
+      <h4>Redes sociales</h4>
+      <div class="footer-social-icons">
+        <a href="#" class="footer-social-icon" title="Facebook">📘</a>
+        <a href="#" class="footer-social-icon" title="Instagram">📷</a>
+        <a href="#" class="footer-social-icon" title="TikTok">🎵</a>
+        <a href="#" class="footer-social-icon" title="WhatsApp">💬</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 Fiestalandia — Todos los derechos reservados</p>
+  </div>
 </footer>
 
-<script src="js/app.js"></script>
+<script src="js/main.js"></script>
 
 </body>
 </html>
