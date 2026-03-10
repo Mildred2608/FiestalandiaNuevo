@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fiestalandia | Inicio</title>
+
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+<header id="inicio">
+  <h1>Fiestalandia</h1>
+  <p>Organiza tu evento ideal en un solo lugar</p>
+</header>
+
+<nav>
+  <div class="nav-container">
+
+    <div class="logo">
+      Fiestalandia
+    </div>
+
+    <div class="menu">
+      <a href="#inicio">Inicio</a>
+      <a href="#servicios">Servicios</a>
+      <a href="#detalle">Detalle</a>
+    </div>
+
+  </div>
+</nav>
+
+<main class="container">
+
+<section id="servicios">
+
+<div class="section-title">
+<h2>Servicios principales</h2>
+<p>Selecciona una categoría para ver sus opciones.</p>
+</div>
+
+<div class="cards">
+
+<div class="card" onclick="mostrarApartado('lugar')">
+<h3>Lugar</h3>
+<p>Salones, jardines y espacios para cualquier evento.</p>
+<button>Ver opciones</button>
+</div>
+
+<div class="card" onclick="mostrarApartado('musica')">
+<h3>Música</h3>
+<p>DJ, grupos musicales y mariachis.</p>
+<button>Ver opciones</button>
+</div>
+
+<div class="card" onclick="mostrarApartado('banquetes')">
+<h3>Banquetes</h3>
+<p>Comida, bebidas y postres para tus invitados.</p>
+<button>Ver opciones</button>
+</div>
+
+<div class="card" onclick="mostrarApartado('decoracion')">
+<h3>Decoración</h3>
+<p>Diseños temáticos y ambientación especial.</p>
+<button>Ver opciones</button>
+</div>
+
+</div>
+</section>
+
+
+<section id="detalle" class="details-section">
+
+<h3 id="titulo-detalle">Detalle del servicio</h3>
+
+<div id="contenido-detalle" class="subcards"></div>
+
+</section>
+
+</main>
+
+<footer>
+<p>© 2026 Fiestalandia</p>
+</footer>
+
+<script src="js/app.js"></script>
+
+</body>
+</html>
