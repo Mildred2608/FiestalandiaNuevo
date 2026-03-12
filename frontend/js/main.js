@@ -1,7 +1,7 @@
 /* ===== DATOS DE SERVICIOS ===== */
 const datosServicios = {
 
-  lugar: {
+ /* lugar: {
     titulo: "Opciones de Lugar",
     items: [
       { nombre: "Salones de fiesta", descripcion: "Espacios cerrados para bodas y eventos.", precio: 8000 },
@@ -9,7 +9,7 @@ const datosServicios = {
       { nombre: "Terrazas", descripcion: "Espacios modernos para celebraciones.", precio: 10000 },
       { nombre: "Haciendas", descripcion: "Lugares amplios y elegantes.", precio: 15000 }
     ]
-  },
+  }, */
 
   musica: {
     titulo: "Opciones de Música",
@@ -38,6 +38,40 @@ function mostrarApartado(servicio) {
   // Decoración redirige a su propia página
   if (servicio === 'decoracion') {
     window.location.href = 'decoracion.html';
+    return;
+  }
+
+  const detalle = datosServicios[servicio];
+  if (!detalle) return;
+
+  const tituloDetalle = document.getElementById("titulo-detalle");
+  const contenidoDetalle = document.getElementById("contenido-detalle");
+  const seccionDetalle = document.getElementById("detalle");
+
+  tituloDetalle.textContent = detalle.titulo;
+  contenidoDetalle.innerHTML = "";
+
+  detalle.items.forEach(item => {
+    const div = document.createElement("div");
+    div.classList.add("subcard");
+    div.innerHTML = `
+      <h4>${item.nombre}</h4>
+      <p>${item.descripcion}</p>
+      <p class="subcard-price">Desde $${item.precio.toLocaleString('es-MX')}</p>
+      <button class="btn" onclick="agregarServicioCarrito('${item.nombre}', '${item.descripcion}', ${item.precio})">🛒 Agregar al carrito</button>
+    `;
+    contenidoDetalle.appendChild(div);
+  });
+
+  seccionDetalle.classList.add("active");
+  seccionDetalle.scrollIntoView({ behavior: "smooth" });
+}
+
+/* ===== MOSTRAR DETALLE DE SERVICIO ===== */
+function mostrarApartado(servicio) {
+  // Decoración redirige a su propia página
+  if (servicio === 'opciones') {
+    window.location.href = 'opciones.html';
     return;
   }
 
