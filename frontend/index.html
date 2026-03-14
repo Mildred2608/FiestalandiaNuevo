@@ -7,14 +7,15 @@
   <meta name="description" content="Fiestalandia — Organiza tu evento ideal en un solo lugar. Servicios de decoración, banquetes, música y más.">
   <link rel="stylesheet" href="css/styles.css">
 </head>
-
 <body>
 
+<!-- ===== HEADER ===== -->
 <header id="inicio">
   <h1>🎉 Fiestalandia</h1>
   <p>Organiza tu evento ideal en un solo lugar</p>
 </header>
 
+<!-- ===== NAVEGACIÓN ===== -->
 <nav>
   <div class="nav-container">
     <div class="logo">Fiestalandia</div>
@@ -32,10 +33,12 @@
       <a href="carrito.html" class="cart-link">
         🛒 Carrito <span class="cart-badge" id="cartBadge">0</span>
       </a>
+      <a href="#" class="btn-login" id="loginBtn">🔐 Login</a>
     </div>
   </div>
 </nav>
 
+<!-- ===== CONTENIDO PRINCIPAL ===== -->
 <main class="container">
 
   <!-- ===== SERVICIOS ===== -->
@@ -46,17 +49,18 @@
     </div>
 
     <div class="cards">
-
+      <!-- Tarjeta: Lugar -->
       <div class="card">
         <div class="card-icon">🏛️</div>
         <h3>Lugar</h3>
         <p>Salones, jardines y espacios para cualquier tipo de evento.</p>
         <div class="card-buttons">
-          <a href="opciones.html" class="btn btn-primary" style="text-align:center;">Ver opciones</a>
+          <a href="opciones.html" class="btn btn-primary">Ver opciones</a>
           <button class="btn btn-secondary" onclick="agregarServicioCarrito('Lugar para evento', 'Salón o jardín para tu evento', 8000)">🛒 Agregar</button>
         </div>
       </div>
 
+      <!-- Tarjeta: Música -->
       <div class="card">
         <div class="card-icon">🎵</div>
         <h3>Música</h3>
@@ -67,6 +71,7 @@
         </div>
       </div>
 
+      <!-- Tarjeta: Banquetes -->
       <div class="card">
         <div class="card-icon">🍽️</div>
         <h3>Banquetes</h3>
@@ -77,20 +82,20 @@
         </div>
       </div>
 
+      <!-- Tarjeta: Decoración -->
       <div class="card">
         <div class="card-icon">🎈</div>
         <h3>Decoración</h3>
         <p>Diseños temáticos y ambientación especial para tu evento.</p>
         <div class="card-buttons">
-          <a href="decoracion.html" class="btn btn-primary" style="text-align:center;">Ver opciones</a>
+          <a href="decoracion.html" class="btn btn-primary">Ver opciones</a>
           <button class="btn btn-secondary" onclick="agregarServicioCarrito('Decoración básica', 'Decoración temática para evento', 3500)">🛒 Agregar</button>
         </div>
       </div>
-
     </div>
   </section>
 
-  <!-- ===== DETALLE ===== -->
+  <!-- ===== DETALLE DE SERVICIOS ===== -->
   <section id="detalle" class="details-section">
     <h3 id="titulo-detalle">Detalle del servicio</h3>
     <div id="contenido-detalle" class="subcards"></div>
@@ -104,7 +109,7 @@
     </div>
 
     <div class="contact-grid">
-      <!-- Formulario -->
+      <!-- Formulario de contacto -->
       <div class="contact-form-card">
         <h3>Envíanos un mensaje</h3>
         <p class="form-subtitle">Completa el formulario y te responderemos en menos de 24 horas.</p>
@@ -155,7 +160,7 @@
         </form>
       </div>
 
-      <!-- Info de contacto -->
+      <!-- Información de contacto -->
       <div class="contact-info-card">
         <div class="info-box">
           <h4>📍 Información de contacto</h4>
@@ -201,7 +206,6 @@
       </div>
     </div>
   </section>
-
 </main>
 
 <!-- ===== FOOTER ===== -->
@@ -236,7 +240,114 @@
   </div>
 </footer>
 
-<script src="js/main.js"></script>
+<!-- ===== MODAL DE LOGIN/REGISTRO ===== -->
+<div class="modal" id="authModal" style="display: none;">
+  <div class="modal-content modal-auth">
+    <span class="modal-close" id="closeAuthModal">&times;</span>
+    
+    <div class="modal-header">
+      <div class="modal-logo">🎉</div>
+      <h2>¡Bienvenido!</h2>
+      <p>Inicia sesión para continuar</p>
+    </div>
 
+    <!-- FORMULARIO DE LOGIN -->
+    <form id="formLogin" class="auth-form active">
+      <div class="form-group">
+        <label></i> Correo electrónico</label>
+        <input type="email" id="loginEmail" placeholder="tu@email.com" required>
+        <div class="error-message" id="loginEmailError"></div>
+      </div>
+
+      <div class="form-group">
+        <label></i> Contraseña</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" required>
+        <div class="error-message" id="loginPasswordError"></div>
+      </div>
+
+      <button type="submit" class="modal-btn" id="btnLogin">
+        <span>Iniciar Sesión</span>
+      </button>
+
+      <div class="auth-switch">
+        ¿No tienes cuenta? 
+        <a href="#" id="switchToRegister">Regístrate aquí</a>
+      </div>
+    </form>
+
+    <!-- FORMULARIO DE REGISTRO -->
+    <form id="formRegister" class="auth-form">
+      <div class="form-group">
+        <label></i> Nombre completo</label>
+        <input type="text" id="regName" placeholder="Juan Pérez García" required>
+        <div class="error-message" id="regNameError"></div>
+      </div>
+
+      <div class="form-group">
+        <label></i> Correo electrónico</label>
+        <input type="email" id="regEmail" placeholder="tu@email.com" required>
+        <div class="error-message" id="regEmailError"></div>
+      </div>
+
+      <div class="form-group">
+        <label></i> Teléfono</label>
+        <input type="tel" id="regTelefono" placeholder="55-1234-5678" required>
+        <div class="input-hint">10 dígitos, formato: 55-1234-5678</div>
+        <div class="error-message" id="regTelefonoError"></div>
+      </div>
+
+      <div class="form-group">
+        <label></i> Contraseña</label>
+        <input type="password" id="regPassword" placeholder="••••••••" required>
+        <div class="password-strength">
+          <div class="strength-bar">
+            <div class="strength-segment"></div>
+            <div class="strength-segment"></div>
+            <div class="strength-segment"></div>
+            <div class="strength-segment"></div>
+          </div>
+          <div class="strength-text">Mínimo 8 caracteres, 1 mayúscula, 1 número</div>
+        </div>
+        <div class="error-message" id="regPasswordError"></div>
+      </div>
+
+      <div class="form-group">
+        <label><i>✓</i> Confirmar contraseña</label>
+        <input type="password" id="regConfirmPassword" placeholder="••••••••" required>
+        <div class="error-message" id="regConfirmError"></div>
+      </div>
+
+      <button type="submit" class="modal-btn" id="btnRegister">
+        <span>Crear Cuenta</span>
+      </button>
+
+      <div class="auth-switch">
+        ¿Ya tienes cuenta? 
+        <a href="#" id="switchToLogin">Inicia sesión</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== MODAL DE PERFIL ===== -->
+<div class="modal" id="perfilModal" style="display: none;">
+  <div class="modal-content modal-perfil">
+    <span class="modal-close" id="closePerfilModal">&times;</span>
+    
+    <div class="modal-header">
+      <div class="modal-logo">👤</div>
+      <h2>Mi Perfil</h2>
+      <p>Tus datos de cuenta</p>
+    </div>
+
+    <div class="perfil-info" id="perfilInfo"></div>
+
+    <button class="modal-btn" id="btnCerrarPerfil">Cerrar</button>
+  </div>
+</div>
+
+<!-- ===== SCRIPTS ===== -->
+<script src="js/auth.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
