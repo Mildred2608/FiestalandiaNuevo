@@ -78,9 +78,9 @@ function mostrarToast(mensaje, tipo = 'info') {
     if (tipo === 'warning') toast.classList.add('warning');
     
     let icono = '📌';
-    if (tipo === 'success') icono = '✅';
-    if (tipo === 'error') icono = '❌';
-    if (tipo === 'warning') icono = '⚠️';
+    if (tipo === 'success');
+    if (tipo === 'error');
+    if (tipo === 'warning');
     
     toast.innerHTML = `<span class="toast-icon">${icono}</span>${mensaje}`;
     document.body.appendChild(toast);
@@ -145,11 +145,11 @@ function enviarFormulario(e) {
     const fechaEvento = document.getElementById('fechaEvento').value;
 
     if (!nombre || !email || !telefono || !tipoEvento || !fechaEvento) {
-        mostrarToast('⚠️ Por favor completa todos los campos requeridos', 'warning');
+        mostrarToast('Por favor completa todos los campos requeridos', 'warning');
         return;
     }
 
-    mostrarToast('✅ ¡Solicitud enviada! Te contactaremos pronto.', 'success');
+    mostrarToast('¡Solicitud enviada! Te contactaremos pronto.', 'success');
     document.getElementById('contactForm').reset();
 }
 
@@ -308,6 +308,40 @@ function cerrarModal(modalId) {
     }
 }
 
+// ===== FUNCIONES DE LIMPIEZA DE FORMULARIOS =====
+function limpiarFormularioLogin() {
+    document.getElementById('loginEmail').value = '';
+    document.getElementById('loginPassword').value = '';
+    document.getElementById('loginEmailError').textContent = '';
+    document.getElementById('loginPasswordError').textContent = '';
+    
+    document.getElementById('loginEmail').classList.remove('error');
+    document.getElementById('loginPassword').classList.remove('error');
+}
+
+function limpiarFormularioRegistro() {
+    document.getElementById('regName').value = '';
+    document.getElementById('regEmail').value = '';
+    document.getElementById('regTelefono').value = '';
+    document.getElementById('regPassword').value = '';
+    document.getElementById('regConfirmPassword').value = '';
+    
+    document.getElementById('regNameError').textContent = '';
+    document.getElementById('regEmailError').textContent = '';
+    document.getElementById('regTelefonoError').textContent = '';
+    document.getElementById('regPasswordError').textContent = '';
+    document.getElementById('regConfirmError').textContent = '';
+    
+    document.getElementById('regName').classList.remove('error');
+    document.getElementById('regEmail').classList.remove('error');
+    document.getElementById('regTelefono').classList.remove('error');
+    document.getElementById('regPassword').classList.remove('error');
+    document.getElementById('regConfirmPassword').classList.remove('error');
+    
+    const segments = document.querySelectorAll('.strength-segment');
+    segments.forEach(seg => seg.classList.remove('active'));
+}
+
 // ===== INICIALIZACIÓN DE MODALES =====
 function initModales() {
     const modal = document.getElementById('authModal');
@@ -318,31 +352,62 @@ function initModales() {
     const switchToLogin = document.getElementById('switchToLogin');
     const formLogin = document.getElementById('formLogin');
     const formRegister = document.getElementById('formRegister');
+    const loginBtn = document.getElementById('loginBtn');
     
-    // Cerrar modales
-    closeBtn.onclick = () => cerrarModal('authModal');
-    if (closePerfil) closePerfil.onclick = () => cerrarModal('perfilModal');
-    if (btnCerrarPerfil) btnCerrarPerfil.onclick = () => cerrarModal('perfilModal');
+    // Limpiar formularios al abrir el modal
+    loginBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (!auth.isAuthenticated()) {
+            limpiarFormularioLogin();
+            limpiarFormularioRegistro();
+            formLogin.classList.add('active');
+            formRegister.classList.remove('active');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+    });
+    
+    // Limpiar al cambiar a registro
+    switchToRegister.addEventListener('click', (e) => {
+        e.preventDefault();
+        limpiarFormularioRegistro();
+        formLogin.classList.remove('active');
+        formRegister.classList.add('active');
+    });
+    
+    // Limpiar al cambiar a login
+    switchToLogin.addEventListener('click', (e) => {
+        e.preventDefault();
+        limpiarFormularioLogin();
+        formRegister.classList.remove('active');
+        formLogin.classList.add('active');
+    });
+    
+    // Limpiar al cerrar modal
+    closeBtn.onclick = () => {
+        cerrarModal('authModal');
+        limpiarFormularioLogin();
+        limpiarFormularioRegistro();
+    };
+    
+    if (closePerfil) {
+        closePerfil.onclick = () => cerrarModal('perfilModal');
+    }
+    
+    if (btnCerrarPerfil) {
+        btnCerrarPerfil.onclick = () => cerrarModal('perfilModal');
+    }
     
     // Cerrar al hacer click fuera
     window.addEventListener('click', (e) => {
         if (e.target.classList.contains('modal')) {
             e.target.style.display = 'none';
             document.body.style.overflow = 'auto';
+            if (e.target.id === 'authModal') {
+                limpiarFormularioLogin();
+                limpiarFormularioRegistro();
+            }
         }
-    });
-    
-    // Switches entre login y registro
-    switchToRegister.addEventListener('click', (e) => {
-        e.preventDefault();
-        formLogin.classList.remove('active');
-        formRegister.classList.add('active');
-    });
-    
-    switchToLogin.addEventListener('click', (e) => {
-        e.preventDefault();
-        formRegister.classList.remove('active');
-        formLogin.classList.add('active');
     });
     
     // Formato de teléfono
@@ -405,9 +470,11 @@ function initModales() {
         const result = await auth.login(email, password);
         
         if (result.success) {
-            mostrarToast(' ¡Bienvenido!', 'success');
+            mostrarToast('¡Bienvenido!', 'success');
             cerrarModal('authModal');
             actualizarBotonLogin();
+            limpiarFormularioLogin();
+            limpiarFormularioRegistro();
         } else {
             mostrarToast(result.error, 'error');
         }
@@ -457,9 +524,11 @@ function initModales() {
         });
         
         if (result.success) {
-            mostrarToast(' ¡Registro exitoso!', 'success');
+            mostrarToast('¡Registro exitoso!', 'success');
             cerrarModal('authModal');
             actualizarBotonLogin();
+            limpiarFormularioLogin();
+            limpiarFormularioRegistro();
         } else {
             mostrarToast(result.error, 'error');
         }
