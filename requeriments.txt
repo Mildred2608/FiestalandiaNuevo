@@ -1,0 +1,24 @@
+# SOFTWARE REQUERIDO (instalación manual)
+
+
+#  INSTALAR NODE.JS (MANUAL)
+
+   Descargar: https://nodejs.org/ (versión LTS)
+   Verificar: node --version
+
+#  INSTALAR DEPENDENCIAS (AUTOMÁTICO)
+   cd backend
+   npm install
+
+#  CONFIGURAR
+   cp .env.example .env
+   # Editar .env con usuario/contraseña de MySQL
+
+#  CREAR BASE DE DATOS
+   # Ejecutar database.sql en MySQL Workbench
+
+#  INICIAR
+   npm run dev
+
+#  ABRIR FRONTEND
+   # frontend/index.html en navegador
