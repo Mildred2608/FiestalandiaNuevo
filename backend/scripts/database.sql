@@ -169,29 +169,175 @@ CREATE INDEX idx_detalle_cotizacion ON detalle_cotizacion(cotizacion_id);
 CREATE INDEX idx_servicio_subcategoria ON servicios(subcategoria_id);
 CREATE INDEX idx_proveedor_email ON proveedores(email);
 
--- views
+-- ============================================
+-- VISTA PÚBLICA: Servicios activos (para todos)
+-- ============================================
 CREATE OR REPLACE VIEW vista_servicios_publicos AS
-SELECT s.id, c.nombre AS categoria, sc.nombre AS subcategoria, s.nombre,
-       s.descripcion, s.precio_base
+SELECT 
+    s.id,
+    s.nombre,
+    s.descripcion,
+    s.precio_base,
+    sc.nombre AS subcategoria,
+    sc.id AS subcategoria_id,
+    c.nombre AS categoria,
+    c.id AS categoria_id,
+    p.nombre AS proveedor,
+    p.id AS proveedor_id
 FROM servicios s
 LEFT JOIN subcategorias sc ON s.subcategoria_id = sc.id
 LEFT JOIN categorias c ON sc.categoria_id = c.id
-WHERE s.activo = 1;
+LEFT JOIN proveedores p ON s.proveedor_id = p.id
+WHERE s.activo = 1
+ORDER BY c.nombre, sc.nombre, s.nombre;
 
+-- ============================================
+-- VISTA PARA ADMIN: Todos los servicios
+-- ============================================
+CREATE OR REPLACE VIEW vista_admin_servicios AS
+SELECT 
+    s.id,
+    s.nombre,
+    s.descripcion,
+    s.precio_base,
+    s.activo,
+    s.creado_en,
+    sc.nombre AS subcategoria,
+    sc.id AS subcategoria_id,
+    c.nombre AS categoria,
+    c.id AS categoria_id,
+    p.nombre AS proveedor,
+    p.id AS proveedor_id,
+    p.email AS proveedor_email
+FROM servicios s
+LEFT JOIN subcategorias sc ON s.subcategoria_id = sc.id
+LEFT JOIN categorias c ON sc.categoria_id = c.id
+LEFT JOIN proveedores p ON s.proveedor_id = p.id
+ORDER BY s.id DESC;
+
+-- ============================================
+-- VISTA PARA ADMIN: Todos los proveedores
+-- ============================================
+CREATE OR REPLACE VIEW vista_admin_proveedores AS
+SELECT 
+    id,
+    nombre,
+    email,
+    telefono,
+    direccion,
+    aprobado,
+    creado_en
+FROM proveedores
+ORDER BY id DESC;
+
+-- ============================================
+-- VISTA PARA ADMIN: Todos los clientes
+-- ============================================
+CREATE OR REPLACE VIEW vista_admin_clientes AS
+SELECT 
+    id,
+    nombre,
+    email,
+    telefono,
+    rol,
+    creado_en
+FROM clientes
+ORDER BY id DESC;
+
+-- ============================================
+-- VISTA PARA ADMIN: Todas las cotizaciones
+-- ============================================
+CREATE OR REPLACE VIEW vista_admin_cotizaciones AS
+SELECT 
+    c.id,
+    c.evento_id,
+    c.total,
+    c.estado,
+    c.creado_en,
+    cl.nombre AS cliente,
+    cl.email AS cliente_email,
+    cl.id AS cliente_id,
+    e.nombre_evento
+FROM cotizaciones c
+LEFT JOIN eventos e ON c.evento_id = e.id
+LEFT JOIN clientes cl ON e.cliente_id = cl.id
+ORDER BY c.id DESC;
+
+-- ============================================
+-- VISTA PARA ADMIN: Todos los eventos
+-- ============================================
 CREATE OR REPLACE VIEW vista_admin_eventos AS
-SELECT e.id AS evento_id,
-       e.nombre_evento,
-       t.nombre AS tipo,
-       e.fecha,
-       e.invitados,
-       e.ubicacion,
-       e.mensaje,
-       c.id AS cliente_id,
-       c.nombre AS cliente_nombre,
-       c.email AS cliente_email
+SELECT 
+    e.id AS evento_id,
+    e.nombre_evento,
+    t.nombre AS tipo,
+    e.fecha,
+    e.invitados,
+    e.ubicacion,
+    e.mensaje,
+    c.id AS cliente_id,
+    c.nombre AS cliente_nombre,
+    c.email AS cliente_email
 FROM eventos e
 LEFT JOIN clientes c ON e.cliente_id = c.id
-LEFT JOIN tipos_evento t ON e.tipo_id = t.id;
+LEFT JOIN tipos_evento t ON e.tipo_id = t.id
+ORDER BY e.id DESC;
+
+-- ============================================
+-- VISTA PARA CLIENTE: Sus cotizaciones
+-- (NOTA: El filtro por cliente_id se hará en el backend)
+-- ============================================
+CREATE OR REPLACE VIEW vista_cliente_cotizaciones AS
+SELECT 
+    c.id,
+    c.evento_id,
+    c.total,
+    c.estado,
+    c.creado_en,
+    e.nombre_evento,
+    e.cliente_id
+FROM cotizaciones c
+JOIN eventos e ON c.evento_id = e.id;
+
+-- ============================================
+-- VISTA PARA CLIENTE: Sus eventos
+-- (NOTA: El filtro por cliente_id se hará en el backend)
+-- ============================================
+CREATE OR REPLACE VIEW vista_cliente_eventos AS
+SELECT 
+    id,
+    nombre_evento,
+    fecha,
+    invitados,
+    ubicacion,
+    creado_en,
+    cliente_id
+FROM eventos;
+
+-- ============================================
+-- VISTA PARA CLIENTE: Su carrito
+-- (NOTA: Requiere que la tabla carrito exista)
+-
+CREATE OR REPLACE VIEW vista_cliente_carrito AS
+SELECT 
+    ca.id AS carrito_id,
+    ca.cantidad,
+    ca.fecha_agregado,
+    ca.usuario_id,
+    s.id AS servicio_id,
+    s.nombre,
+    s.descripcion,
+    s.precio_base,
+    sc.nombre AS subcategoria,
+    p.nombre AS proveedor
+FROM carrito ca
+JOIN servicios s ON ca.servicio_id = s.id
+LEFT JOIN subcategorias sc ON s.subcategoria_id = sc.id
+LEFT JOIN proveedores p ON s.proveedor_id = p.id;
+
+
+-- VERIFICAR VISTAS CREADAS
+SHOW FULL TABLES WHERE Table_type = 'VIEW';
 
 -- user accounts creation (manual)
 -- CREATE USER 'fiesta_admin'@'localhost' IDENTIFIED BY '12345678';

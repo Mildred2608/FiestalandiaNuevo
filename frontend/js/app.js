@@ -71,3 +71,23 @@ seccionDetalle.classList.add("active");
 seccionDetalle.scrollIntoView({behavior:"smooth"});
 
 }
+
+
+// Obtener categorías para las cards del inicio
+app.get('/api/categorias', async (req, res) => {
+    try {
+        const { pool } = require('./config/database');
+        const [rows] = await pool.query(`
+            SELECT id, nombre, descripcion, imagen_url 
+            FROM categorias 
+            ORDER BY nombre
+        `);
+        res.json(rows);
+    } catch (error) {
+        console.error('Error al obtener categorías:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error al obtener categorías' 
+        });
+    }
+});

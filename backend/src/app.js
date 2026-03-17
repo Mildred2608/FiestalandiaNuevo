@@ -1,4 +1,4 @@
-// src/app.js
+// backend/src/app.js
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
@@ -6,9 +6,13 @@ const dotenv = require('dotenv');
 // Cargar variables de entorno
 dotenv.config();
 
-// Importar conexión a BD y rutas
+// Importar conexión a BD
 const { testConnection } = require('./config/database');
+
+// Importar rutas
 const authRoutes = require('./routes/authRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+const publicRoutes = require('./routes/publicRoutes');
 
 const app = express();
 
@@ -17,23 +21,45 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Rutas
+// Probar conexión a BD
+testConnection();
+
+// ============================================
+// RUTAS DE LA API
+// ============================================
+
+// Rutas de autenticación (públicas)
 app.use('/api/auth', authRoutes);
 
-// Ruta de prueba
+// Rutas de administrador (protegidas)
+app.use('/api/admin', adminRoutes);
+app.use('/api', publicRoutes); 
+
+// ============================================
+// RUTA DE BIENVENIDA
+// ============================================
 app.get('/', (req, res) => {
     res.json({
         message: 'API de Fiestalandia funcionando ',
         status: 'OK',
         endpoints: {
-            login: 'POST /api/auth/login',
-            register: 'POST /api/auth/register'
+            auth: {
+                login: 'POST /api/auth/login',
+                register: 'POST /api/auth/register'
+            },
+            admin: {
+                categorias: 'GET /api/admin/categorias',
+                proveedores: 'GET /api/admin/proveedores',
+                servicios: 'POST /api/admin/servicios'
+            }
         },
         timestamp: new Date().toISOString()
     });
 });
 
-// Ruta para probar la BD
+// ============================================
+// RUTA PARA PROBAR CONEXIÓN A BD
+// ============================================
 app.get('/api/test-db', async (req, res) => {
     try {
         const { pool } = require('./config/database');
@@ -50,6 +76,28 @@ app.get('/api/test-db', async (req, res) => {
             error: error.message
         });
     }
+});
+
+// ============================================
+// MANEJO DE ERRORES 404
+// ============================================
+app.use((req, res) => {
+    res.status(404).json({
+        success: false,
+        message: 'Ruta no encontrada'
+    });
+});
+
+// ============================================
+// MANEJO DE ERRORES GLOBAL
+// ============================================
+app.use((err, req, res, next) => {
+    console.error('Error global:', err.stack);
+    res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
 });
 
 module.exports = app;

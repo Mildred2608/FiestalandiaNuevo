@@ -77,7 +77,7 @@ const authController = {
         }
     },
 
-    // REGISTER
+    // REGISTER (solo para clientes)
     async register(req, res) {
         try {
             const { nombre, email, telefono, direccion, password } = req.body;
@@ -113,10 +113,10 @@ const authController = {
             const salt = await bcrypt.genSalt(10);
             const password_hash = await bcrypt.hash(password, salt);
 
-            // Crear usuario
+            // Crear usuario con rol 'cliente' por defecto
             const [result] = await require('../config/database').pool.query(
-                `INSERT INTO clientes (nombre, email, telefono, direccion, password_hash) 
-                 VALUES (?, ?, ?, ?, ?)`,
+                `INSERT INTO clientes (nombre, email, telefono, direccion, password_hash, rol) 
+                 VALUES (?, ?, ?, ?, ?, 'cliente')`,
                 [nombre, email, telefono || null, direccion || null, password_hash]
             );
 
@@ -143,6 +143,76 @@ const authController = {
 
         } catch (error) {
             console.error(' Error en registro:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error en el servidor'
+            });
+        }
+    },
+
+    // ===== SOLO PARA DESARROLLO - Crear primer administrador =====
+    // Este endpoint debe ser eliminado después de crear el admin
+    async createFirstAdmin(req, res) {
+        try {
+            const { email, password, nombre } = req.body;
+
+            // Validaciones
+            if (!email || !password || !nombre) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Email, contraseña y nombre son requeridos'
+                });
+            }
+
+            // Verificar si ya existe algún administrador
+            const [admins] = await require('../config/database').pool.query(
+                'SELECT * FROM clientes WHERE rol = "admin"'
+            );
+
+            if (admins.length > 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Ya existe un administrador en el sistema'
+                });
+            }
+
+            // Verificar si el email ya está registrado
+            const existingUser = await Cliente.findByEmail(email);
+            if (existingUser) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'El email ya está registrado'
+                });
+            }
+
+            // Encriptar password
+            const salt = await bcrypt.genSalt(10);
+            const password_hash = await bcrypt.hash(password, salt);
+
+            // Crear administrador
+            const [result] = await require('../config/database').pool.query(
+                `INSERT INTO clientes (nombre, email, telefono, password_hash, rol) 
+                 VALUES (?, ?, ?, ?, 'admin')`,
+                [nombre, email, '555-000-0000', password_hash]
+            );
+
+            console.log('✅ ADMINISTRADOR CREADO EXITOSAMENTE');
+            console.log('   Email:', email);
+            console.log('   Nombre:', nombre);
+
+            res.status(201).json({
+                success: true,
+                message: 'Administrador creado exitosamente',
+                user: {
+                    id: result.insertId,
+                    nombre,
+                    email,
+                    rol: 'admin'
+                }
+            });
+
+        } catch (error) {
+            console.error(' Error creando administrador:', error);
             res.status(500).json({
                 success: false,
                 message: 'Error en el servidor'

@@ -1,0 +1,214 @@
+/* ===== PANEL ADMIN ===== */
+.admin-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.admin-title {
+    color: #7c3aed;
+    font-size: 2rem;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+/* ===== TABS ===== */
+.admin-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    background: #f3f4f6;
+    padding: 8px;
+    border-radius: 16px;
+}
+
+.admin-tab {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    background: transparent;
+    color: #6b7280;
+    transition: all 0.3s ease;
+}
+
+.admin-tab.active {
+    background: white;
+    color: #7c3aed;
+    box-shadow: 0 4px 12px rgba(124,58,237,0.15);
+}
+
+/* ===== PANELES ===== */
+.admin-panel {
+    display: none;
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+}
+
+.admin-panel.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.panel-header h2 {
+    color: #374151;
+    font-size: 1.3rem;
+}
+
+/* ===== TABLAS ===== */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table th {
+    text-align: left;
+    padding: 15px 10px;
+    background: #f9fafb;
+    color: #6b7280;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.admin-table td {
+    padding: 15px 10px;
+    border-bottom: 1px solid #f3f4f6;
+    color: #374151;
+}
+
+.admin-table tr:hover td {
+    background: #faf5ff;
+}
+
+.loading-row {
+    text-align: center;
+    color: #9ca3af;
+    padding: 40px !important;
+}
+
+/* ===== BOTONES DE ACCIÓN ===== */
+.action-btn {
+    padding: 6px 12px;
+    margin: 0 4px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+}
+
+.edit-btn {
+    background: #f3e8ff;
+    color: #7c3aed;
+}
+
+.edit-btn:hover {
+    background: #ede9fe;
+    transform: translateY(-2px);
+}
+
+.delete-btn {
+    background: #fee2e2;
+    color: #ef4444;
+}
+
+.delete-btn:hover {
+    background: #fecaca;
+    transform: translateY(-2px);
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.status-active {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.status-inactive {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .admin-table {
+        display: block;
+        overflow-x: auto;
+    }
+    
+    .panel-header {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
+
+/* ===== BOTONES DE ACCIÓN PARA ADMIN ===== */
+.action-btn {
+    padding: 6px 12px;
+    margin: 0 4px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.edit-btn {
+    background: #f3e8ff;
+    color: #7c3aed;
+}
+
+.edit-btn:hover {
+    background: #ede9fe;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(124, 58, 237, 0.2);
+}
+
+.delete-btn {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.delete-btn:hover {
+    background: #fecaca;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(220, 38, 38, 0.2);
+}
+
+/* ===== STATUS BADGES ===== */
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.status-active {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.status-inactive {
+    background: #fee2e2;
+    color: #dc2626;
+}

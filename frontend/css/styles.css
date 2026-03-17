@@ -1158,3 +1158,63 @@ footer {
 .modal-content::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
 }
+
+/* ===== BOTÓN FLOTANTE PARA ADMIN ===== */
+.admin-float-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: linear-gradient(135deg, #7c3aed, #ec4899);
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.admin-float-btn:hover {
+    width: 200px;
+    box-shadow: 0 8px 25px rgba(124, 58, 237, 0.5);
+}
+
+.admin-float-btn .float-icon {
+    font-size: 30px;
+    font-weight: bold;
+    position: absolute;
+    transition: all 0.3s ease;
+}
+
+.admin-float-btn .float-text {
+    font-size: 16px;
+    font-weight: 600;
+    opacity: 0;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+    position: absolute;
+    left: 50px;
+}
+
+.admin-float-btn:hover .float-icon {
+    opacity: 0;
+    transform: scale(0.5);
+}
+
+.admin-float-btn:hover .float-text {
+    opacity: 1;
+    left: 20px;
+}
+
+/* Responsive para el botón flotante */
+@media (max-width: 768px) {
+    .admin-float-btn {
+        bottom: 20px;
+        right: 20px;
+    }
+}

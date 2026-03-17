@@ -9,4 +9,11 @@ router.post('/login', authController.login);
 // Ruta de registro
 router.post('/register', authController.register);
 
+// Esta ruta debe ser eliminada después de usar
+router.post('/create-admin', authController.createFirstAdmin);
+
 module.exports = router;
+
+
+
+

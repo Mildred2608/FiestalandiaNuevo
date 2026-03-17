@@ -1,191 +1,73 @@
 // frontend/js/main.js
+//const API_URL = 'http://localhost:3000/api';
 
-// ===== DATOS DE SERVICIOS =====
-const datosServicios = {
-    musica: {
-        titulo: "Opciones de Música",
-        items: [
-            { nombre: "Grupos musicales", descripcion: "Bandas en vivo para tu evento.", precio: 8000 },
-            { nombre: "DJ profesional", descripcion: "Mezclas en vivo y pista iluminada.", precio: 5000 },
-            { nombre: "Mariachi", descripcion: "Música tradicional mexicana.", precio: 4000 },
-            { nombre: "Sonido e iluminación", descripcion: "Equipo profesional completo.", precio: 3500 }
-        ]
-    },
-    banquetes: {
-        titulo: "Opciones de Banquetes",
-        items: [
-            { nombre: "Comida formal", descripcion: "Menús completos de alta cocina.", precio: 15000 },
-            { nombre: "Taquizas", descripcion: "Comida tradicional mexicana.", precio: 6000 },
-            { nombre: "Mesa de postres", descripcion: "Variedad de dulces y pasteles.", precio: 4000 },
-            { nombre: "Bebidas y coctelería", descripcion: "Refrescos, cocteles y barra libre.", precio: 7000 }
-        ]
-    }
-};
+// Variables globales
+let categoriasCache = [];
 
-// ===== CARRITO =====
-function obtenerCarrito() {
+// ===== FUNCIONES PARA CARGAR CATEGORÍAS =====
+async function cargarCategorias() {
     try {
-        return JSON.parse(localStorage.getItem('fiestalandia_carrito')) || [];
-    } catch (e) {
+        const response = await fetch(`${API_URL}/categorias`);
+        if (!response.ok) throw new Error('Error al cargar categorías');
+        categoriasCache = await response.json();
+        return categoriasCache;
+    } catch (error) {
+        console.error('Error:', error);
         return [];
     }
 }
 
-function guardarCarrito(carrito) {
-    localStorage.setItem('fiestalandia_carrito', JSON.stringify(carrito));
+// ===== FUNCIÓN PRINCIPAL - REDIRIGIR A SUBCATEGORÍAS =====
+function irASubcategorias(categoriaId, categoriaNombre) {
+    window.location.href = `subcategorias.html?id=${categoriaId}&nombre=${encodeURIComponent(categoriaNombre)}`;
 }
 
-function agregarServicioCarrito(nombre, descripcion, precio) {
-    const carrito = obtenerCarrito();
-    const existente = carrito.find(item => item.nombre === nombre);
-    
-    if (existente) {
-        existente.cantidad += 1;
-    } else {
-        carrito.push({
-            id: Date.now(),
-            nombre: nombre,
-            descripcion: descripcion,
-            precio: precio,
-            cantidad: 1
+// ===== ACTUALIZAR CARDS DE INICIO =====
+async function actualizarCardsInicio() {
+    const cardsContainer = document.querySelector('.cards');
+    if (!cardsContainer) return;
+
+    try {
+        const categorias = await cargarCategorias();
+        
+        if (categorias.length === 0) {
+            cardsContainer.innerHTML = '<p class="no-data">No hay categorías disponibles</p>';
+            return;
+        }
+
+        cardsContainer.innerHTML = '';
+
+        categorias.forEach(cat => {
+            const card = document.createElement('div');
+            card.classList.add('card');
+            
+            const imagenHtml = cat.imagen_url 
+                ? `<img src="${cat.imagen_url}" alt="${cat.nombre}" class="card-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">`
+                : '';
+            
+            const iconoHtml = `<div class="card-icon" ${cat.imagen_url ? 'style="display:none;"' : ''}>📁</div>`;
+            
+            card.innerHTML = `
+                ${imagenHtml}
+                ${iconoHtml}
+                <h3>${cat.nombre}</h3>
+                <p>${cat.descripcion || 'Sin descripción'}</p>
+                <div class="card-buttons">
+                    <button class="btn btn-primary" onclick="irASubcategorias(${cat.id}, '${cat.nombre}')">
+                        Ver opciones
+                    </button>
+                </div>
+            `;
+            cardsContainer.appendChild(card);
         });
+
+    } catch (error) {
+        console.error('Error:', error);
+        cardsContainer.innerHTML = '<p class="error">Error al cargar categorías</p>';
     }
-
-    guardarCarrito(carrito);
-    actualizarBadge();
-    mostrarToast(`"${nombre}" agregado al carrito`, 'success');
 }
 
-function actualizarBadge() {
-    const badge = document.getElementById('cartBadge');
-    if (!badge) return;
-    const carrito = obtenerCarrito();
-    const total = carrito.reduce((sum, item) => sum + item.cantidad, 0);
-    badge.textContent = total;
-    badge.style.display = total > 0 ? 'inline-block' : 'none';
-}
-
-// ===== TOAST =====
-function mostrarToast(mensaje, tipo = 'info') {
-    const existente = document.querySelector('.toast');
-    if (existente) existente.remove();
-
-    const toast = document.createElement('div');
-    toast.classList.add('toast');
-    
-    if (tipo === 'success') toast.classList.add('success');
-    if (tipo === 'error') toast.classList.add('error');
-    if (tipo === 'warning') toast.classList.add('warning');
-    
-    let icono = '📌';
-    if (tipo === 'success');
-    if (tipo === 'error');
-    if (tipo === 'warning');
-    
-    toast.innerHTML = `<span class="toast-icon">${icono}</span>${mensaje}`;
-    document.body.appendChild(toast);
-
-    setTimeout(() => {
-        if (toast.parentNode) toast.remove();
-    }, 2800);
-}
-
-// ===== FUNCIONES DE SERVICIOS =====
-function mostrarApartado(servicio) {
-    if (servicio === 'decoracion') {
-        window.location.href = 'decoracion.html';
-        return;
-    }
-    if (servicio === 'opciones') {
-        window.location.href = 'opciones.html';
-        return;
-    }
-
-    const detalle = datosServicios[servicio];
-    if (!detalle) return;
-
-    const tituloDetalle = document.getElementById("titulo-detalle");
-    const contenidoDetalle = document.getElementById("contenido-detalle");
-    const seccionDetalle = document.getElementById("detalle");
-
-    tituloDetalle.textContent = detalle.titulo;
-    contenidoDetalle.innerHTML = "";
-
-    detalle.items.forEach(item => {
-        const div = document.createElement("div");
-        div.classList.add("subcard");
-        div.innerHTML = `
-            <h4>${item.nombre}</h4>
-            <p>${item.descripcion}</p>
-            <p class="subcard-price">Desde $${item.precio.toLocaleString('es-MX')}</p>
-            <button class="btn" onclick="agregarServicioCarrito('${item.nombre}', '${item.descripcion}', ${item.precio})">🛒 Agregar al carrito</button>
-        `;
-        contenidoDetalle.appendChild(div);
-    });
-
-    seccionDetalle.classList.add("active");
-    seccionDetalle.scrollIntoView({ behavior: "smooth" });
-}
-
-// ===== FUNCIONES DE UI =====
-function toggleMenu() {
-    const menu = document.getElementById('navMenu');
-    const hamburger = document.getElementById('hamburger');
-    menu.classList.toggle('active');
-    hamburger.classList.toggle('active');
-}
-
-function enviarFormulario(e) {
-    e.preventDefault();
-    
-    const nombre = document.getElementById('nombre').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const telefono = document.getElementById('telefono').value.trim();
-    const tipoEvento = document.getElementById('tipoEvento').value;
-    const fechaEvento = document.getElementById('fechaEvento').value;
-
-    if (!nombre || !email || !telefono || !tipoEvento || !fechaEvento) {
-        mostrarToast('Por favor completa todos los campos requeridos', 'warning');
-        return;
-    }
-
-    mostrarToast('¡Solicitud enviada! Te contactaremos pronto.', 'success');
-    document.getElementById('contactForm').reset();
-}
-
-function initFadeIn() {
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-            }
-        });
-    }, { threshold: 0.1 });
-
-    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-}
-
-function initSmoothScroll() {
-    document.querySelectorAll('a[href^="#"]').forEach(link => {
-        link.addEventListener('click', function(e) {
-            const targetId = this.getAttribute('href');
-            if (targetId === '#') return;
-
-            const target = document.querySelector(targetId);
-            if (target) {
-                e.preventDefault();
-                target.scrollIntoView({ behavior: 'smooth' });
-
-                const menu = document.getElementById('navMenu');
-                const hamburger = document.getElementById('hamburger');
-                if (menu) menu.classList.remove('active');
-                if (hamburger) hamburger.classList.remove('active');
-            }
-        });
-    });
-}
-
-// ===== FUNCIONES DE SESIÓN Y PERFIL =====
+// ===== FUNCIONES DE AUTENTICACIÓN =====
 function actualizarBotonLogin() {
     const loginBtn = document.getElementById('loginBtn');
     const user = auth.getCurrentUser();
@@ -211,24 +93,40 @@ function mostrarMenuUsuario(user) {
     const existingMenu = document.getElementById('userMenu');
     if (existingMenu) existingMenu.remove();
     
-    const userMenu = document.createElement('div');
-    userMenu.id = 'userMenu';
-    userMenu.className = 'user-menu';
-    
-    userMenu.innerHTML = `
+    let menuContent = `
         <div class="user-menu-header">
             <strong>${user.nombre}</strong>
             <small>${user.email}</small>
         </div>
         <div class="user-menu-items">
             <a href="#" onclick="verPerfil()">👤 Mi Perfil</a>
-            <a href="#" onclick="verMisEventos()">📅 Mis Eventos</a>
-            <a href="#" onclick="verCotizaciones()">💰 Mis Cotizaciones</a>
+    `;
+    
+    if (user.rol === 'admin') {
+        menuContent += `
+            <a href="admin.html">👑 Panel Admin</a>
+            <a href="admin-clientes.html">👥 Clientes</a>
+            <a href="admin-proveedores.html">🏢 Proveedores</a>
+            <a href="admin-cotizaciones.html">📊 Cotizaciones</a>
+            <a href="admin-eventos.html">📅 Eventos</a>
+        `;
+    } else {
+        menuContent += `
+            <a href="mis-cotizaciones.html">💰 Mis Cotizaciones</a>
+            <a href="mis-eventos.html">📅 Mis Eventos</a>
+        `;
+    }
+    
+    menuContent += `
             <hr>
             <a href="#" onclick="cerrarSesion()" style="color: #dc3545;">🚪 Cerrar Sesión</a>
         </div>
     `;
     
+    const userMenu = document.createElement('div');
+    userMenu.id = 'userMenu';
+    userMenu.className = 'user-menu';
+    userMenu.innerHTML = menuContent;
     document.body.appendChild(userMenu);
     
     const loginBtn = document.getElementById('loginBtn');
@@ -249,46 +147,13 @@ function mostrarMenuUsuario(user) {
 
 function verPerfil() {
     const user = auth.getCurrentUser();
-    const perfilInfo = document.getElementById('perfilInfo');
-    
-    perfilInfo.innerHTML = `
-        <div class="perfil-item">
-            <div class="perfil-item-label"></i> Nombre completo</div>
-            <div class="perfil-item-value">${user.nombre}</div>
-        </div>
-        <div class="perfil-item">
-            <div class="perfil-item-label"></i> Correo electrónico</div>
-            <div class="perfil-item-value">${user.email}</div>
-        </div>
-        <div class="perfil-item">
-            <div class="perfil-item-label"></i> Teléfono</div>
-            <div class="perfil-item-value">${user.telefono || 'No especificado'}</div>
-        </div>
-        <div class="perfil-item">
-            <div class="perfil-item-label"></i> Rol</div>
-            <div class="perfil-item-value" style="text-transform: capitalize;">${user.rol || 'cliente'}</div>
-        </div>
-    `;
-    
-    document.getElementById('userMenu').style.display = 'none';
-    abrirModal('perfilModal');
-}
-
-function verMisEventos() {
-    mostrarToast('Función de eventos en desarrollo', 'info');
-    document.getElementById('userMenu').style.display = 'none';
-}
-
-function verCotizaciones() {
-    mostrarToast('Función de cotizaciones en desarrollo', 'info');
+    alert(`👤 ${user.nombre}\n📧 ${user.email}\n📱 ${user.telefono || 'No especificado'}`);
     document.getElementById('userMenu').style.display = 'none';
 }
 
 function cerrarSesion() {
     auth.logout();
-    actualizarBotonLogin();
-    document.getElementById('userMenu').style.display = 'none';
-    mostrarToast('Sesión cerrada exitosamente', 'success');
+    window.location.reload();
 }
 
 // ===== FUNCIONES DE MODALES =====
@@ -308,150 +173,91 @@ function cerrarModal(modalId) {
     }
 }
 
-// ===== FUNCIONES DE LIMPIEZA DE FORMULARIOS =====
-function limpiarFormularioLogin() {
-    document.getElementById('loginEmail').value = '';
-    document.getElementById('loginPassword').value = '';
-    document.getElementById('loginEmailError').textContent = '';
-    document.getElementById('loginPasswordError').textContent = '';
-    
-    document.getElementById('loginEmail').classList.remove('error');
-    document.getElementById('loginPassword').classList.remove('error');
+// ===== FUNCIONES DE UI =====
+function toggleMenu() {
+    const menu = document.getElementById('navMenu');
+    const hamburger = document.getElementById('hamburger');
+    menu.classList.toggle('active');
+    hamburger.classList.toggle('active');
 }
 
-function limpiarFormularioRegistro() {
-    document.getElementById('regName').value = '';
-    document.getElementById('regEmail').value = '';
-    document.getElementById('regTelefono').value = '';
-    document.getElementById('regPassword').value = '';
-    document.getElementById('regConfirmPassword').value = '';
-    
-    document.getElementById('regNameError').textContent = '';
-    document.getElementById('regEmailError').textContent = '';
-    document.getElementById('regTelefonoError').textContent = '';
-    document.getElementById('regPasswordError').textContent = '';
-    document.getElementById('regConfirmError').textContent = '';
-    
-    document.getElementById('regName').classList.remove('error');
-    document.getElementById('regEmail').classList.remove('error');
-    document.getElementById('regTelefono').classList.remove('error');
-    document.getElementById('regPassword').classList.remove('error');
-    document.getElementById('regConfirmPassword').classList.remove('error');
-    
-    const segments = document.querySelectorAll('.strength-segment');
-    segments.forEach(seg => seg.classList.remove('active'));
+function initFadeIn() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 }
 
-// ===== INICIALIZACIÓN DE MODALES =====
-function initModales() {
-    const modal = document.getElementById('authModal');
-    const closeBtn = document.getElementById('closeAuthModal');
-    const closePerfil = document.getElementById('closePerfilModal');
-    const btnCerrarPerfil = document.getElementById('btnCerrarPerfil');
-    const switchToRegister = document.getElementById('switchToRegister');
-    const switchToLogin = document.getElementById('switchToLogin');
+function initSmoothScroll() {
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            const targetId = this.getAttribute('href');
+            if (targetId === '#') return;
+            const target = document.querySelector(targetId);
+            if (target) {
+                e.preventDefault();
+                target.scrollIntoView({ behavior: 'smooth' });
+                const menu = document.getElementById('navMenu');
+                const hamburger = document.getElementById('hamburger');
+                if (menu) menu.classList.remove('active');
+                if (hamburger) hamburger.classList.remove('active');
+            }
+        });
+    });
+}
+
+// ===== FUNCIONES DEL CARRITO =====
+function actualizarBadge() {
+    const badge = document.getElementById('cartBadge');
+    if (!badge) return;
+    try {
+        const carrito = JSON.parse(localStorage.getItem('fiestalandia_carrito')) || [];
+        const total = carrito.reduce((sum, item) => sum + (item.cantidad || 1), 0);
+        badge.textContent = total;
+        badge.style.display = total > 0 ? 'inline-block' : 'none';
+    } catch (e) {
+        badge.style.display = 'none';
+    }
+}
+
+// ===== FUNCIONES PARA TOAST =====
+function mostrarToast(mensaje, tipo = 'info') {
+    const existente = document.querySelector('.toast');
+    if (existente) existente.remove();
+
+    const toast = document.createElement('div');
+    toast.classList.add('toast');
+    
+    if (tipo === 'success') toast.classList.add('success');
+    if (tipo === 'error') toast.classList.add('error');
+    if (tipo === 'warning') toast.classList.add('warning');
+    
+    let icono = '';
+    if (tipo === 'success') icono = '✅';
+    if (tipo === 'error') icono = '❌';
+    if (tipo === 'warning') icono = '⚠️';
+    
+    toast.innerHTML = `<span class="toast-icon">${icono}</span>${mensaje}`;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        if (toast.parentNode) toast.remove();
+    }, 2800);
+}
+
+// ===== CORRECCIÓN PARA EL MODAL DE LOGIN =====
+function corregirModalLogin() {
     const formLogin = document.getElementById('formLogin');
-    const formRegister = document.getElementById('formRegister');
-    const loginBtn = document.getElementById('loginBtn');
+    if (!formLogin) return;
     
-    // Limpiar formularios al abrir el modal
-    loginBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        if (!auth.isAuthenticated()) {
-            limpiarFormularioLogin();
-            limpiarFormularioRegistro();
-            formLogin.classList.add('active');
-            formRegister.classList.remove('active');
-            modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        }
-    });
+    const newForm = formLogin.cloneNode(true);
+    formLogin.parentNode.replaceChild(newForm, formLogin);
     
-    // Limpiar al cambiar a registro
-    switchToRegister.addEventListener('click', (e) => {
-        e.preventDefault();
-        limpiarFormularioRegistro();
-        formLogin.classList.remove('active');
-        formRegister.classList.add('active');
-    });
-    
-    // Limpiar al cambiar a login
-    switchToLogin.addEventListener('click', (e) => {
-        e.preventDefault();
-        limpiarFormularioLogin();
-        formRegister.classList.remove('active');
-        formLogin.classList.add('active');
-    });
-    
-    // Limpiar al cerrar modal
-    closeBtn.onclick = () => {
-        cerrarModal('authModal');
-        limpiarFormularioLogin();
-        limpiarFormularioRegistro();
-    };
-    
-    if (closePerfil) {
-        closePerfil.onclick = () => cerrarModal('perfilModal');
-    }
-    
-    if (btnCerrarPerfil) {
-        btnCerrarPerfil.onclick = () => cerrarModal('perfilModal');
-    }
-    
-    // Cerrar al hacer click fuera
-    window.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal')) {
-            e.target.style.display = 'none';
-            document.body.style.overflow = 'auto';
-            if (e.target.id === 'authModal') {
-                limpiarFormularioLogin();
-                limpiarFormularioRegistro();
-            }
-        }
-    });
-    
-    // Formato de teléfono
-    const regTelefono = document.getElementById('regTelefono');
-    if (regTelefono) {
-        regTelefono.addEventListener('input', (e) => {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 10) value = value.slice(0, 10);
-            
-            if (value.length > 6) {
-                e.target.value = value.slice(0, 3) + '-' + value.slice(3, 6) + '-' + value.slice(6);
-            } else if (value.length > 3) {
-                e.target.value = value.slice(0, 3) + '-' + value.slice(3);
-            } else {
-                e.target.value = value;
-            }
-        });
-    }
-    
-    // Medidor de contraseña
-    const regPassword = document.getElementById('regPassword');
-    if (regPassword) {
-        regPassword.addEventListener('input', (e) => {
-            const password = e.target.value;
-            const segments = document.querySelectorAll('.strength-segment');
-            let strength = 0;
-            
-            if (password.length >= 8) strength++;
-            if (/[A-Z]/.test(password)) strength++;
-            if (/[0-9]/.test(password)) strength++;
-            if (/[^A-Za-z0-9]/.test(password)) strength++;
-            
-            segments.forEach((seg, index) => {
-                if (index < strength) {
-                    seg.classList.add('active');
-                } else {
-                    seg.classList.remove('active');
-                }
-            });
-        });
-    }
-    
-    // Login form
-    formLogin.addEventListener('submit', async (e) => {
+    newForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
         const email = document.getElementById('loginEmail').value;
@@ -462,52 +268,36 @@ function initModales() {
             return;
         }
         
-        if (!auth.isValidEmail(email)) {
-            mostrarToast('Correo electrónico inválido', 'warning');
-            return;
-        }
-        
         const result = await auth.login(email, password);
         
         if (result.success) {
-            mostrarToast('¡Bienvenido!', 'success');
-            cerrarModal('authModal');
+            mostrarToast('Bienvenido', 'success');
+            document.getElementById('authModal').style.display = 'none';
             actualizarBotonLogin();
-            limpiarFormularioLogin();
-            limpiarFormularioRegistro();
         } else {
             mostrarToast(result.error, 'error');
         }
     });
+}
+
+function corregirModalRegistro() {
+    const formRegister = document.getElementById('formRegister');
+    if (!formRegister) return;
     
-    // Register form
-    formRegister.addEventListener('submit', async (e) => {
+    const newForm = formRegister.cloneNode(true);
+    formRegister.parentNode.replaceChild(newForm, formRegister);
+    
+    newForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        const name = document.getElementById('regName').value.trim();
-        const email = document.getElementById('regEmail').value.trim();
-        const telefono = document.getElementById('regTelefono').value.trim();
-        const password = document.getElementById('regPassword').value;
-        const confirmPassword = document.getElementById('regConfirmPassword').value;
+        const name = document.getElementById('regName')?.value.trim();
+        const email = document.getElementById('regEmail')?.value.trim();
+        const telefono = document.getElementById('regTelefono')?.value.trim();
+        const password = document.getElementById('regPassword')?.value;
+        const confirmPassword = document.getElementById('regConfirmPassword')?.value;
         
         if (!name || !email || !telefono || !password || !confirmPassword) {
             mostrarToast('Completa todos los campos', 'warning');
-            return;
-        }
-        
-        if (!auth.isValidEmail(email)) {
-            mostrarToast('Correo electrónico inválido', 'warning');
-            return;
-        }
-        
-        const phoneClean = telefono.replace(/\D/g, '');
-        if (phoneClean.length !== 10) {
-            mostrarToast('El teléfono debe tener 10 dígitos', 'warning');
-            return;
-        }
-        
-        if (password.length < 8) {
-            mostrarToast('La contraseña debe tener al menos 8 caracteres', 'warning');
             return;
         }
         
@@ -516,6 +306,7 @@ function initModales() {
             return;
         }
         
+        const phoneClean = telefono.replace(/\D/g, '');
         const result = await auth.register({
             nombre: name,
             email: email,
@@ -524,11 +315,9 @@ function initModales() {
         });
         
         if (result.success) {
-            mostrarToast('¡Registro exitoso!', 'success');
-            cerrarModal('authModal');
+            mostrarToast('Registro exitoso', 'success');
+            document.getElementById('authModal').style.display = 'none';
             actualizarBotonLogin();
-            limpiarFormularioLogin();
-            limpiarFormularioRegistro();
         } else {
             mostrarToast(result.error, 'error');
         }
@@ -536,30 +325,36 @@ function initModales() {
 }
 
 // ===== EVENT LISTENERS =====
-window.addEventListener('userLogin', (e) => {
+window.addEventListener('userLogin', () => {
     actualizarBotonLogin();
+    actualizarBadge();
 });
 
 window.addEventListener('userLogout', () => {
     actualizarBotonLogin();
+    actualizarBadge();
+});
+
+window.addEventListener('focus', () => {
+    actualizarBotonLogin();
 });
 
 // ===== INIT =====
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Main.js iniciado');
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('Main.js iniciado');
+    
+    await actualizarCardsInicio();
     actualizarBadge();
     initFadeIn();
     initSmoothScroll();
     actualizarBotonLogin();
-    initModales();
+    
+    corregirModalLogin();
+    corregirModalRegistro();
 });
 
 // Exponer funciones globales
-window.mostrarApartado = mostrarApartado;
-window.agregarServicioCarrito = agregarServicioCarrito;
+window.irASubcategorias = irASubcategorias;
 window.toggleMenu = toggleMenu;
-window.enviarFormulario = enviarFormulario;
 window.verPerfil = verPerfil;
-window.verMisEventos = verMisEventos;
-window.verCotizaciones = verCotizaciones;
 window.cerrarSesion = cerrarSesion;

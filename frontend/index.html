@@ -49,49 +49,7 @@
     </div>
 
     <div class="cards">
-      <!-- Tarjeta: Lugar -->
-      <div class="card">
-        <div class="card-icon">🏛️</div>
-        <h3>Lugar</h3>
-        <p>Salones, jardines y espacios para cualquier tipo de evento.</p>
-        <div class="card-buttons">
-          <a href="opciones.html" class="btn btn-primary">Ver opciones</a>
-          <button class="btn btn-secondary" onclick="agregarServicioCarrito('Lugar para evento', 'Salón o jardín para tu evento', 8000)">🛒 Agregar</button>
-        </div>
-      </div>
-
-      <!-- Tarjeta: Música -->
-      <div class="card">
-        <div class="card-icon">🎵</div>
-        <h3>Música</h3>
-        <p>DJ, grupos musicales y mariachis para ambientar tu fiesta.</p>
-        <div class="card-buttons">
-          <button class="btn btn-primary" onclick="mostrarApartado('musica')">Ver opciones</button>
-          <button class="btn btn-secondary" onclick="agregarServicioCarrito('Música para evento', 'DJ o grupo musical en vivo', 5000)">🛒 Agregar</button>
-        </div>
-      </div>
-
-      <!-- Tarjeta: Banquetes -->
-      <div class="card">
-        <div class="card-icon">🍽️</div>
-        <h3>Banquetes</h3>
-        <p>Comida, bebidas y postres deliciosos para tus invitados.</p>
-        <div class="card-buttons">
-          <button class="btn btn-primary" onclick="mostrarApartado('banquetes')">Ver opciones</button>
-          <button class="btn btn-secondary" onclick="agregarServicioCarrito('Banquete completo', 'Comida y bebidas para evento', 12000)">🛒 Agregar</button>
-        </div>
-      </div>
-
-      <!-- Tarjeta: Decoración -->
-      <div class="card">
-        <div class="card-icon">🎈</div>
-        <h3>Decoración</h3>
-        <p>Diseños temáticos y ambientación especial para tu evento.</p>
-        <div class="card-buttons">
-          <a href="decoracion.html" class="btn btn-primary">Ver opciones</a>
-          <button class="btn btn-secondary" onclick="agregarServicioCarrito('Decoración básica', 'Decoración temática para evento', 3500)">🛒 Agregar</button>
-        </div>
-      </div>
+      <!-- Las cards se cargarán dinámicamente desde la base de datos -->
     </div>
   </section>
 
@@ -246,7 +204,7 @@
     <span class="modal-close" id="closeAuthModal">&times;</span>
     
     <div class="modal-header">
-      <div class="modal-logo">🎉</div>
+      <div class="modal-logo"></div>
       <h2>¡Bienvenido!</h2>
       <p>Inicia sesión para continuar</p>
     </div>
@@ -344,6 +302,67 @@
 
     <button class="modal-btn" id="btnCerrarPerfil">Cerrar</button>
   </div>
+</div>
+
+<!-- ===== BOTÓN FLOTANTE PARA ADMIN (solo visible para administradores) ===== -->
+<div class="admin-float-btn" id="adminFloatBtn" style="display: none;" onclick="abrirModalServicio()">
+    <span class="float-icon">+</span>
+    <span class="float-text">Agregar Servicio</span>
+</div>
+
+<!-- ===== MODAL PARA AGREGAR SERVICIOS ===== -->
+<div class="modal" id="modalServicio" style="display: none;">
+    <div class="modal-content" style="max-width: 500px;">
+        <span class="modal-close" id="closeModalServicio">&times;</span>
+        
+        <div class="modal-header">
+            <div class="modal-logo"></div>
+            <h2>Agregar Nuevo Servicio</h2>
+            <p>Completa los datos del servicio</p>
+        </div>
+
+        <form id="formServicio">
+            <div class="form-group">
+                <label></i> Categoría</label>
+                <select id="servicioCategoria" required>
+                    <option value="">Seleccionar categoría...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label></i> Subcategoría</label>
+                <select id="servicioSubcategoria" required>
+                    <option value="">Primero selecciona una categoría</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label></i> Nombre del Servicio</label>
+                <input type="text" id="servicioNombre" placeholder="Ej: Salón Imperial, DJ Carlos, etc." required>
+            </div>
+
+            <div class="form-group">
+                <label></i> Descripción</label>
+                <textarea id="servicioDescripcion" rows="3" placeholder="Describe el servicio..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label></i> Precio Base</label>
+                <input type="number" id="servicioPrecio" placeholder="Ej: 5000" min="0" step="100" required>
+            </div>
+
+            <div class="form-group">
+                <label></i> Proveedor</label>
+                <select id="servicioProveedor" required>
+                    <option value="">Seleccionar proveedor...</option>
+                </select>
+            </div>
+
+            <button type="submit" class="modal-btn" id="btnGuardarServicio">
+                <span>Guardar Servicio</span>
+            </button>
+        </form>
+    </div>
 </div>
 
 <!-- ===== SCRIPTS ===== -->

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotizaciones | Panel Admin</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">Fiestalandia Admin</div>
+            <div class="menu">
+                <a href="admin.html">← Volver al panel</a>
+                <a href="index.html">Inicio</a>
+                <a href="#" class="btn-login" id="adminName">👤 Admin</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="admin-container">
+        <h1 class="admin-title">Gestión de Cotizaciones</h1>
+
+        <div class="admin-panel active">
+            <div class="panel-header">
+                <h2>Lista de Cotizaciones</h2>
+                <select id="filtroEstado" class="filter-select">
+                    <option value="">Todos los estados</option>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="enviada">Enviada</option>
+                    <option value="aceptada">Aceptada</option>
+                    <option value="cancelada">Cancelada</option>
+                </select>
+            </div>
+
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Evento</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaCotizaciones">
+                    <tr>
+                        <td colspan="7" class="loading-row">Cargando cotizaciones...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="js/auth.js"></script>
+    <script src="js/admin-cotizaciones.js"></script>
+</body>
+</html>

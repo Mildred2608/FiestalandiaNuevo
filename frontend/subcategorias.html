@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subcategorías | Fiestalandia</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/subcategorias.css">
+</head>
+<body>
+    <!-- ===== NAVEGACIÓN ===== -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">Fiestalandia</div>
+            <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="menu" id="navMenu">
+                <a href="index.html">← Inicio</a>
+                <a href="carrito.html" class="cart-link">
+                    🛒 Carrito <span class="cart-badge" id="cartBadge">0</span>
+                </a>
+                <a href="#" class="btn-login" id="loginBtn">🔐 Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== CONTENIDO PRINCIPAL ===== -->
+    <main class="container">
+        <div class="subcategorias-header">
+            <h1 id="categoriaTitulo">Cargando...</h1>
+            <p id="categoriaDescripcion"></p>
+        </div>
+
+        <div class="subcategorias-grid" id="subcategoriasGrid">
+            <div class="loading-spinner">Cargando subcategorías...</div>
+        </div>
+    </main>
+
+    <!-- ===== MODALES ===== -->
+    <!-- Modal de Login (copiado de index.html) -->
+    <div class="modal" id="authModal" style="display: none;">
+        <!-- ... mismo contenido que en index.html ... -->
+    </div>
+
+    <div class="modal" id="perfilModal" style="display: none;">
+        <!-- ... mismo contenido que en index.html ... -->
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/subcategorias.js"></script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrador | Fiestalandia</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <!-- ===== NAVEGACIÓN ===== -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">Fiestalandia Admin</div>
+            <div class="menu">
+                <a href="index.html">← Volver al inicio</a>
+                <a href="#" class="btn-login" id="adminName">👤 Admin</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="admin-container">
+        <h1 class="admin-title">Panel de Administración</h1>
+
+        <!-- ===== TABS ===== -->
+        <div class="admin-tabs">
+            <button class="admin-tab active" data-tab="categorias">📋 Categorías</button>
+            <button class="admin-tab" data-tab="subcategorias">📑 Subcategorías</button>
+            <button class="admin-tab" data-tab="servicios">🎯 Servicios</button>
+        </div>
+
+        <!-- ===== PANEL DE CATEGORÍAS ===== -->
+        <div id="categorias" class="admin-panel active">
+            <div class="panel-header">
+                <h2>Gestionar Categorías</h2>
+                <button class="btn-primary" id="btnNuevaCategoria">+ Nueva Categoría</button>
+            </div>
+
+            <!-- Tabla de categorías -->
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Icono</th>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Fecha Creación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaCategorias">
+                    <tr>
+                        <td colspan="6" class="loading-row">Cargando categorías...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ===== PANEL DE SUBCATEGORÍAS ===== -->
+        <div id="subcategorias" class="admin-panel">
+            <div class="panel-header">
+                <h2>Gestionar Subcategorías</h2>
+                <button class="btn-primary" id="btnNuevaSubcategoria">+ Nueva Subcategoría</button>
+            </div>
+
+            <!-- Tabla de subcategorías -->
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Categoría</th>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Fecha Creación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaSubcategorias">
+                    <tr>
+                        <td colspan="6" class="loading-row">Cargando subcategorías...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ===== PANEL DE SERVICIOS ===== -->
+        <div id="servicios" class="admin-panel">
+            <div class="panel-header">
+                <h2>Gestionar Servicios</h2>
+                <button class="btn-primary" id="btnNuevoServicio">+ Nuevo Servicio</button>
+            </div>
+
+            <!-- Tabla de servicios -->
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Subcategoría</th>
+                        <th>Proveedor</th>
+                        <th>Nombre</th>
+                        <th>Precio Base</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaServicios">
+                    <tr>
+                        <td colspan="7" class="loading-row">Cargando servicios...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- ===== MODAL PARA CATEGORÍAS ===== -->
+    <div class="modal" id="modalCategoria" style="display: none;">
+        <div class="modal-content">
+            <span class="modal-close" id="closeModalCategoria">&times;</span>
+            <h2 id="modalCategoriaTitle">Nueva Categoría</h2>
+            <form id="formCategoria">
+                <input type="hidden" id="categoriaId">
+                <div class="form-group">
+                    <label>Icono</label>
+                    <input type="text" id="categoriaIcono" placeholder="Ej: 🏛️, 🎵, 🍽️, 🎈" required>
+                </div>
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" id="categoriaNombre" placeholder="Ej: Lugar, Música, Banquetes" required>
+                </div>
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea id="categoriaDescripcion" rows="3" placeholder="Descripción de la categoría..." required></textarea>
+                </div>
+                <button type="submit" class="modal-btn">Guardar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== MODAL PARA SUBCATEGORÍAS ===== -->
+    <div class="modal" id="modalSubcategoria" style="display: none;">
+        <div class="modal-content">
+            <span class="modal-close" id="closeModalSubcategoria">&times;</span>
+            <h2 id="modalSubcategoriaTitle">Nueva Subcategoría</h2>
+            <form id="formSubcategoria">
+                <input type="hidden" id="subcategoriaId">
+                <div class="form-group">
+                    <label>Categoría</label>
+                    <select id="subcategoriaCategoriaId" required>
+                        <option value="">Seleccionar categoría...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" id="subcategoriaNombre" placeholder="Ej: Salones de fiesta, DJ profesional" required>
+                </div>
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea id="subcategoriaDescripcion" rows="3" placeholder="Descripción de la subcategoría..." required></textarea>
+                </div>
+                <button type="submit" class="modal-btn">Guardar</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
