@@ -212,3 +212,230 @@
     background: #fee2e2;
     color: #dc2626;
 }
+
+/* ===== MODALES ADMIN ===== */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    backdrop-filter: blur(3px);
+}
+
+.modal-admin-content {
+    background: white;
+    border-radius: 24px;
+    padding: 36px 32px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    position: relative;
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from { opacity: 0; transform: translateY(24px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0)  scale(1); }
+}
+
+.modal-close {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    font-size: 1.6rem;
+    color: #9ca3af;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
+}
+.modal-close:hover { color: #374151; }
+
+.modal-header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.modal-logo {
+    font-size: 2.6rem;
+    margin-bottom: 10px;
+}
+
+.modal-header h2 {
+    color: #7c3aed;
+    font-size: 1.5rem;
+    margin-bottom: 6px;
+}
+
+.modal-header p {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+/* Form groups inside admin modals */
+.modal-admin-content .form-group {
+    margin-bottom: 18px;
+}
+
+.modal-admin-content .form-group label {
+    display: block;
+    margin-bottom: 7px;
+    color: #374151;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.modal-admin-content .form-group input,
+.modal-admin-content .form-group select,
+.modal-admin-content .form-group textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    background: #fafafa;
+    color: #374151;
+}
+
+.modal-admin-content .form-group input:focus,
+.modal-admin-content .form-group select:focus,
+.modal-admin-content .form-group textarea:focus {
+    outline: none;
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 4px rgba(124,58,237,0.10);
+    background: white;
+}
+
+.modal-admin-content .form-group input:hover,
+.modal-admin-content .form-group select:hover,
+.modal-admin-content .form-group textarea:hover {
+    border-color: #c084fc;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.modal-btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #7c3aed, #ec4899);
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 10px;
+    transition: all 0.3s ease;
+}
+
+.modal-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(124,58,237,0.35);
+}
+
+.modal-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Error messages in admin modal */
+.modal-admin-content .error-message {
+    color: #ef4444;
+    font-size: 0.8rem;
+    margin-top: 5px;
+    padding-left: 4px;
+    display: none;
+}
+
+.modal-admin-content .error-message.visible {
+    display: block;
+    animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.input-hint {
+    color: #9ca3af;
+    font-size: 0.78rem;
+    margin-top: 5px;
+    padding-left: 4px;
+}
+
+.field-required { color: #ef4444; margin-left: 2px; }
+.field-optional  { color: #9ca3af; font-size: 0.8rem; font-weight: 400; }
+
+/* Category badge in subcategories table */
+.category-badge {
+    background: #f3e8ff;
+    color: #7c3aed;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Error row styling */
+.error-row {
+    color: #ef4444 !important;
+}
+
+/* ===== ADMIN TOAST ===== */
+.admin-toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: white;
+    color: #1f2937;
+    padding: 14px 22px;
+    border-radius: 14px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    font-size: 0.95rem;
+    font-weight: 500;
+    z-index: 9999;
+    border-left: 4px solid #7c3aed;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 360px;
+    opacity: 0;
+    transform: translateX(30px);
+    transition: all 0.35s ease;
+}
+
+.admin-toast.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.admin-toast-success { border-left-color: #10b981; }
+.admin-toast-error   { border-left-color: #ef4444; }
+.admin-toast-warning { border-left-color: #f59e0b; }
+.admin-toast-info    { border-left-color: #7c3aed; }
+
+/* Scrollbar styling */
+.modal-admin-content::-webkit-scrollbar { width: 6px; }
+.modal-admin-content::-webkit-scrollbar-track { background: #f9fafb; border-radius: 3px; }
+.modal-admin-content::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+
+@media (max-width: 540px) {
+    .modal-admin-content { padding: 28px 20px; }
+    .form-row { grid-template-columns: 1fr; }
+    .admin-toast { left: 16px; right: 16px; bottom: 20px; max-width: none; }
+}

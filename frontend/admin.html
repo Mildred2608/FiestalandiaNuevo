@@ -35,13 +35,11 @@
                 <h2>Gestionar Categorías</h2>
                 <button class="btn-primary" id="btnNuevaCategoria">+ Nueva Categoría</button>
             </div>
-
-            <!-- Tabla de categorías -->
             <table class="admin-table">
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Icono</th>
+                        <th>Ícono</th>
                         <th>Nombre</th>
                         <th>Descripción</th>
                         <th>Fecha Creación</th>
@@ -49,9 +47,7 @@
                     </tr>
                 </thead>
                 <tbody id="tablaCategorias">
-                    <tr>
-                        <td colspan="6" class="loading-row">Cargando categorías...</td>
-                    </tr>
+                    <tr><td colspan="6" class="loading-row">⏳ Cargando categorías...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -62,8 +58,6 @@
                 <h2>Gestionar Subcategorías</h2>
                 <button class="btn-primary" id="btnNuevaSubcategoria">+ Nueva Subcategoría</button>
             </div>
-
-            <!-- Tabla de subcategorías -->
             <table class="admin-table">
                 <thead>
                     <tr>
@@ -76,9 +70,7 @@
                     </tr>
                 </thead>
                 <tbody id="tablaSubcategorias">
-                    <tr>
-                        <td colspan="6" class="loading-row">Cargando subcategorías...</td>
-                    </tr>
+                    <tr><td colspan="6" class="loading-row">⏳ Cargando subcategorías...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -89,8 +81,6 @@
                 <h2>Gestionar Servicios</h2>
                 <button class="btn-primary" id="btnNuevoServicio">+ Nuevo Servicio</button>
             </div>
-
-            <!-- Tabla de servicios -->
             <table class="admin-table">
                 <thead>
                     <tr>
@@ -104,9 +94,7 @@
                     </tr>
                 </thead>
                 <tbody id="tablaServicios">
-                    <tr>
-                        <td colspan="7" class="loading-row">Cargando servicios...</td>
-                    </tr>
+                    <tr><td colspan="7" class="loading-row">⏳ Cargando servicios...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -114,50 +102,114 @@
 
     <!-- ===== MODAL PARA CATEGORÍAS ===== -->
     <div class="modal" id="modalCategoria" style="display: none;">
-        <div class="modal-content">
+        <div class="modal-content modal-admin-content">
             <span class="modal-close" id="closeModalCategoria">&times;</span>
-            <h2 id="modalCategoriaTitle">Nueva Categoría</h2>
+            <div class="modal-header">
+                <div class="modal-logo">📋</div>
+                <h2 id="modalCategoriaTitle">Nueva Categoría</h2>
+                <p>Completa los datos de la categoría</p>
+            </div>
             <form id="formCategoria">
                 <input type="hidden" id="categoriaId">
                 <div class="form-group">
-                    <label>Icono</label>
-                    <input type="text" id="categoriaIcono" placeholder="Ej: 🏛️, 🎵, 🍽️, 🎈" required>
+                    <label>Ícono <span class="field-optional">(opcional)</span></label>
+                    <input type="text" id="categoriaIcono" placeholder="Ej: 🏛️, 🎵, 🍽️, 🎈">
+                    <div class="input-hint">Escribe un emoji para representar la categoría</div>
                 </div>
                 <div class="form-group">
-                    <label>Nombre</label>
-                    <input type="text" id="categoriaNombre" placeholder="Ej: Lugar, Música, Banquetes" required>
+                    <label>Nombre <span class="field-required">*</span></label>
+                    <input type="text" id="categoriaNombre" placeholder="Ej: Lugar, Música, Banquetes">
+                    <div class="error-message" id="categoriaNombreError"></div>
                 </div>
                 <div class="form-group">
-                    <label>Descripción</label>
-                    <textarea id="categoriaDescripcion" rows="3" placeholder="Descripción de la categoría..." required></textarea>
+                    <label>Descripción <span class="field-optional">(opcional)</span></label>
+                    <textarea id="categoriaDescripcion" rows="3" placeholder="Descripción de la categoría..."></textarea>
                 </div>
-                <button type="submit" class="modal-btn">Guardar</button>
+                <button type="submit" class="modal-btn">Guardar Categoría</button>
             </form>
         </div>
     </div>
 
     <!-- ===== MODAL PARA SUBCATEGORÍAS ===== -->
     <div class="modal" id="modalSubcategoria" style="display: none;">
-        <div class="modal-content">
+        <div class="modal-content modal-admin-content">
             <span class="modal-close" id="closeModalSubcategoria">&times;</span>
-            <h2 id="modalSubcategoriaTitle">Nueva Subcategoría</h2>
+            <div class="modal-header">
+                <div class="modal-logo">📑</div>
+                <h2 id="modalSubcategoriaTitle">Agregar Nueva Subcategoría</h2>
+                <p>Vincula una subcategoría a una categoría existente</p>
+            </div>
             <form id="formSubcategoria">
                 <input type="hidden" id="subcategoriaId">
                 <div class="form-group">
-                    <label>Categoría</label>
-                    <select id="subcategoriaCategoriaId" required>
-                        <option value="">Seleccionar categoría...</option>
+                    <label>Categoría padre <span class="field-required">*</span></label>
+                    <select id="subcategoriaCategoriaId">
+                        <option value="">Cargando categorías...</option>
                     </select>
+                    <div class="error-message" id="subcategoriaCategoriaError"></div>
                 </div>
                 <div class="form-group">
-                    <label>Nombre</label>
-                    <input type="text" id="subcategoriaNombre" placeholder="Ej: Salones de fiesta, DJ profesional" required>
+                    <label>Nombre <span class="field-required">*</span></label>
+                    <input type="text" id="subcategoriaNombre" placeholder="Ej: Salones de fiesta, DJ profesional">
+                    <div class="error-message" id="subcategoriaNombreError"></div>
                 </div>
                 <div class="form-group">
-                    <label>Descripción</label>
-                    <textarea id="subcategoriaDescripcion" rows="3" placeholder="Descripción de la subcategoría..." required></textarea>
+                    <label>Descripción <span class="field-optional">(opcional)</span></label>
+                    <textarea id="subcategoriaDescripcion" rows="3" placeholder="Descripción de la subcategoría..."></textarea>
                 </div>
-                <button type="submit" class="modal-btn">Guardar</button>
+                <button type="submit" class="modal-btn">Guardar Subcategoría</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== MODAL PARA SERVICIOS ===== -->
+    <div class="modal" id="modalServicio" style="display: none;">
+        <div class="modal-content modal-admin-content">
+            <span class="modal-close" id="closeModalServicio">&times;</span>
+            <div class="modal-header">
+                <div class="modal-logo">🎯</div>
+                <h2>Agregar Nuevo Servicio</h2>
+                <p>Completa los datos del servicio</p>
+            </div>
+            <form id="formServicio">
+                <div class="form-group">
+                    <label>Subcategoría <span class="field-required">*</span></label>
+                    <select id="servicioSubcategoriaId">
+                        <option value="">Cargando subcategorías...</option>
+                    </select>
+                    <div class="error-message" id="servicioSubcategoriaError"></div>
+                </div>
+                <div class="form-group">
+                    <label>Proveedor <span class="field-required">*</span></label>
+                    <select id="servicioProveedorId">
+                        <option value="">Cargando proveedores...</option>
+                    </select>
+                    <div class="error-message" id="servicioProveedorError"></div>
+                </div>
+                <div class="form-group">
+                    <label>Nombre del servicio <span class="field-required">*</span></label>
+                    <input type="text" id="servicioNombre" placeholder="Ej: Salón Imperial, DJ Carlos...">
+                    <div class="error-message" id="servicioNombreError"></div>
+                </div>
+                <div class="form-group">
+                    <label>Descripción <span class="field-optional">(opcional)</span></label>
+                    <textarea id="servicioDescripcion" rows="3" placeholder="Describe el servicio..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Precio base <span class="field-required">*</span></label>
+                        <input type="number" id="servicioPrecioBase" placeholder="Ej: 5000" min="1" step="50">
+                        <div class="error-message" id="servicioPrecioError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select id="servicioEstado">
+                            <option value="1">✅ Activo</option>
+                            <option value="0">❌ Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="modal-btn">Guardar Servicio</button>
             </form>
         </div>
     </div>

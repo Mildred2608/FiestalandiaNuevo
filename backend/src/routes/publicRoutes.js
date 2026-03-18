@@ -11,7 +11,7 @@ const { pool } = require('../config/database');
 router.get('/categorias', async (req, res) => {
     try {
         const [rows] = await pool.query(`
-            SELECT id, nombre, descripcion, imagen_url 
+            SELECT id, nombre, descripcion 
             FROM categorias 
             ORDER BY nombre
         `);
@@ -47,7 +47,7 @@ router.get('/servicios/publicos', async (req, res) => {
 router.get('/subcategorias/categoria/:categoriaId', async (req, res) => {
     try {
         const [rows] = await pool.query(`
-            SELECT id, nombre, descripcion, imagen_url 
+            SELECT id, nombre, descripcion 
             FROM subcategorias 
             WHERE categoria_id = ? 
             ORDER BY nombre

@@ -249,33 +249,83 @@ function mostrarToast(mensaje, tipo = 'info') {
     }, 2800);
 }
 
+// ===== SWITCH ENTRE FORMULARIOS LOGIN / REGISTRO =====
+function initAuthModalSwitch() {
+    const switchToRegister = document.getElementById('switchToRegister');
+    const switchToLogin    = document.getElementById('switchToLogin');
+    const formLogin        = document.getElementById('formLogin');
+    const formRegister     = document.getElementById('formRegister');
+    const modalTitle       = document.querySelector('#authModal h2');
+    const modalSubtitle    = document.querySelector('#authModal .modal-header p');
+
+    if (!switchToRegister || !switchToLogin || !formLogin || !formRegister) return;
+
+    function mostrarRegistro() {
+        formLogin.classList.remove('active');
+        formRegister.classList.add('active');
+        if (modalTitle) modalTitle.textContent = '¡Crea tu cuenta!';
+        if (modalSubtitle) modalSubtitle.textContent = 'Regístrate para continuar';
+    }
+
+    function mostrarLogin() {
+        formRegister.classList.remove('active');
+        formLogin.classList.add('active');
+        if (modalTitle) modalTitle.textContent = '¡Bienvenido!';
+        if (modalSubtitle) modalSubtitle.textContent = 'Inicia sesión para continuar';
+    }
+
+    switchToRegister.addEventListener('click', (e) => { e.preventDefault(); mostrarRegistro(); });
+    switchToLogin.addEventListener('click',    (e) => { e.preventDefault(); mostrarLogin(); });
+}
+
+// ===== HELPER: MOSTRAR ERROR INLINE =====
+function mostrarErrorCampo(id, msg) {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = msg; el.classList.add('visible'); }
+}
+
+function limpiarErroresCampo(...ids) {
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.textContent = ''; el.classList.remove('visible'); }
+    });
+}
+
 // ===== CORRECCIÓN PARA EL MODAL DE LOGIN =====
 function corregirModalLogin() {
     const formLogin = document.getElementById('formLogin');
     if (!formLogin) return;
-    
+
     const newForm = formLogin.cloneNode(true);
     formLogin.parentNode.replaceChild(newForm, formLogin);
-    
+
     newForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
-        const email = document.getElementById('loginEmail').value;
+        limpiarErroresCampo('loginEmailError', 'loginPasswordError');
+
+        const email    = document.getElementById('loginEmail').value.trim();
         const password = document.getElementById('loginPassword').value;
-        
-        if (!email || !password) {
-            mostrarToast('Completa todos los campos', 'warning');
-            return;
-        }
-        
+        let valid = true;
+
+        if (!email) { mostrarErrorCampo('loginEmailError', 'El correo es obligatorio'); valid = false; }
+        else if (!auth.isValidEmail(email)) { mostrarErrorCampo('loginEmailError', 'Email no válido'); valid = false; }
+        if (!password) { mostrarErrorCampo('loginPasswordError', 'La contraseña es obligatoria'); valid = false; }
+        if (!valid) return;
+
+        const btn = newForm.querySelector('button[type="submit"]');
+        const txtOriginal = btn.textContent;
+        btn.disabled = true; btn.textContent = 'Iniciando sesión...';
+
         const result = await auth.login(email, password);
-        
+
+        btn.disabled = false; btn.textContent = txtOriginal;
+
         if (result.success) {
-            mostrarToast('Bienvenido', 'success');
+            mostrarToast('¡Bienvenido! 🎉', 'success');
             document.getElementById('authModal').style.display = 'none';
             actualizarBotonLogin();
         } else {
-            mostrarToast(result.error, 'error');
+            mostrarToast(result.error || 'Error al iniciar sesión', 'error');
         }
     });
 }
@@ -283,43 +333,69 @@ function corregirModalLogin() {
 function corregirModalRegistro() {
     const formRegister = document.getElementById('formRegister');
     if (!formRegister) return;
-    
+
+    // Inyectar checkbox de términos si no existe
+    if (!document.getElementById('regTerminos')) {
+        const terminosGroup = document.createElement('div');
+        terminosGroup.className = 'form-group terminos-group';
+        terminosGroup.innerHTML = `
+            <label class="checkbox-label">
+                <input type="checkbox" id="regTerminos">
+                <span>Acepto los <a href="#" style="color:#7c3aed;font-weight:600">términos y condiciones</a></span>
+            </label>
+            <div class="error-message" id="regTerminosError"></div>
+        `;
+        const submitBtn = formRegister.querySelector('button[type="submit"]');
+        formRegister.insertBefore(terminosGroup, submitBtn);
+    }
+
     const newForm = formRegister.cloneNode(true);
     formRegister.parentNode.replaceChild(newForm, formRegister);
-    
+
     newForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
-        const name = document.getElementById('regName')?.value.trim();
-        const email = document.getElementById('regEmail')?.value.trim();
-        const telefono = document.getElementById('regTelefono')?.value.trim();
-        const password = document.getElementById('regPassword')?.value;
+        limpiarErroresCampo('regNameError','regEmailError','regTelefonoError','regPasswordError','regConfirmError','regTerminosError');
+
+        const name            = document.getElementById('regName')?.value.trim();
+        const email           = document.getElementById('regEmail')?.value.trim();
+        const telefono        = document.getElementById('regTelefono')?.value.trim();
+        const password        = document.getElementById('regPassword')?.value;
         const confirmPassword = document.getElementById('regConfirmPassword')?.value;
-        
-        if (!name || !email || !telefono || !password || !confirmPassword) {
-            mostrarToast('Completa todos los campos', 'warning');
-            return;
-        }
-        
-        if (password !== confirmPassword) {
-            mostrarToast('Las contraseñas no coinciden', 'warning');
-            return;
-        }
-        
-        const phoneClean = telefono.replace(/\D/g, '');
+        const terminos        = document.getElementById('regTerminos')?.checked;
+
+        let valid = true;
+        if (!name)  { mostrarErrorCampo('regNameError', 'El nombre es obligatorio'); valid = false; }
+        if (!email) { mostrarErrorCampo('regEmailError', 'El correo es obligatorio'); valid = false; }
+        else if (!auth.isValidEmail(email)) { mostrarErrorCampo('regEmailError', 'Email no válido'); valid = false; }
+        if (!telefono) { mostrarErrorCampo('regTelefonoError', 'El teléfono es obligatorio'); valid = false; }
+        else if (!auth.isValidPhone(telefono)) { mostrarErrorCampo('regTelefonoError', 'Debe tener 10 dígitos'); valid = false; }
+        if (!password) { mostrarErrorCampo('regPasswordError', 'La contraseña es obligatoria'); valid = false; }
+        else if (password.length < 8) { mostrarErrorCampo('regPasswordError', 'Mínimo 8 caracteres'); valid = false; }
+        if (!confirmPassword) { mostrarErrorCampo('regConfirmError', 'Confirma tu contraseña'); valid = false; }
+        else if (password !== confirmPassword) { mostrarErrorCampo('regConfirmError', 'Las contraseñas no coinciden'); valid = false; }
+        if (!terminos) { mostrarErrorCampo('regTerminosError', 'Debes aceptar los términos'); valid = false; }
+        if (!valid) return;
+
+        const btn = newForm.querySelector('button[type="submit"]');
+        const txtOriginal = btn.textContent;
+        btn.disabled = true; btn.textContent = 'Registrando...';
+
         const result = await auth.register({
             nombre: name,
-            email: email,
-            telefono: phoneClean,
-            password: password
+            email,
+            telefono: telefono.replace(/\D/g, ''),
+            password,
+            rol: 'usuario'
         });
-        
+
+        btn.disabled = false; btn.textContent = txtOriginal;
+
         if (result.success) {
-            mostrarToast('Registro exitoso', 'success');
+            mostrarToast('¡Cuenta creada exitosamente! 🎉', 'success');
             document.getElementById('authModal').style.display = 'none';
             actualizarBotonLogin();
         } else {
-            mostrarToast(result.error, 'error');
+            mostrarToast(result.error || 'Error al registrar', 'error');
         }
     });
 }
@@ -342,15 +418,37 @@ window.addEventListener('focus', () => {
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Main.js iniciado');
-    
+
     await actualizarCardsInicio();
     actualizarBadge();
     initFadeIn();
     initSmoothScroll();
     actualizarBotonLogin();
-    
+
+    // Inicializar modales de auth
+    initAuthModalSwitch();
     corregirModalLogin();
     corregirModalRegistro();
+
+    // Cerrar modal auth al hacer clic fuera
+    const authModal = document.getElementById('authModal');
+    if (authModal) {
+        authModal.addEventListener('click', (e) => {
+            if (e.target === authModal) {
+                authModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        });
+    }
+
+    // Cerrar con botón X
+    const closeAuthModal = document.getElementById('closeAuthModal');
+    if (closeAuthModal) {
+        closeAuthModal.addEventListener('click', () => {
+            if (authModal) authModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        });
+    }
 });
 
 // Exponer funciones globales

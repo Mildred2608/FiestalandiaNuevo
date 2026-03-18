@@ -135,7 +135,7 @@ router.get('/cliente/eventos', authMiddleware.verifyToken, async (req, res) => {
 router.get('/categorias', authMiddleware.verifyToken, isAdmin, async (req, res) => {
     try {
         const [rows] = await pool.query(`
-            SELECT id, nombre, descripcion, imagen_url, creado_en 
+            SELECT id, nombre, descripcion, creado_en 
             FROM categorias 
             ORDER BY id DESC
         `);
@@ -152,7 +152,7 @@ router.get('/categorias', authMiddleware.verifyToken, isAdmin, async (req, res) 
 // Crear nueva categoría
 router.post('/categorias', authMiddleware.verifyToken, isAdmin, async (req, res) => {
     try {
-        const { nombre, descripcion, imagen_url } = req.body;
+        const { nombre, descripcion } = req.body;
         
         if (!nombre) {
             return res.status(400).json({ 
@@ -162,8 +162,8 @@ router.post('/categorias', authMiddleware.verifyToken, isAdmin, async (req, res)
         }
         
         const [result] = await pool.query(
-            'INSERT INTO categorias (nombre, descripcion, imagen_url) VALUES (?, ?, ?)',
-            [nombre, descripcion || null, imagen_url || null]
+            'INSERT INTO categorias (nombre, descripcion) VALUES (?, ?)',
+            [nombre, descripcion || null]
         );
         
         res.status(201).json({ 
@@ -188,7 +188,7 @@ router.post('/categorias', authMiddleware.verifyToken, isAdmin, async (req, res)
 router.get('/subcategorias', authMiddleware.verifyToken, isAdmin, async (req, res) => {
     try {
         const [rows] = await pool.query(`
-            SELECT s.id, s.nombre, s.descripcion, s.imagen_url, s.creado_en,
+            SELECT s.id, s.nombre, s.descripcion, s.creado_en,
                    s.categoria_id, c.nombre as categoria_nombre
             FROM subcategorias s
             LEFT JOIN categorias c ON s.categoria_id = c.id
@@ -224,7 +224,7 @@ router.get('/subcategorias/:categoriaId', authMiddleware.verifyToken, async (req
 // Crear nueva subcategoría
 router.post('/subcategorias', authMiddleware.verifyToken, isAdmin, async (req, res) => {
     try {
-        const { categoria_id, nombre, descripcion, imagen_url } = req.body;
+        const { categoria_id, nombre, descripcion } = req.body;
         
         if (!categoria_id || !nombre) {
             return res.status(400).json({ 
@@ -234,8 +234,8 @@ router.post('/subcategorias', authMiddleware.verifyToken, isAdmin, async (req, r
         }
         
         const [result] = await pool.query(
-            'INSERT INTO subcategorias (categoria_id, nombre, descripcion, imagen_url) VALUES (?, ?, ?, ?)',
-            [categoria_id, nombre, descripcion || null, imagen_url || null]
+            'INSERT INTO subcategorias (categoria_id, nombre, descripcion) VALUES (?, ?, ?)',
+            [categoria_id, nombre, descripcion || null]
         );
         
         res.status(201).json({ 
@@ -462,7 +462,7 @@ router.post('/servicios/:id/reactivar', authMiddleware.verifyToken, isAdmin, asy
 router.get('/categorias/publicas', async (req, res) => {
     try {
         const [rows] = await pool.query(`
-            SELECT id, nombre, descripcion, imagen_url 
+            SELECT id, nombre, descripcion 
             FROM categorias 
             ORDER BY nombre
         `);
