@@ -426,9 +426,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     actualizarBotonLogin();
 
     // Inicializar modales de auth
-    initAuthModalSwitch();
     corregirModalLogin();
     corregirModalRegistro();
+    initAuthModalSwitch();
 
     // Cerrar modal auth al hacer clic fuera
     const authModal = document.getElementById('authModal');
