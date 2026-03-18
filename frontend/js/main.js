@@ -109,11 +109,13 @@ function mostrarMenuUsuario(user) {
             <a href="admin-proveedores.html">🏢 Proveedores</a>
             <a href="admin-cotizaciones.html">📊 Cotizaciones</a>
             <a href="admin-eventos.html">📅 Eventos</a>
+            <a href="admin-solicitudes.html">📋 Solicitudes de Registro</a>
         `;
     } else {
         menuContent += `
             <a href="mis-cotizaciones.html">💰 Mis Cotizaciones</a>
             <a href="mis-eventos.html">📅 Mis Eventos</a>
+            <a href="solicitar-registro-servicio.html" class="menu-solicitar">📋 Registrar mi servicio</a>
         `;
     }
     

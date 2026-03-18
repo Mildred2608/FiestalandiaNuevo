@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitar Registro de Servicio | Fiestalandia</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/solicitar-registro-servicio.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">Fiestalandia</div>
+            <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="menu" id="navMenu">
+                <a href="index.html">Inicio</a>
+                <a href="carrito.html" class="cart-link">
+                    🛒 Carrito <span class="cart-badge" id="cartBadge">0</span>
+                </a>
+                <a href="#" class="btn-login" id="loginBtn">🔐 Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="form-header">
+            <h1>Solicitar Registro de Servicio</h1>
+            <p>¿Tienes un negocio y quieres aparecer en Fiestalandia? Completa este formulario y lo revisaremos.</p>
+        </div>
+
+        <div class="solicitud-form-container">
+            <form id="formSolicitudRegistro" class="solicitud-form">
+                <div class="form-section">
+                    <h3>Información del Servicio</h3>
+                    
+                    <div class="form-group">
+                        <label for="categoria">Categoría *</label>
+                        <select id="categoria" required>
+                            <option value="">Seleccionar categoría...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subcategoria">Subcategoría *</label>
+                        <select id="subcategoria" required>
+                            <option value="">Primero selecciona una categoría</option>
+                        </select>
+                        <small class="form-hint">Si no existe la subcategoría, indícala en el campo "Nueva subcategoría"</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nuevaSubcategoria">¿Sugerir nueva subcategoría?</label>
+                        <input type="text" id="nuevaSubcategoria" placeholder="Ej: Salones con vista al mar">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nombreServicio">Nombre del Servicio *</label>
+                        <input type="text" id="nombreServicio" placeholder="Ej: Salón Imperial" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="descripcion">Descripción *</label>
+                        <textarea id="descripcion" rows="4" placeholder="Describe tu servicio..." required></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="precio">Precio Base *</label>
+                            <input type="number" id="precio" min="0" step="100" placeholder="Ej: 8500" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="moneda">Moneda</label>
+                            <select id="moneda">
+                                <option value="MXN">MXN</option>
+                                <option value="USD">USD</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Información del Proveedor</h3>
+                    
+                    <div class="form-group">
+                        <label for="proveedorNombre">Nombre del negocio *</label>
+                        <input type="text" id="proveedorNombre" placeholder="Ej: Salones García" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="proveedorEmail">Correo electrónico *</label>
+                        <input type="email" id="proveedorEmail" placeholder="contacto@negocio.com" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="proveedorTelefono">Teléfono *</label>
+                            <input type="tel" id="proveedorTelefono" placeholder="55-1234-5678" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="proveedorWhatsapp">WhatsApp</label>
+                            <input type="tel" id="proveedorWhatsapp" placeholder="55-1234-5678">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="proveedorDireccion">Dirección</label>
+                        <textarea id="proveedorDireccion" rows="2" placeholder="Dirección del negocio..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sitioWeb">Sitio web (opcional)</label>
+                        <input type="url" id="sitioWeb" placeholder="https://tusitio.com">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Información adicional</h3>
+                    
+                    <div class="form-group">
+                        <label for="imagenes">URL de imágenes (opcional)</label>
+                        <input type="text" id="imagenes" placeholder="https://ejemplo.com/imagen.jpg">
+                        <small class="form-hint">Puedes separar varias URLs con comas</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="comentarios">Comentarios adicionales</label>
+                        <textarea id="comentarios" rows="3" placeholder="Información que consideres importante..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">Enviar Solicitud</button>
+                    <button type="button" class="btn-cancel" onclick="window.location.href='index.html'">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- SCRIPTS EN EL ORDEN CORRECTO -->
+    <script src="js/auth.js"></script>
+    <script src="js/main.js"></script>  <!-- ← AGREGADO -->
+    <script src="js/solicitar-registro-servicio.js"></script>
+</body>
+</html>
