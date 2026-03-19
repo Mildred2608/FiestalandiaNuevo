@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitudes de Registro | Panel Admin</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/admin-solicitudes.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">Fiestalandia Admin</div>
+            <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="menu" id="navMenu">
+                <a href="admin.html">← Panel Principal</a>
+                <a href="index.html">Inicio</a>
+                <a href="#" class="btn-login" id="adminName">👤 Admin</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="admin-container">
+        <h1 class="admin-title">Solicitudes de Registro de Servicios</h1>
+
+        <!-- Tabs para filtrar por estado -->
+        <div class="solicitudes-tabs">
+            <button class="solicitud-tab active" data-estado="pendiente">⏳ Pendientes</button>
+            <button class="solicitud-tab" data-estado="aprobada">✅ Aprobadas</button>
+            <button class="solicitud-tab" data-estado="rechazada">❌ Rechazadas</button>
+            <button class="solicitud-tab" data-estado="todas">📋 Todas</button>
+        </div>
+
+        <!-- Contenedor de solicitudes -->
+        <div id="solicitudesContainer" class="solicitudes-container">
+            <div class="loading-spinner">Cargando solicitudes...</div>
+        </div>
+    </main>
+
+    <!-- Modal para ver detalle y aprobar/rechazar -->
+    <div class="modal" id="modalSolicitud" style="display: none;">
+        <div class="modal-content modal-solicitud">
+            <span class="modal-close" id="closeModalSolicitud">&times;</span>
+            <h2 id="modalTitulo">Detalle de Solicitud</h2>
+            
+            <div id="solicitudDetalle" class="solicitud-detalle">
+                <!-- Se llena con JS -->
+            </div>
+
+            <div class="solicitud-acciones-modal" id="solicitudAcciones">
+                <!-- Botones de acción -->
+            </div>
+
+            <div class="form-group" id="observacionesGroup" style="display: none;">
+                <label for="observacionesModal">Observaciones para el cliente:</label>
+                <textarea id="observacionesModal" rows="3" class="modal-observaciones"></textarea>
+            </div>
+
+            <div class="modal-botones">
+                <button class="btn-cerrar-modal" onclick="cerrarModalSolicitud()">Cancelar</button>
+                <button class="modal-btn" id="btnConfirmarAccion">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/admin-solicitudes.js"></script>
+</body>
+</html>
