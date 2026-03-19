@@ -5,8 +5,6 @@ function checkAdminAuth() {
     const user = auth.getCurrentUser();
     if (!user || user.rol !== 'admin') {
         window.location.href = 'index.html';
-    } else {
-        document.getElementById('adminName').textContent = `👤 ${user.nombre}`;
     }
 }
 

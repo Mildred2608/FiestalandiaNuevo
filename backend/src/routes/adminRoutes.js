@@ -50,7 +50,7 @@ router.get('/proveedores', authMiddleware.verifyToken, isAdmin, async (req, res)
 // Obtener todos los clientes (usando vista_admin_clientes)
 router.get('/clientes', authMiddleware.verifyToken, isAdmin, async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM vista_admin_clientes');
+        const [rows] = await pool.query('SELECT id, nombre, email, telefono, rol, creado_en FROM clientes ORDER BY id DESC');
         res.json(rows);
     } catch (error) {
         console.error('Error al obtener clientes:', error);
