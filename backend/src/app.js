@@ -12,6 +12,7 @@ const { testConnection } = require('./config/database');
 // Importar rutas
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const solicitudesRoutes = require('./routes/solicitudesRoutes');
 const publicRoutes = require('./routes/publicRoutes');
 
 const app = express();
@@ -25,22 +26,27 @@ app.use(express.urlencoded({ extended: true }));
 testConnection();
 
 // ============================================
-// RUTAS DE LA API
+// RUTAS DE LA API (ORDEN CORRECTO)
 // ============================================
 
-// Rutas de autenticación (públicas)
+// 1. Rutas de autenticación (públicas)
 app.use('/api/auth', authRoutes);
 
-// Rutas de administrador (protegidas)
+// 2. Rutas de administrador (protegidas)
 app.use('/api/admin', adminRoutes);
-app.use('/api', publicRoutes); 
+
+// 3. Rutas de solicitudes (ESPECÍFICAS - VAN PRIMERO)
+app.use('/api', solicitudesRoutes);
+
+// 4. Rutas públicas (GENÉRICAS - VAN AL FINAL)
+app.use('/api', publicRoutes);
 
 // ============================================
 // RUTA DE BIENVENIDA
 // ============================================
 app.get('/', (req, res) => {
     res.json({
-        message: 'API de Fiestalandia funcionando ',
+        message: 'API de Fiestalandia funcionando 🚀',
         status: 'OK',
         endpoints: {
             auth: {
