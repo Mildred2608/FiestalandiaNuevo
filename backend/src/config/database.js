@@ -3,10 +3,11 @@ const mysql = require('mysql2');
 
 // Crear el pool de conexiones
 const pool = mysql.createPool({
-    host: process.env.DB_HOST || 'localhost',
+    host: process.env.DB_HOST || '127.0.0.1',
     user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '123456',
+    password: process.env.DB_PASSWORD || 'Mildred1234',
     database: process.env.DB_NAME || 'fiestalandia',
+    port: Number(process.env.DB_PORT) || 3307,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
@@ -20,7 +21,7 @@ const testConnection = async () => {
     try {
         const [rows] = await promisePool.query('SELECT 1 + 1 AS result');
         console.log(' Conexión a MySQL exitosa');
-        console.log(' Base de datos:', process.env.DB_NAME);
+        console.log(' Base de datos:', process.env.DB_NAME || 'fiestalandia');
         return true;
     } catch (error) {
         console.error(' Error conectando a MySQL:');
