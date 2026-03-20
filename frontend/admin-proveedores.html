@@ -8,7 +8,21 @@
     <link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
-    <nav id="admin-navbar"></nav>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">Fiestalandia Admin</div>
+            <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="menu" id="navMenu">
+                <a href="admin.html">← Volver al panel</a>
+                <a href="index.html">Inicio</a>
+                <a href="#" class="btn-login" id="adminName">👤 Admin</a>
+            </div>
+        </div>
+    </nav>
 
     <main class="admin-container">
         <h1 class="admin-title">Gestión de Proveedores</h1>
@@ -40,8 +54,33 @@
         </div>
     </main>
 
+    <div class="modal" id="modalProveedor" style="display: none;">
+        <div class="modal-content">
+            <span class="modal-close" id="closeModalProveedor">&times;</span>
+            <h2>Nuevo Proveedor</h2>
+            <form id="formProveedor">
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" id="provNombre" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="provEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="text" id="provTelefono">
+                </div>
+                <div class="form-group">
+                    <label>Dirección</label>
+                    <textarea id="provDireccion" rows="2"></textarea>
+                </div>
+                <button type="submit" class="modal-btn">Guardar</button>
+            </form>
+        </div>
+    </div>
+
     <script src="js/auth.js"></script>
-    <script src="js/admin-header.js"></script>
     <script src="js/admin-proveedores.js"></script>
 </body>
 </html>

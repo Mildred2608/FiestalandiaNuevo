@@ -12,13 +12,18 @@ function checkAdminAuth() {
     if (!user || user.rol !== 'admin') {
         window.location.href = 'index.html';
     } else {
-        document.getElementById('adminName').textContent = `👤 ${user.nombre}`;
+        const adminName = document.getElementById('adminName');
+        if (adminName) {
+            adminName.textContent = `👤 ${user.nombre}`;
+        }
     }
 }
 
 // ===== CARGAR SOLICITUDES =====
 async function cargarSolicitudes() {
     const container = document.getElementById('solicitudesContainer');
+    if (!container) return;
+    
     container.innerHTML = '<div class="loading-spinner">Cargando solicitudes...</div>';
     
     try {
@@ -26,6 +31,10 @@ async function cargarSolicitudes() {
         const response = await fetch(`${API_URL}/admin/solicitudes-registro`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         
         solicitudesData = await response.json();
         filtrarSolicitudes(currentFilter);
@@ -40,6 +49,7 @@ async function cargarSolicitudes() {
 function filtrarSolicitudes(estado) {
     currentFilter = estado;
     const container = document.getElementById('solicitudesContainer');
+    if (!container) return;
     
     // Actualizar tabs
     document.querySelectorAll('.solicitud-tab').forEach(t => {
@@ -128,6 +138,8 @@ function verDetalleSolicitud(id) {
     const detalle = document.getElementById('solicitudDetalle');
     const acciones = document.getElementById('solicitudAcciones');
     const observacionesGroup = document.getElementById('observacionesGroup');
+    
+    if (!detalle) return;
     
     // Construir detalle
     detalle.innerHTML = `
@@ -247,42 +259,58 @@ function verDetalleSolicitud(id) {
     `;
     
     // Configurar acciones según estado
-    if (solicitud.estado === 'pendiente') {
-        acciones.innerHTML = `
-            <button class="btn-aprobar" onclick="prepararAprobar(${solicitud.id})">✅ Aprobar solicitud</button>
-            <button class="btn-rechazar" onclick="prepararRechazar(${solicitud.id})">❌ Rechazar solicitud</button>
-        `;
-        observacionesGroup.style.display = 'block';
-    } else {
-        acciones.innerHTML = '';
-        observacionesGroup.style.display = 'none';
+    if (acciones && observacionesGroup) {
+        if (solicitud.estado === 'pendiente') {
+            acciones.innerHTML = `
+                <button class="btn-aprobar" onclick="prepararAprobar(${solicitud.id})">✅ Aprobar solicitud</button>
+                <button class="btn-rechazar" onclick="prepararRechazar(${solicitud.id})">❌ Rechazar solicitud</button>
+            `;
+            observacionesGroup.style.display = 'block';
+        } else {
+            acciones.innerHTML = '';
+            observacionesGroup.style.display = 'none';
+        }
     }
     
-    document.getElementById('observacionesModal').value = '';
-    document.getElementById('modalSolicitud').style.display = 'flex';
-    document.body.style.overflow = 'hidden';
+    const observacionesModal = document.getElementById('observacionesModal');
+    if (observacionesModal) {
+        observacionesModal.value = '';
+    }
+    
+    const modal = document.getElementById('modalSolicitud');
+    if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
 }
 
 // ===== PREPARAR APROBAR =====
 function prepararAprobar(id) {
     solicitudIdAccion = id;
     accionActual = 'aprobar';
-    document.getElementById('modalTitulo').textContent = 'Aprobar Solicitud';
-    document.getElementById('observacionesGroup').style.display = 'block';
+    const modalTitulo = document.getElementById('modalTitulo');
+    if (modalTitulo) modalTitulo.textContent = 'Aprobar Solicitud';
+    
+    const observacionesGroup = document.getElementById('observacionesGroup');
+    if (observacionesGroup) observacionesGroup.style.display = 'block';
 }
 
 function prepararRechazar(id) {
     solicitudIdAccion = id;
     accionActual = 'rechazar';
-    document.getElementById('modalTitulo').textContent = 'Rechazar Solicitud';
-    document.getElementById('observacionesGroup').style.display = 'block';
+    const modalTitulo = document.getElementById('modalTitulo');
+    if (modalTitulo) modalTitulo.textContent = 'Rechazar Solicitud';
+    
+    const observacionesGroup = document.getElementById('observacionesGroup');
+    if (observacionesGroup) observacionesGroup.style.display = 'block';
 }
 
 // ===== CONFIRMAR ACCIÓN =====
 async function confirmarAccion() {
     if (!solicitudIdAccion || !accionActual) return;
     
-    const observaciones = document.getElementById('observacionesModal').value;
+    const observacionesModal = document.getElementById('observacionesModal');
+    const observaciones = observacionesModal ? observacionesModal.value : '';
     const token = localStorage.getItem('token');
     
     try {
@@ -311,8 +339,11 @@ async function confirmarAccion() {
 
 // ===== CERRAR MODAL =====
 function cerrarModalSolicitud() {
-    document.getElementById('modalSolicitud').style.display = 'none';
-    document.body.style.overflow = 'auto';
+    const modal = document.getElementById('modalSolicitud');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
     solicitudIdAccion = null;
     accionActual = null;
 }
@@ -339,8 +370,8 @@ function mostrarToast(mensaje, tipo = 'info') {
 function toggleMenu() {
     const menu = document.getElementById('navMenu');
     const hamburger = document.getElementById('hamburger');
-    menu.classList.toggle('active');
-    hamburger.classList.toggle('active');
+    if (menu) menu.classList.toggle('active');
+    if (hamburger) hamburger.classList.toggle('active');
 }
 
 // ===== INICIALIZACIÓN =====
@@ -357,13 +388,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // Cerrar modal
-    document.getElementById('closeModalSolicitud').addEventListener('click', cerrarModalSolicitud);
+    const closeModal = document.getElementById('closeModalSolicitud');
+    if (closeModal) {
+        closeModal.addEventListener('click', cerrarModalSolicitud);
+    }
     
     // Botón confirmar
-    document.getElementById('btnConfirmarAccion').addEventListener('click', confirmarAccion);
+    const btnConfirmar = document.getElementById('btnConfirmarAccion');
+    if (btnConfirmar) {
+        btnConfirmar.addEventListener('click', confirmarAccion);
+    }
     
     window.addEventListener('click', (e) => {
-        if (e.target === document.getElementById('modalSolicitud')) {
+        const modal = document.getElementById('modalSolicitud');
+        if (e.target === modal) {
             cerrarModalSolicitud();
         }
     });

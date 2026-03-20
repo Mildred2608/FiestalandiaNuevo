@@ -9,7 +9,21 @@
     <link rel="stylesheet" href="css/admin-solicitudes.css">
 </head>
 <body>
-    <nav id="admin-navbar"></nav>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">Fiestalandia Admin</div>
+            <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="menu" id="navMenu">
+                <a href="admin.html">← Panel Principal</a>
+                <a href="index.html">Inicio</a>
+                <a href="#" class="btn-login" id="adminName">👤 Admin</a>
+            </div>
+        </div>
+    </nav>
 
     <main class="admin-container">
         <h1 class="admin-title">Solicitudes de Registro de Servicios</h1>
@@ -55,7 +69,6 @@
     </div>
 
     <script src="js/auth.js"></script>
-    <script src="js/admin-header.js"></script>
     <script src="js/main.js"></script>
     <script src="js/admin-solicitudes.js"></script>
 </body>
