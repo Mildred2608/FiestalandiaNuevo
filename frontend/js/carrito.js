@@ -9,12 +9,30 @@ function cargarCarrito() {
     const resumenLines = document.getElementById('resumenLines');
     const totalPrecio = document.getElementById('totalPrecio');
 
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventoId = urlParams.get('eventoId');
+
+    if (eventoId) {
+        const header = document.querySelector('header h1');
+        if (header) header.textContent = `🛒 Carrito del Evento #${eventoId}`;
+    }
+
     try {
         const carrito = JSON.parse(localStorage.getItem('fiestalandia_carrito')) || [];
-        
-        if (carrito.length === 0) {
+        const carritoFiltrado = eventoId ? carrito.filter(item => String(item.eventoId) === String(eventoId)) : carrito;
+
+        if (carritoFiltrado.length === 0) {
             carritoVacio.style.display = 'block';
             carritoContenido.style.display = 'none';
+
+            if (eventoId) {
+                carritoVacio.innerHTML = `
+                    <div class="empty-icon">🛒</div>
+                    <h3>No hay servicios en el carrito para el evento #${eventoId}</h3>
+                    <p>Agrega servicios desde <a href="servicios.html?eventoId=${eventoId}">Servicios</a></p>
+                `;
+            }
+
             actualizarBadge();
             return;
         }
@@ -22,50 +40,229 @@ function cargarCarrito() {
         carritoVacio.style.display = 'none';
         carritoContenido.style.display = 'grid';
 
-        // Generar items del carrito
-        let itemsHtml = '';
-        let resumenHtml = '';
         let total = 0;
+        const secciones = {};
 
-        carrito.forEach((item, index) => {
-            const cantidad = item.cantidad || 1;
-            const subtotal = item.precio * cantidad;
-            total += subtotal;
+        carritoFiltrado.forEach((item, index) => {
+            const key = item.eventoId ? `evento-${item.eventoId}` : 'general';
+            if (!secciones[key]) {
+                secciones[key] = {
+                    eventoId: item.eventoId || null,
+                    eventoNombre: item.eventoNombre || 'Carrito general',
+                    items: []
+                };
+            }
+            secciones[key].items.push({ item, index });
+            total += (item.precio || 0) * (item.cantidad || 1);
+        });
 
-            itemsHtml += `
-                <div class="carrito-item" data-index="${index}">
-                    <div class="item-icon"></div>
-                    <div class="item-info">
-                        <h4>${item.nombre}</h4>
-                        <p>${item.descripcion || 'Sin descripción'}</p>
-                        <div class="item-price">$${item.precio.toLocaleString('es-MX')}</div>
+        let itemsHtml = '';
+        const selectorData = [];
+        Object.values(secciones).forEach(seccion => {
+            const subtotalSeccion = seccion.items.reduce((s, { item }) => s + (item.precio || 0) * (item.cantidad || 1), 0);
+            selectorData.push({
+                eventoId: seccion.eventoId,
+                eventoNombre: seccion.eventoNombre,
+                total: subtotalSeccion
+            });
+
+            itemsHtml += `<div class="carrito-evento-seccion">
+                <h3>${seccion.eventoNombre}${seccion.eventoId ? ` (#${seccion.eventoId})` : ''}</h3>`;
+
+            seccion.items.forEach(({ item, index }) => {
+                const cantidad = item.cantidad || 1;
+                const subtotal = item.precio * cantidad;
+
+                itemsHtml += `
+                    <div class="carrito-item" data-index="${index}">
+                        <div class="item-icon"></div>
+                        <div class="item-info">
+                            <h4>${item.nombre}</h4>
+                            <p>${item.descripcion || 'Sin descripción'}</p>
+                            <div class="item-price">$${item.precio.toLocaleString('es-MX')}</div>
+                        </div>
+                        <div class="item-controls">
+                            <button class="qty-btn" onclick="cambiarCantidad(${index}, -1)">−</button>
+                            <span class="qty-value">${cantidad}</span>
+                            <button class="qty-btn" onclick="cambiarCantidad(${index}, 1)">+</button>
+                            <button class="btn-remove" onclick="eliminarDelCarrito(${index})" title="Eliminar"></button>
+                        </div>
                     </div>
-                    <div class="item-controls">
-                        <button class="qty-btn" onclick="cambiarCantidad(${index}, -1)">−</button>
-                        <span class="qty-value">${cantidad}</span>
-                        <button class="qty-btn" onclick="cambiarCantidad(${index}, 1)">+</button>
-                        <button class="btn-remove" onclick="eliminarDelCarrito(${index})" title="Eliminar"></button>
-                    </div>
-                </div>
-            `;
+                `;
+            });
 
-            resumenHtml += `
-                <div class="resumen-line">
-                    <span class="line-name">${item.nombre}</span>
-                    <span class="line-qty">x${cantidad}</span>
-                    <span class="line-price">$${subtotal.toLocaleString('es-MX')}</span>
-                </div>
-            `;
+            itemsHtml += '</div>';
         });
 
         carritoItems.innerHTML = itemsHtml;
-        resumenLines.innerHTML = resumenHtml;
+        resumenLines.innerHTML = selectorData.map(seccion => {
+            return `
+                <div class="resumen-line">
+                    <span class="line-name">${seccion.eventoNombre}</span>
+                    <span class="line-qty">&nbsp;</span>
+                    <span class="line-price">$${seccion.total.toLocaleString('es-MX')}</span>
+                </div>
+            `;
+        }).join('');
+
         totalPrecio.textContent = `$${total.toLocaleString('es-MX')}`;
 
+        populateEventoAPagar(selectorData);
+        const select = document.getElementById('eventoAPagar');
+        if (select) {
+            select.addEventListener('change', updateEventoAPagarTotal);
+        }
         actualizarBadge();
 
     } catch (error) {
         console.error('Error al cargar carrito:', error);
+    }
+}
+
+function populateEventoAPagar(selectorData) {
+    const select = document.getElementById('eventoAPagar');
+    const totalLabel = document.getElementById('pagoEventoTotal');
+
+    if (!select || !totalLabel) return;
+
+    select.innerHTML = '';
+    selectorData.forEach((evt, idx) => {
+        const value = evt.eventoId ? String(evt.eventoId) : `general-${idx}`;
+        const display = evt.eventoId
+            ? `${evt.eventoNombre} (#${evt.eventoId}) - $${evt.total.toLocaleString('es-MX')}`
+            : `${evt.eventoNombre} - $${evt.total.toLocaleString('es-MX')}`;
+
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = display;
+        option.dataset.total = evt.total;
+        select.appendChild(option);
+    });
+
+    if (selectorData.length > 0) {
+        select.selectedIndex = 0;
+        totalLabel.textContent = `Total evento seleccionado: $${Number(select.options[0].dataset.total).toLocaleString('es-MX')}`;
+        updateEventoAPagarTotal(); // Update total general
+    } else {
+        totalLabel.textContent = 'Total evento seleccionado: $0';
+    }
+}
+
+function updateEventoAPagarTotal() {
+    const select = document.getElementById('eventoAPagar');
+    const totalLabel = document.getElementById('pagoEventoTotal');
+    const totalPrecio = document.getElementById('totalPrecio');
+    if (!select || !totalLabel || !totalPrecio) return;
+    const selected = select.options[select.selectedIndex];
+    const total = Number(selected.dataset.total || 0);
+    totalLabel.textContent = `Total evento seleccionado: $${total.toLocaleString('es-MX')}`;
+    totalPrecio.textContent = `$${total.toLocaleString('es-MX')}`;
+}
+
+function abrirModalPagoEvento() {
+    const select = document.getElementById('eventoAPagar');
+    const totalLabel = document.getElementById('pagoEventoTotal');
+    if (!select || select.options.length === 0) {
+        mostrarToast('No hay eventos con saldo para pagar', 'warning');
+        return;
+    }
+
+    const selected = select.options[select.selectedIndex];
+    const total = Number(selected.dataset.total || 0);
+    if (total <= 0) {
+        mostrarToast('No hay monto para pagar en este evento.', 'info');
+        return;
+    }
+
+    const modal = document.getElementById('modalPagoEvento');
+    const info = document.getElementById('pagoModalEventoInfo');
+    if (modal && info) {
+        info.textContent = `Evento: ${selected.textContent} - Total: $${total.toLocaleString('es-MX')}`;
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function cerrarModalPagoEvento() {
+    const modal = document.getElementById('modalPagoEvento');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+}
+
+async function enviarSolicitudPago(event) {
+    event.preventDefault();
+
+    const select = document.getElementById('eventoAPagar');
+    if (!select || select.options.length === 0) return;
+
+    const selected = select.options[select.selectedIndex];
+    const eventoId = selected.value;
+    const total = Number(selected.dataset.total || 0);
+
+    const tarjetaNumero = document.getElementById('tarjetaNumero').value.replace(/\s+/g, '');
+    const tarjetaNombre = document.getElementById('tarjetaNombre').value.trim();
+    const tarjetaExp = document.getElementById('tarjetaExp').value.trim();
+    const tarjetaCvv = document.getElementById('tarjetaCvv').value.trim();
+
+    if (!tarjetaNumero || tarjetaNumero.length < 13 || tarjetaNumero.length > 19 || !/^\d+$/.test(tarjetaNumero)) {
+        mostrarToast('Ingresa un número de tarjeta válido', 'error');
+        return;
+    }
+    if (!tarjetaNombre) {
+        mostrarToast('Ingresa el nombre de la tarjeta', 'error');
+        return;
+    }
+    if (!tarjetaExp || !/^(0[1-9]|1[0-2])\/(\d{2})$/.test(tarjetaExp)) {
+        mostrarToast('Ingresa fecha de expiración válida MM/AA', 'error');
+        return;
+    }
+    if (!tarjetaCvv || tarjetaCvv.length < 3 || tarjetaCvv.length > 4 || !/^\d+$/.test(tarjetaCvv)) {
+        mostrarToast('Ingresa CVV válido', 'error');
+        return;
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+        mostrarToast('Debes iniciar sesión para pagar', 'warning');
+        return;
+    }
+
+    const payload = {
+        evento_id: eventoId,
+        total: total,
+        tarjeta_ultimos4: tarjetaNumero.slice(-4),
+        tarjeta_nombre: tarjetaNombre
+    };
+
+    try {
+        const response = await fetch(`${API_URL}/admin/cliente/pagos`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al enviar solicitud de pago');
+        }
+
+        mostrarToast('Solicitud de pago enviada correctamente. Su pago será aprobado en un máximo de 48 horas.', 'success');
+        cerrarModalPagoEvento();
+
+        // Eliminar los items pagados de ese evento en carrito local
+        const carrito = JSON.parse(localStorage.getItem('fiestalandia_carrito')) || [];
+        const restante = carrito.filter(item => String(item.eventoId) !== String(eventoId));
+        localStorage.setItem('fiestalandia_carrito', JSON.stringify(restante));
+        cargarCarrito();
+
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarToast(error.message || 'Error en solicitud de pago', 'error');
     }
 }
 
@@ -105,10 +302,20 @@ function eliminarDelCarrito(index) {
 
 // ===== VACIAR CARRITO =====
 function vaciarCarrito() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventoId = urlParams.get('eventoId');
+
     if (confirm('¿Estás seguro de vaciar el carrito?')) {
-        localStorage.removeItem('fiestalandia_carrito');
+        if (eventoId) {
+            const carrito = JSON.parse(localStorage.getItem('fiestalandia_carrito')) || [];
+            const restante = carrito.filter(item => String(item.eventoId) !== String(eventoId));
+            localStorage.setItem('fiestalandia_carrito', JSON.stringify(restante));
+            mostrarToast(`Carrito del evento #${eventoId} vaciado`, 'info');
+        } else {
+            localStorage.removeItem('fiestalandia_carrito');
+            mostrarToast('Carrito vaciado', 'info');
+        }
         cargarCarrito();
-        mostrarToast(' Carrito vaciado', 'info');
     }
 }
 
@@ -258,13 +465,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     cargarCarrito();
+    const select = document.getElementById('eventoAPagar');
+    const button = document.getElementById('btnPagarEvento');
+    const closeModal = document.getElementById('closeModalPago');
+    const formPago = document.getElementById('formPagoEvento');
+    
+    if (select) select.addEventListener('change', updateEventoAPagarTotal);
+    if (button) button.addEventListener('click', abrirModalPagoEvento);
+    if (closeModal) closeModal.addEventListener('click', cerrarModalPagoEvento);
+    if (formPago) formPago.addEventListener('submit', enviarSolicitudPago);
+
+    // Cerrar modal con click fuera del contenido
+    window.addEventListener('click', (e) => {
+        const modal = document.getElementById('modalPagoEvento');
+        if (modal && e.target === modal) {
+            cerrarModalPagoEvento();
+        }
+    });
 });
 
 // Exponer funciones globales
 window.cambiarCantidad = cambiarCantidad;
 window.eliminarDelCarrito = eliminarDelCarrito;
 window.vaciarCarrito = vaciarCarrito;
-window.solicitarCotizacion = solicitarCotizacion;
+window.abrirModalPagoEvento = abrirModalPagoEvento;
 window.toggleMenu = toggleMenu;
 window.verPerfil = verPerfil;
 window.cerrarSesion = cerrarSesion;

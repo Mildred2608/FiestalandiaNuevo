@@ -64,13 +64,20 @@
 
         <div class="resumen-divider"></div>
 
+        <div id="pagoEventoContainer" class="pago-evento">
+            <label for="eventoAPagar">Pagar evento:</label>
+            <select id="eventoAPagar"></select>
+            <button id="btnPagarEvento" class="btn-pagar">Pagar evento</button>
+            <div id="pagoEventoTotal" class="total-evento" style="margin-top: 10px; font-weight: 700;">Total evento seleccionado: $0</div>
+        </div>
+
         <div class="resumen-total">
-          <span>Total</span>
+          <span>Total general</span>
           <span id="totalPrecio">$0</span>
         </div>
 
         <div class="resumen-actions">
-          <button class="btn-cotizar" onclick="solicitarCotizacion()"> Solicitar cotización</button>
+          <button class="btn-pagar" onclick="abrirModalPagoEvento()"> Pagar evento</button>
           <button class="btn-vaciar" onclick="vaciarCarrito()"> Vaciar carrito</button>
         </div>
       </div>
@@ -80,6 +87,36 @@
 
   <div class="back-btn-container">
     <a href="index.html" class="btn-back">← Regresar al inicio</a>
+  </div>
+
+  <!-- Modal de pago -->
+  <div class="modal" id="modalPagoEvento" style="display:none;">
+    <div class="modal-content">
+      <span id="closeModalPago" class="modal-close">&times;</span>
+      <h2>Pago con tarjeta</h2>
+      <p id="pagoModalEventoInfo">Evento:</p>
+      <form id="formPagoEvento">
+        <div class="form-group">
+          <label>Número de tarjeta</label>
+          <input type="text" id="tarjetaNumero" maxlength="19" placeholder="1234 5678 9012 3456" required>
+        </div>
+        <div class="form-group">
+          <label>Nombre en la tarjeta</label>
+          <input type="text" id="tarjetaNombre" placeholder="Nombre Apellido" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Expiración (MM/AA)</label>
+            <input type="text" id="tarjetaExp" maxlength="5" placeholder="MM/AA" required>
+          </div>
+          <div class="form-group">
+            <label>CVV</label>
+            <input type="text" id="tarjetaCvv" maxlength="4" placeholder="123" required>
+          </div>
+        </div>
+        <button type="submit" class="modal-btn">Enviar solicitud de pago</button>
+      </form>
+    </div>
   </div>
 
 </main>

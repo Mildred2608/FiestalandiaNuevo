@@ -13,20 +13,61 @@ function checkAuth() {
 }
 
 // ===== CARGAR TIPOS DE EVENTO =====
-async function cargarTiposEvento() {
+async function cargarTiposEvento(tipoSeleccionado = '') {
+    const tiposPorDefecto = [
+        { id: '1', nombre: 'Boda' },
+        { id: '2', nombre: 'Cumpleaños' },
+        { id: '3', nombre: 'Bautizo' },
+        { id: '4', nombre: 'Comunión' },
+        { id: '5', nombre: 'Aniversario' },
+        { id: '6', nombre: 'Fiesta infantil' },
+        { id: '7', nombre: 'Conferencia' },
+        { id: '8', nombre: 'Team building' },
+        { id: '9', nombre: 'Graduación' },
+        { id: '10', nombre: 'Celebración corporativa' }
+    ];
+    
+    const select = document.getElementById('eventoTipo');
+    select.innerHTML = '<option value="">Seleccionar...</option>';
+
     try {
         const response = await fetch(`${API_URL}/tipos-evento`);
-        const tipos = await response.json();
-        
-        const select = document.getElementById('eventoTipo');
-        tipos.forEach(tipo => {
+        let tiposApi = [];
+
+        if (response.ok) {
+            tiposApi = await response.json();
+        } else {
+            console.warn('No se pudo obtener tipos desde API, usando valores por defecto.');
+        }
+
+        const tiposUnicos = [...tiposPorDefecto];
+        tiposApi.forEach(apiTipo => {
+            const existe = tiposUnicos.some(t => String(t.id) === String(apiTipo.id) || t.nombre.toLowerCase() === (apiTipo.nombre || '').toLowerCase());
+            if (!existe) {
+                tiposUnicos.push({ id: apiTipo.id, nombre: apiTipo.nombre });
+            }
+        });
+
+        tiposUnicos.forEach(tipo => {
             const option = document.createElement('option');
             option.value = tipo.id;
             option.textContent = tipo.nombre;
             select.appendChild(option);
         });
+
+        if (tipoSeleccionado) {
+            select.value = tipoSeleccionado;
+        }
+
     } catch (error) {
         console.error('Error al cargar tipos de evento:', error);
+        // En caso de error de red, mostrar los tipos por defecto
+        tiposPorDefecto.forEach(tipo => {
+            const option = document.createElement('option');
+            option.value = tipo.id;
+            option.textContent = tipo.nombre;
+            select.appendChild(option);
+        });
     }
 }
 
@@ -37,7 +78,7 @@ async function cargarEventos() {
     
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`${API_URL}/eventos/cliente/mis-eventos`, {
+        const response = await fetch(`${API_URL}/admin/cliente/eventos`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -47,9 +88,7 @@ async function cargarEventos() {
             grid.innerHTML = `
                 <div class="no-eventos">
                     <p>No tienes eventos creados aún</p>
-                    <button class="btn-nuevo-evento" onclick="abrirModalNuevoEvento()" style="margin-top: 20px;">
-                        + Crear mi primer evento
-                    </button>
+                    <p>Usa el botón "+ Nuevo Evento" en la parte superior para crear uno.</p>
                 </div>
             `;
             return;
@@ -124,8 +163,8 @@ async function guardarEvento(event) {
     
     const token = localStorage.getItem('token');
     const url = eventoId 
-        ? `${API_URL}/eventos/cliente/eventos/${eventoId}`
-        : `${API_URL}/eventos/cliente/eventos`;
+        ? `${API_URL}/admin/cliente/eventos/${eventoId}`
+        : `${API_URL}/admin/cliente/eventos`;
     const method = eventoId ? 'PUT' : 'POST';
     
     try {
@@ -154,14 +193,14 @@ async function guardarEvento(event) {
 
 // ===== VER EVENTO =====
 function verEvento(id) {
-    window.location.href = `evento-detalle.html?id=${id}`;
+    window.location.href = `carrito.html?eventoId=${id}`;
 }
 
 // ===== EDITAR EVENTO =====
 async function editarEvento(id) {
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`${API_URL}/eventos/cliente/eventos/${id}`, {
+        const response = await fetch(`${API_URL}/admin/cliente/eventos/${id}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -170,13 +209,12 @@ async function editarEvento(id) {
         document.getElementById('modalTitulo').textContent = 'Editar Evento';
         document.getElementById('eventoId').value = evento.id;
         document.getElementById('eventoNombre').value = evento.nombre_evento;
-        document.getElementById('eventoTipo').value = evento.tipo_id;
         document.getElementById('eventoFecha').value = new Date(evento.fecha).toISOString().split('T')[0];
         document.getElementById('eventoInvitados').value = evento.invitados || '';
         document.getElementById('eventoUbicacion').value = evento.ubicacion || '';
         document.getElementById('eventoMensaje').value = evento.mensaje || '';
-        
-        await cargarTiposEvento();
+
+        await cargarTiposEvento(evento.tipo_id);
         document.getElementById('modalEvento').style.display = 'flex';
         document.body.style.overflow = 'hidden';
         
@@ -200,7 +238,7 @@ async function eliminarEvento() {
     const token = localStorage.getItem('token');
     
     try {
-        const response = await fetch(`${API_URL}/eventos/cliente/eventos/${eventoAEliminar}`, {
+        const response = await fetch(`${API_URL}/admin/cliente/eventos/${eventoAEliminar}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });

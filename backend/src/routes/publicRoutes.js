@@ -62,6 +62,50 @@ router.get('/subcategorias/categoria/:categoriaId', async (req, res) => {
     }
 });
 
+// Obtener tipos de evento públicos (con carga inicial si está vacío)
+router.get('/tipos-evento', async (req, res) => {
+    try {
+        let [rows] = await pool.query(`
+            SELECT id, nombre
+            FROM tipos_evento
+            ORDER BY nombre
+        `);
+
+        if (!rows.length) {
+            const defaultTipos = [
+                'Boda',
+                'Cumpleaños',
+                'Bautizo',
+                'Comunión',
+                'Aniversario',
+                'Fiesta infantil',
+                'Conferencia',
+                'Team building',
+                'Graduación',
+                'Celebración corporativa'
+            ];
+
+            await Promise.all(defaultTipos.map(nombre =>
+                pool.query('INSERT IGNORE INTO tipos_evento (nombre) VALUES (?)', [nombre])
+            ));
+
+            [rows] = await pool.query(`
+                SELECT id, nombre
+                FROM tipos_evento
+                ORDER BY nombre
+            `);
+        }
+
+        res.json(rows);
+    } catch (error) {
+        console.error('Error al obtener tipos de evento:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error al obtener tipos de evento' 
+        });
+    }
+});
+
 // Obtener servicios por subcategoría
 router.get('/servicios/subcategoria/:subcategoriaId', async (req, res) => {
     try {

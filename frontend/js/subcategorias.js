@@ -70,12 +70,25 @@ async function cargarSubcategorias() {
                 window.location.href = `servicios.html?id=${sub.id}&nombre=${encodeURIComponent(sub.nombre)}`;
             };
             
-            const imagenHtml = sub.imagen_url 
-                ? `<img src="${sub.imagen_url}" alt="${sub.nombre}" class="subcategoria-imagen" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`
+            const imagenPorDefecto = 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3';
+            const tieneImagen = sub.imagen_url && sub.imagen_url.trim() !== '';
+            console.log('Subcategoría:', sub.nombre, 'URL imagen:', sub.imagen_url);
+
+            const imagenHtml = tieneImagen
+                ? `
+                    <img 
+                        src="${sub.imagen_url}" 
+                        alt="${sub.nombre}" 
+                        class="subcategoria-imagen"
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                    >
+                 `
                 : '';
-            
-            const iconoHtml = `<div class="subcategoria-icon" ${sub.imagen_url ? 'style="display:none;"' : ''}></div>`;
-            
+
+            const iconoHtml = `
+                <div class="subcategoria-icon" ${tieneImagen ? 'style="display:none;"' : ''}></div>
+            `;
+
             card.innerHTML = `
                 ${imagenHtml}
                 ${iconoHtml}

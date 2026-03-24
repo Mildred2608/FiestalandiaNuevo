@@ -19,10 +19,12 @@ async function apiCall(url, options = {}) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
     };
+
     const response = await fetch(`${API_URL}${url}`, {
         ...options,
         headers: { ...defaultHeaders, ...(options.headers || {}) }
     });
+
     return response;
 }
 
@@ -34,7 +36,13 @@ function showAdminToast(mensaje, tipo = 'info') {
     const toast = document.createElement('div');
     toast.className = `admin-toast admin-toast-${tipo}`;
 
-    const iconos = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+    const iconos = {
+        success: '✅',
+        error: '❌',
+        warning: '⚠️',
+        info: 'ℹ️'
+    };
+
     toast.innerHTML = `<span>${iconos[tipo] || ''}</span> ${mensaje}`;
     document.body.appendChild(toast);
 
@@ -42,7 +50,9 @@ function showAdminToast(mensaje, tipo = 'info') {
 
     setTimeout(() => {
         toast.classList.remove('visible');
-        setTimeout(() => { if (toast.parentNode) toast.remove(); }, 400);
+        setTimeout(() => {
+            if (toast.parentNode) toast.remove();
+        }, 400);
     }, 3000);
 }
 
@@ -61,6 +71,22 @@ function cerrarModalAdmin(id) {
         modal.style.display = 'none';
         document.body.style.overflow = 'auto';
     }
+}
+
+// ===== HELPER: MINIATURA DE IMAGEN =====
+function renderMiniatura(imagenUrl, alt = 'Imagen') {
+    if (imagenUrl && String(imagenUrl).trim() !== '') {
+        return `
+            <img 
+                src="${imagenUrl}" 
+                alt="${alt}" 
+                style="width:50px;height:50px;object-fit:cover;border-radius:10px;border:1px solid #e5e7eb;"
+                onerror="this.outerHTML='<span style=&quot;font-size:1.4rem&quot;>🖼️</span>';"
+            >
+        `;
+    }
+
+    return '<span style="font-size:1.4rem">📁</span>';
 }
 
 // ===== TABS =====
@@ -100,7 +126,7 @@ async function cargarCategorias() {
         tbody.innerHTML = categorias.map(cat => `
             <tr>
                 <td>${cat.id}</td>
-                <td><span style="font-size:1.4rem">${cat.icono || '📁'}</span></td>
+                <td>${renderMiniatura(cat.imagen_url, cat.nombre)}</td>
                 <td><strong>${cat.nombre}</strong></td>
                 <td>${cat.descripcion || '<em style="color:#9ca3af">Sin descripción</em>'}</td>
                 <td>${cat.creado_en ? new Date(cat.creado_en).toLocaleDateString('es-MX') : '-'}</td>
@@ -112,16 +138,22 @@ async function cargarCategorias() {
 
     } catch (error) {
         console.error('Error al cargar categorías:', error);
-        tbody.innerHTML = `<tr><td colspan="6" class="loading-row error-row">
-            ⚠️ No se pudo conectar al servidor. Verifica que el backend esté activo.
-        </td></tr>`;
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="loading-row error-row">
+                    ⚠️ No se pudo conectar al servidor. Verifica que el backend esté activo.
+                </td>
+            </tr>
+        `;
     }
 }
 
 async function eliminarCategoria(id) {
     if (!confirm('¿Estás seguro de eliminar esta categoría? Esta acción no se puede deshacer.')) return;
+
     try {
         const response = await apiCall(`/admin/categorias/${id}`, { method: 'DELETE' });
+
         if (response.ok) {
             showAdminToast('Categoría eliminada', 'success');
             cargarCategorias();
@@ -157,35 +189,56 @@ async function cargarSubcategorias() {
             <tr>
                 <td>${sub.id}</td>
                 <td><span class="category-badge">${sub.categoria_nombre || 'Sin categoría'}</span></td>
-                <td><strong>${sub.nombre}</strong></td>
+                <td>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        ${renderMiniatura(sub.imagen_url, sub.nombre)}
+                        <strong>${sub.nombre}</strong>
+                    </div>
+                </td>
                 <td>${sub.descripcion || '<em style="color:#9ca3af">Sin descripción</em>'}</td>
                 <td>${sub.creado_en ? new Date(sub.creado_en).toLocaleDateString('es-MX') : '-'}</td>
                 <td>
-                    <button class="action-btn delete-btn" onclick="eliminarSubcategoria(${sub.id})">🗑️ Eliminar</button>
+                    <button type="button" class="action-btn delete-btn btn-eliminar-subcategoria" data-id="${sub.id}">
+                        🗑️ Eliminar
+                    </button>
                 </td>
             </tr>
         `).join('');
 
     } catch (error) {
         console.error('Error al cargar subcategorías:', error);
-        tbody.innerHTML = `<tr><td colspan="6" class="loading-row error-row">
-            ⚠️ No se pudo conectar al servidor. Verifica que el backend esté activo.
-        </td></tr>`;
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="loading-row error-row">
+                    ⚠️ No se pudo conectar al servidor. Verifica que el backend esté activo.
+                </td>
+            </tr>
+        `;
     }
 }
 
 async function eliminarSubcategoria(id) {
-    if (!confirm('¿Estás seguro de eliminar esta subcategoría?')) return;
+    const confirmar = confirm('¿Estás seguro de que deseas eliminar esta subcategoría? Esta acción no se puede deshacer.');
+    if (!confirmar) return;
+
     try {
         const response = await apiCall(`/admin/subcategorias/${id}`, { method: 'DELETE' });
+
+        let data = {};
+        try {
+            data = await response.json();
+        } catch (e) {
+            data = {};
+        }
+
         if (response.ok) {
-            showAdminToast('Subcategoría eliminada', 'success');
+            showAdminToast(data.message || 'Subcategoría eliminada correctamente', 'success');
             cargarSubcategorias();
         } else {
-            const data = await response.json();
-            showAdminToast(data.message || 'Error al eliminar', 'error');
+            showAdminToast(data.message || 'Error al eliminar subcategoría', 'error');
         }
     } catch (error) {
+        console.error('Error al eliminar subcategoría:', error);
         showAdminToast('Error de conexión', 'error');
     }
 }
@@ -214,7 +267,12 @@ async function cargarServicios() {
                 <td>${s.id}</td>
                 <td>${s.subcategoria_nombre || '-'}</td>
                 <td>${s.proveedor_nombre || '-'}</td>
-                <td><strong>${s.nombre}</strong></td>
+                <td>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        ${renderMiniatura(s.imagen_url, s.nombre)}
+                        <strong>${s.nombre}</strong>
+                    </div>
+                </td>
                 <td>$${Number(s.precio_base).toLocaleString('es-MX')}</td>
                 <td>
                     <span class="status-badge ${s.activo ? 'status-active' : 'status-inactive'}">
@@ -233,9 +291,13 @@ async function cargarServicios() {
 
     } catch (error) {
         console.error('Error al cargar servicios:', error);
-        tbody.innerHTML = `<tr><td colspan="7" class="loading-row error-row">
-            ⚠️ No se pudo conectar al servidor. Verifica que el backend esté activo.
-        </td></tr>`;
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="loading-row error-row">
+                    ⚠️ No se pudo conectar al servidor. Verifica que el backend esté activo.
+                </td>
+            </tr>
+        `;
     }
 }
 
@@ -246,6 +308,7 @@ async function toggleServicio(id, accion) {
         const url = accion === 'desactivar'
             ? `/admin/servicios/${id}`
             : `/admin/servicios/${id}/reactivar`;
+
         const method = accion === 'desactivar' ? 'DELETE' : 'POST';
 
         const response = await apiCall(url, { method });
@@ -270,21 +333,25 @@ async function editarServicio(id) {
 async function cargarCategoriasParaSelect(selectId) {
     const select = document.getElementById(selectId);
     if (!select) return;
+
     select.innerHTML = '<option value="">Cargando categorías...</option>';
     select.disabled = true;
 
     try {
         const response = await apiCall('/admin/categorias');
         if (!response.ok) throw new Error();
+
         const categorias = await response.json();
 
         select.innerHTML = '<option value="">Seleccionar categoría...</option>';
+
         categorias.forEach(cat => {
             const opt = document.createElement('option');
             opt.value = cat.id;
             opt.textContent = cat.nombre;
             select.appendChild(opt);
         });
+
         select.disabled = false;
     } catch {
         select.innerHTML = '<option value="">Error al cargar categorías</option>';
@@ -295,21 +362,25 @@ async function cargarCategoriasParaSelect(selectId) {
 async function cargarSubcategoriasParaSelect(selectId) {
     const select = document.getElementById(selectId);
     if (!select) return;
+
     select.innerHTML = '<option value="">Cargando subcategorías...</option>';
     select.disabled = true;
 
     try {
         const response = await apiCall('/admin/subcategorias');
         if (!response.ok) throw new Error();
+
         const subcategorias = await response.json();
 
         select.innerHTML = '<option value="">Seleccionar subcategoría...</option>';
+
         subcategorias.forEach(sub => {
             const opt = document.createElement('option');
             opt.value = sub.id;
             opt.textContent = `${sub.categoria_nombre ? sub.categoria_nombre + ' › ' : ''}${sub.nombre}`;
             select.appendChild(opt);
         });
+
         select.disabled = false;
     } catch {
         select.innerHTML = '<option value="">Error al cargar subcategorías</option>';
@@ -320,15 +391,18 @@ async function cargarSubcategoriasParaSelect(selectId) {
 async function cargarProveedoresParaSelect(selectId) {
     const select = document.getElementById(selectId);
     if (!select) return;
+
     select.innerHTML = '<option value="">Cargando proveedores...</option>';
     select.disabled = true;
 
     try {
         const response = await apiCall('/admin/proveedores-list');
         if (!response.ok) throw new Error();
+
         const proveedores = await response.json();
 
         select.innerHTML = '<option value="">Seleccionar proveedor...</option>';
+
         if (proveedores.length === 0) {
             select.innerHTML = '<option value="">No hay proveedores aprobados</option>';
         } else {
@@ -339,6 +413,7 @@ async function cargarProveedoresParaSelect(selectId) {
                 select.appendChild(opt);
             });
         }
+
         select.disabled = false;
     } catch {
         select.innerHTML = '<option value="">Error al cargar proveedores</option>';
@@ -362,8 +437,13 @@ function initModalCategoria() {
         abrirModalAdmin('modalCategoria');
     });
 
-    closeBtn?.addEventListener('click', () => cerrarModalAdmin('modalCategoria'));
-    modal.addEventListener('click', (e) => { if (e.target === modal) cerrarModalAdmin('modalCategoria'); });
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => cerrarModalAdmin('modalCategoria'));
+    }
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) cerrarModalAdmin('modalCategoria');
+    });
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -371,7 +451,7 @@ function initModalCategoria() {
 
         const nombre = document.getElementById('categoriaNombre').value.trim();
         const descripcion = document.getElementById('categoriaDescripcion').value.trim();
-        const icono = document.getElementById('categoriaIcono').value.trim();
+        const imagenUrl = document.getElementById('categoriaImagenUrl').value.trim();
 
         if (!nombre) {
             showFieldError('categoriaNombreError', 'El nombre es obligatorio');
@@ -384,7 +464,11 @@ function initModalCategoria() {
         try {
             const response = await apiCall('/admin/categorias', {
                 method: 'POST',
-                body: JSON.stringify({ nombre, descripcion, imagen_url: icono || null })
+                body: JSON.stringify({
+                    nombre,
+                    descripcion,
+                    imagen_url: imagenUrl || null
+                })
             });
 
             const data = await response.json();
@@ -421,8 +505,13 @@ function initModalSubcategoria() {
         abrirModalAdmin('modalSubcategoria');
     });
 
-    closeBtn?.addEventListener('click', () => cerrarModalAdmin('modalSubcategoria'));
-    modal.addEventListener('click', (e) => { if (e.target === modal) cerrarModalAdmin('modalSubcategoria'); });
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => cerrarModalAdmin('modalSubcategoria'));
+    }
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) cerrarModalAdmin('modalSubcategoria');
+    });
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -431,16 +520,20 @@ function initModalSubcategoria() {
         const categoriaId = document.getElementById('subcategoriaCategoriaId').value;
         const nombre = document.getElementById('subcategoriaNombre').value.trim();
         const descripcion = document.getElementById('subcategoriaDescripcion').value.trim();
+        const imagenUrl = document.getElementById('subcategoriaImagenUrl').value.trim();
 
         let valid = true;
+
         if (!categoriaId) {
             showFieldError('subcategoriaCategoriaError', 'Debes seleccionar una categoría');
             valid = false;
         }
+
         if (!nombre) {
             showFieldError('subcategoriaNombreError', 'El nombre es obligatorio');
             valid = false;
         }
+
         if (!valid) return;
 
         const submitBtn = form.querySelector('button[type="submit"]');
@@ -449,7 +542,12 @@ function initModalSubcategoria() {
         try {
             const response = await apiCall('/admin/subcategorias', {
                 method: 'POST',
-                body: JSON.stringify({ categoria_id: categoriaId, nombre, descripcion })
+                body: JSON.stringify({
+                    categoria_id: categoriaId,
+                    nombre,
+                    descripcion,
+                    imagen_url: imagenUrl || null
+                })
             });
 
             const data = await response.json();
@@ -486,8 +584,13 @@ function initModalServicio() {
         abrirModalAdmin('modalServicio');
     });
 
-    closeBtn?.addEventListener('click', () => cerrarModalAdmin('modalServicio'));
-    modal.addEventListener('click', (e) => { if (e.target === modal) cerrarModalAdmin('modalServicio'); });
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => cerrarModalAdmin('modalServicio'));
+    }
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) cerrarModalAdmin('modalServicio');
+    });
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -497,26 +600,32 @@ function initModalServicio() {
         const proveedorId = document.getElementById('servicioProveedorId').value;
         const nombre = document.getElementById('servicioNombre').value.trim();
         const descripcion = document.getElementById('servicioDescripcion').value.trim();
+        const imagenUrl = document.getElementById('servicioImagenUrl').value.trim();
         const precioBase = parseFloat(document.getElementById('servicioPrecioBase').value);
         const activo = document.getElementById('servicioEstado').value === '1' ? 1 : 0;
 
         let valid = true;
+
         if (!subcategoriaId) {
             showFieldError('servicioSubcategoriaError', 'Selecciona una subcategoría');
             valid = false;
         }
+
         if (!proveedorId) {
             showFieldError('servicioProveedorError', 'Selecciona un proveedor');
             valid = false;
         }
+
         if (!nombre) {
             showFieldError('servicioNombreError', 'El nombre es obligatorio');
             valid = false;
         }
-        if (!precioBase || precioBase <= 0) {
-            showFieldError('servicioPrecioError', 'El precio debe ser mayor a 0');
+
+        if (isNaN(precioBase) || precioBase < 0) {
+            showFieldError('servicioPrecioError', 'El precio debe ser un número válido mayor o igual a 0');
             valid = false;
         }
+
         if (!valid) return;
 
         const submitBtn = form.querySelector('button[type="submit"]');
@@ -531,7 +640,8 @@ function initModalServicio() {
                     nombre,
                     descripcion,
                     precio_base: precioBase,
-                    activo
+                    activo,
+                    imagen_url: imagenUrl || null
                 })
             });
 
@@ -581,4 +691,19 @@ document.addEventListener('DOMContentLoaded', () => {
     initModalSubcategoria();
     initModalServicio();
     cargarCategorias();
+
+    // Delegación de eventos para eliminar subcategorías
+    const tablaSubcategorias = document.getElementById('tablaSubcategorias');
+
+    if (tablaSubcategorias) {
+        tablaSubcategorias.addEventListener('click', (e) => {
+            const botonEliminar = e.target.closest('.btn-eliminar-subcategoria');
+            if (!botonEliminar) return;
+
+            const id = botonEliminar.dataset.id;
+            if (id) {
+                eliminarSubcategoria(id);
+            }
+        });
+    }
 });

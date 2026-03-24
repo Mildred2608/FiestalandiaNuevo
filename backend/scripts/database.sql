@@ -105,6 +105,19 @@ CREATE TABLE cotizaciones (
     FOREIGN KEY (evento_id) REFERENCES eventos(id) ON DELETE CASCADE
 );
 
+CREATE TABLE pagos_evento (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    evento_id INT NOT NULL,
+    cliente_id INT NOT NULL,
+    total DECIMAL(12,2) NOT NULL,
+    tarjeta_ultimos4 VARCHAR(4),
+    tarjeta_nombre VARCHAR(100),
+    estado ENUM('pendiente','aceptada','rechazada') NOT NULL DEFAULT 'pendiente',
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (evento_id) REFERENCES eventos(id) ON DELETE CASCADE,
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
+);
+
 CREATE TABLE detalle_cotizacion (
     id INT AUTO_INCREMENT PRIMARY KEY,
     cotizacion_id INT NOT NULL,

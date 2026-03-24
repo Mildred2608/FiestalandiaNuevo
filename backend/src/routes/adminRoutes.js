@@ -110,7 +110,7 @@ router.get('/cliente/cotizaciones', authMiddleware.verifyToken, async (req, res)
     }
 });
 
-// Obtener eventos del cliente actual
+// Obtener eventos del cliente actual (mis eventos)
 router.get('/cliente/eventos', authMiddleware.verifyToken, async (req, res) => {
     try {
         const [rows] = await pool.query(
@@ -124,6 +124,165 @@ router.get('/cliente/eventos', authMiddleware.verifyToken, async (req, res) => {
             success: false, 
             message: 'Error al obtener eventos' 
         });
+    }
+});
+
+// Crear evento para cliente actual
+router.post('/cliente/eventos', authMiddleware.verifyToken, async (req, res) => {
+    try {
+        const { nombre_evento, tipo_id, fecha, invitados, ubicacion, mensaje } = req.body;
+
+        if (!nombre_evento || !fecha || !tipo_id) {
+            return res.status(400).json({ success: false, message: 'Nombre de evento, fecha y tipo son requeridos' });
+        }
+
+        const [result] = await pool.query(
+            'INSERT INTO eventos (cliente_id, nombre_evento, tipo_id, fecha, invitados, ubicacion, mensaje) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [req.user.id, nombre_evento, tipo_id, fecha, invitados || 0, ubicacion || null, mensaje || null]
+        );
+
+        const [newEvento] = await pool.query('SELECT * FROM vista_cliente_eventos WHERE id = ?', [result.insertId]);
+        res.status(201).json(newEvento[0] || {});
+
+    } catch (error) {
+        console.error('Error al crear evento:', error);
+        res.status(500).json({ success: false, message: 'Error al crear evento' });
+    }
+});
+
+// Obtener evento específico del cliente actual
+router.get('/cliente/eventos/:id', authMiddleware.verifyToken, async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM eventos WHERE id = ? AND cliente_id = ?', [req.params.id, req.user.id]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Evento no encontrado' });
+        }
+
+        res.json(rows[0]);
+    } catch (error) {
+        console.error('Error al obtener evento:', error);
+        res.status(500).json({ success: false, message: 'Error al obtener evento' });
+    }
+});
+
+// Actualizar evento del cliente actual
+router.put('/cliente/eventos/:id', authMiddleware.verifyToken, async (req, res) => {
+    try {
+        const { nombre_evento, tipo_id, fecha, invitados, ubicacion, mensaje } = req.body;
+        const eventoId = req.params.id;
+
+        const [result] = await pool.query(
+            'UPDATE eventos SET nombre_evento = ?, tipo_id = ?, fecha = ?, invitados = ?, ubicacion = ?, mensaje = ? WHERE id = ? AND cliente_id = ?',
+            [nombre_evento, tipo_id, fecha, invitados || 0, ubicacion || null, mensaje || null, eventoId, req.user.id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Evento no encontrado o sin permiso' });
+        }
+
+        const [updated] = await pool.query('SELECT * FROM eventos WHERE id = ?', [eventoId]);
+        res.json(updated[0] || {});
+    } catch (error) {
+        console.error('Error al actualizar evento:', error);
+        res.status(500).json({ success: false, message: 'Error al actualizar evento' });
+    }
+});
+
+// Eliminar evento del cliente actual
+router.delete('/cliente/eventos/:id', authMiddleware.verifyToken, async (req, res) => {
+    try {
+        const eventoId = req.params.id;
+
+        const [result] = await pool.query('DELETE FROM eventos WHERE id = ? AND cliente_id = ?', [eventoId, req.user.id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Evento no encontrado o sin permiso' });
+        }
+
+        res.json({ success: true, message: 'Evento eliminado exitosamente' });
+    } catch (error) {
+        console.error('Error al eliminar evento:', error);
+        res.status(500).json({ success: false, message: 'Error al eliminar evento' });
+    }
+});
+
+// Solicitar pago para evento (cliente)
+router.post('/cliente/pagos', authMiddleware.verifyToken, async (req, res) => {
+    try {
+        const { evento_id, total, tarjeta_ultimos4, tarjeta_nombre } = req.body;
+
+        if (!evento_id || !total || !tarjeta_ultimos4 || !tarjeta_nombre) {
+            return res.status(400).json({ success: false, message: 'Datos de pago incompletos' });
+        }
+
+        // Verificar que el evento pertenezca al cliente
+        const [evento] = await pool.query('SELECT id FROM eventos WHERE id = ? AND cliente_id = ?', [evento_id, req.user.id]);
+        if (!evento || evento.length === 0) {
+            return res.status(403).json({ success: false, message: 'Evento no encontrado o no autorizado' });
+        }
+
+        const [result] = await pool.query(
+            'INSERT INTO pagos_evento (evento_id, cliente_id, total, tarjeta_ultimos4, tarjeta_nombre) VALUES (?, ?, ?, ?, ?)',
+            [evento_id, req.user.id, total, tarjeta_ultimos4, tarjeta_nombre]
+        );
+
+        const [nuevoPago] = await pool.query(
+            `SELECT p.*, e.nombre_evento, c.nombre as cliente_nombre, c.email as cliente_email
+             FROM pagos_evento p
+             LEFT JOIN eventos e ON p.evento_id = e.id
+             LEFT JOIN clientes c ON p.cliente_id = c.id
+             WHERE p.id = ?`,
+            [result.insertId]
+        );
+
+        res.status(201).json(nuevoPago[0] || {});
+    } catch (error) {
+        console.error('Error al crear solicitud de pago:', error);
+        res.status(500).json({ success: false, message: 'Error al crear solicitud de pago' });
+    }
+});
+
+// Obtener solicitudes de pago (admin)
+router.get('/pagos', authMiddleware.verifyToken, isAdmin, async (req, res) => {
+    try {
+        const [rows] = await pool.query(`
+            SELECT p.*, e.nombre_evento, c.nombre as cliente_nombre, c.email as cliente_email
+            FROM pagos_evento p
+            LEFT JOIN eventos e ON p.evento_id = e.id
+            LEFT JOIN clientes c ON p.cliente_id = c.id
+            ORDER BY p.creado_en DESC
+        `);
+        res.json(rows);
+    } catch (error) {
+        console.error('Error al obtener pagos:', error);
+        res.status(500).json({ success: false, message: 'Error al obtener pagos' });
+    }
+});
+
+// Actualizar estado de pago (admin)
+router.put('/pagos/:id/estado', authMiddleware.verifyToken, isAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { estado } = req.body;
+
+        if (!['pendiente', 'aceptada', 'rechazada'].includes(estado)) {
+            return res.status(400).json({ success: false, message: 'Estado inválido' });
+        }
+
+        const [result] = await pool.query(
+            'UPDATE pagos_evento SET estado = ? WHERE id = ?',
+            [estado, id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Pago no encontrado' });
+        }
+
+        res.json({ success: true, message: 'Estado actualizado' });
+    } catch (error) {
+        console.error('Error al actualizar estado de pago:', error);
+        res.status(500).json({ success: false, message: 'Error al actualizar estado de pago' });
     }
 });
 
@@ -248,6 +407,49 @@ router.post('/subcategorias', authMiddleware.verifyToken, isAdmin, async (req, r
         res.status(500).json({ 
             success: false, 
             message: 'Error al crear subcategoría' 
+        });
+    }
+});
+
+// Eliminar subcategoría
+router.delete('/subcategorias/:id', authMiddleware.verifyToken, isAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        // Verificar si hay servicios asociados a esta subcategoría
+        const [servicios] = await pool.query(
+            'SELECT COUNT(*) as count FROM servicios WHERE subcategoria_id = ? AND activo = 1',
+            [id]
+        );
+        
+        if (servicios[0].count > 0) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'No se puede eliminar la subcategoría porque tiene servicios asociados' 
+            });
+        }
+        
+        const [result] = await pool.query(
+            'DELETE FROM subcategorias WHERE id = ?',
+            [id]
+        );
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Subcategoría no encontrada' 
+            });
+        }
+        
+        res.json({ 
+            success: true, 
+            message: 'Subcategoría eliminada exitosamente' 
+        });
+    } catch (error) {
+        console.error('Error al eliminar subcategoría:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error al eliminar subcategoría' 
         });
     }
 });

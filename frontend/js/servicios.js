@@ -5,6 +5,15 @@
 const urlParams = new URLSearchParams(window.location.search);
 const subcategoriaId = urlParams.get('id');
 const subcategoriaNombre = urlParams.get('nombre');
+const eventoId = urlParams.get('eventoId');
+
+// fallback: si se pasa eventoId, mostrarlo en título
+document.addEventListener('DOMContentLoaded', () => {
+    if (eventoId) {
+        const tituloe = document.getElementById('subcategoriaTitulo');
+        if (tituloe) tituloe.textContent += ` (Evento #${eventoId})`;
+    }
+});
 
 // ===== CARGAR SERVICIOS =====
 async function cargarServicios() {
@@ -133,13 +142,79 @@ function obtenerImagenPorTipo(nombre, descripcion) {
     return 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
 }
 
+async function seleccionarEventoParaCarrito() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        mostrarToast('🔐 Inicia sesión para vincular el servicio a un evento', 'warning');
+        document.getElementById('authModal').style.display = 'flex';
+        return null;
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/admin/cliente/eventos`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+            throw new Error('No se pudieron obtener tus eventos');
+        }
+
+        const eventos = await response.json();
+
+        if (!eventos || eventos.length === 0) {
+            mostrarToast('No tienes eventos. Crea uno antes de agregar servicios.', 'info');
+            window.location.href = 'mis-eventos.html';
+            return null;
+        }
+
+        if (eventos.length === 1) {
+            return eventos[0];
+        }
+
+        const opciones = eventos.map((ev, idx) => `${idx + 1}. ${ev.nombre_evento || ev.nombre || 'Evento'} (${ev.fecha || 'no fecha'})`).join('\n');
+        const seleccion = window.prompt(`Selecciona el evento para vincular:\n${opciones}\n\nIngresa un número:`);
+
+        if (!seleccion) {
+            mostrarToast('Se canceló la selección de evento.', 'info');
+            return null;
+        }
+
+        const indice = Number(seleccion) - 1;
+        if (Number.isNaN(indice) || indice < 0 || indice >= eventos.length) {
+            mostrarToast('Selección de evento inválida.', 'error');
+            return null;
+        }
+
+        return eventos[indice];
+
+    } catch (error) {
+        console.error('Error al obtener eventos de cliente:', error);
+        mostrarToast('Error al obtener eventos. Intenta de nuevo.', 'error');
+        return null;
+    }
+}
+
 // ===== FUNCIÓN PARA AGREGAR AL CARRITO =====
-function agregarAlCarrito(id, nombre, precio) {
+async function agregarAlCarrito(id, nombre, precio) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventoIdFromUrl = urlParams.get('eventoId');
+
+    let eventoSeleccionado = null;
+    if (eventoIdFromUrl) {
+        eventoSeleccionado = { id: eventoIdFromUrl, nombre_evento: `Evento #${eventoIdFromUrl}` };
+    } else {
+        eventoSeleccionado = await seleccionarEventoParaCarrito();
+    }
+
+    if (!eventoSeleccionado) {
+        return;
+    }
+
     try {
         const carrito = JSON.parse(localStorage.getItem('fiestalandia_carrito')) || [];
-        
-        const existente = carrito.find(item => item.id === id);
-        
+
+        const existente = carrito.find(item => item.id === id && String(item.eventoId) === String(eventoSeleccionado.id));
+
         if (existente) {
             existente.cantidad = (existente.cantidad || 1) + 1;
         } else {
@@ -148,14 +223,16 @@ function agregarAlCarrito(id, nombre, precio) {
                 nombre: nombre,
                 precio: precio,
                 cantidad: 1,
-                fecha: new Date().toISOString()
+                fecha: new Date().toISOString(),
+                eventoId: eventoSeleccionado.id,
+                eventoNombre: eventoSeleccionado.nombre_evento || eventoSeleccionado.nombre || ''
             });
         }
-        
+
         localStorage.setItem('fiestalandia_carrito', JSON.stringify(carrito));
-        mostrarToast('Servicio agregado al carrito', 'success');
+        mostrarToast(`Servicio vinculado al evento "${eventoSeleccionado.nombre_evento || eventoSeleccionado.nombre}"`, 'success');
         actualizarBadge();
-        
+
     } catch (error) {
         console.error('Error:', error);
         mostrarToast('Error al agregar al carrito', 'error');
