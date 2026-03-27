@@ -22,7 +22,7 @@ function irASubcategorias(categoriaId, categoriaNombre) {
     window.location.href = `subcategorias.html?id=${categoriaId}&nombre=${encodeURIComponent(categoriaNombre)}`;
 }
 
-// ===== ACTUALIZAR CARDS DE INICIO =====
+// ===== ACTUALIZAR CARDS DE INICIO CON BOTÓN AGREGAR =====
 async function actualizarCardsInicio() {
     const cardsContainer = document.querySelector('.cards');
     if (!cardsContainer) return;
@@ -47,6 +47,10 @@ async function actualizarCardsInicio() {
             
             const iconoHtml = `<div class="card-icon" ${cat.imagen_url ? 'style="display:none;"' : ''}>📁</div>`;
             
+            // Obtener un servicio de ejemplo para esta categoría (el primero disponible)
+            const servicioEjemplo = `Servicio de ${cat.nombre}`;
+            const precioEjemplo = 5000;
+            
             card.innerHTML = `
                 ${imagenHtml}
                 ${iconoHtml}
@@ -55,6 +59,9 @@ async function actualizarCardsInicio() {
                 <div class="card-buttons">
                     <button class="btn btn-primary" onclick="irASubcategorias(${cat.id}, '${cat.nombre}')">
                         Ver opciones
+                    </button>
+                    <button class="btn btn-secondary" onclick="agregarServicioCarrito('${cat.nombre}', 'Servicio de ${cat.nombre}', ${precioEjemplo})">
+                        🛒 Agregar
                     </button>
                 </div>
             `;
@@ -212,18 +219,119 @@ function initSmoothScroll() {
     });
 }
 
-// ===== FUNCIONES DEL CARRITO =====
-function actualizarBadge() {
+// ===== FUNCIONES DEL CARRITO (ACTUALIZADO: muestra cantidad, no total) =====
+async function actualizarBadge() {
     const badge = document.getElementById('cartBadge');
     if (!badge) return;
-    try {
-        const carrito = JSON.parse(localStorage.getItem('fiestalandia_carrito')) || [];
-        const total = carrito.reduce((sum, item) => sum + (item.cantidad || 1), 0);
-        badge.textContent = total;
-        badge.style.display = total > 0 ? 'inline-block' : 'none';
-    } catch (e) {
-        badge.style.display = 'none';
+    
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+        try {
+            // Cambiado de /carrito/total a /carrito/cantidad
+            const response = await fetch(`${API_URL}/carrito/cantidad`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+            badge.textContent = data.total || 0;
+            badge.style.display = (data.total > 0) ? 'inline-block' : 'none';
+        } catch (error) {
+            console.error('Error al obtener cantidad del carrito:', error);
+            try {
+                const carrito = JSON.parse(localStorage.getItem('fiestalandia_carrito')) || [];
+                const total = carrito.reduce((sum, item) => sum + (item.cantidad || 1), 0);
+                badge.textContent = total;
+                badge.style.display = total > 0 ? 'inline-block' : 'none';
+            } catch (e) {
+                badge.style.display = 'none';
+            }
+        }
+    } else {
+        try {
+            const carrito = JSON.parse(localStorage.getItem('fiestalandia_carrito')) || [];
+            const total = carrito.reduce((sum, item) => sum + (item.cantidad || 1), 0);
+            badge.textContent = total;
+            badge.style.display = total > 0 ? 'inline-block' : 'none';
+        } catch (e) {
+            badge.style.display = 'none';
+        }
     }
+}
+
+// ===== FUNCIÓN PARA AGREGAR AL CARRITO (CON BÚSQUEDA POR NOMBRE) =====
+async function agregarServicioCarrito(nombre, descripcion, precio, evento_id = null, evento_nombre = null) {
+    console.log('🛒 Agregando:', nombre, 'Precio:', precio);
+    
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+        try {
+            // Buscar el servicio por nombre en la BD
+            const serviciosResponse = await fetch(`${API_URL}/servicios/publicos`);
+            const servicios = await serviciosResponse.json();
+            const servicio = servicios.find(s => s.nombre === nombre);
+            
+            if (servicio && servicio.id) {
+                const response = await fetch(`${API_URL}/carrito/agregar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ 
+                        servicio_id: servicio.id, 
+                        cantidad: 1, 
+                        evento_id, 
+                        evento_nombre 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    mostrarToast(`"${nombre}" agregado al carrito`, 'success');
+                    actualizarBadge();
+                } else {
+                    mostrarToast(data.message || 'Error al agregar', 'error');
+                }
+            } else {
+                mostrarToast('Servicio no encontrado en la base de datos', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            agregarServicioCarritoLocal(nombre, descripcion, precio, evento_id, evento_nombre);
+        }
+    } else {
+        agregarServicioCarritoLocal(nombre, descripcion, precio, evento_id, evento_nombre);
+    }
+}
+
+// ===== AGREGAR AL CARRITO LOCAL (fallback) =====
+function agregarServicioCarritoLocal(nombre, descripcion, precio, evento_id = null, evento_nombre = null) {
+    const carrito = JSON.parse(localStorage.getItem('fiestalandia_carrito')) || [];
+    
+    const existente = carrito.find(item => 
+        item.nombre === nombre && 
+        (item.eventoId === evento_id || (!item.eventoId && !evento_id))
+    );
+    
+    if (existente) {
+        existente.cantidad += 1;
+    } else {
+        carrito.push({
+            id: Date.now(),
+            nombre: nombre,
+            descripcion: descripcion,
+            precio: precio,
+            cantidad: 1,
+            eventoId: evento_id,
+            eventoNombre: evento_nombre
+        });
+    }
+    
+    localStorage.setItem('fiestalandia_carrito', JSON.stringify(carrito));
+    mostrarToast(`"${nombre}" agregado al carrito`, 'success');
+    actualizarBadge();
 }
 
 // ===== FUNCIONES PARA TOAST =====
@@ -326,6 +434,7 @@ function corregirModalLogin() {
             mostrarToast('¡Bienvenido! 🎉', 'success');
             document.getElementById('authModal').style.display = 'none';
             actualizarBotonLogin();
+            actualizarBadge();
         } else {
             mostrarToast(result.error || 'Error al iniciar sesión', 'error');
         }
@@ -336,7 +445,6 @@ function corregirModalRegistro() {
     const formRegister = document.getElementById('formRegister');
     if (!formRegister) return;
 
-    // Inyectar checkbox de términos si no existe
     if (!document.getElementById('regTerminos')) {
         const terminosGroup = document.createElement('div');
         terminosGroup.className = 'form-group terminos-group';
@@ -396,6 +504,7 @@ function corregirModalRegistro() {
             mostrarToast('¡Cuenta creada exitosamente! 🎉', 'success');
             document.getElementById('authModal').style.display = 'none';
             actualizarBotonLogin();
+            actualizarBadge();
         } else {
             mostrarToast(result.error || 'Error al registrar', 'error');
         }
@@ -427,12 +536,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     initSmoothScroll();
     actualizarBotonLogin();
 
-    // Inicializar modales de auth
     corregirModalLogin();
     corregirModalRegistro();
     initAuthModalSwitch();
 
-    // Cerrar modal auth al hacer clic fuera
     const authModal = document.getElementById('authModal');
     if (authModal) {
         authModal.addEventListener('click', (e) => {
@@ -443,7 +550,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Cerrar con botón X
     const closeAuthModal = document.getElementById('closeAuthModal');
     if (closeAuthModal) {
         closeAuthModal.addEventListener('click', () => {
@@ -458,3 +564,4 @@ window.irASubcategorias = irASubcategorias;
 window.toggleMenu = toggleMenu;
 window.verPerfil = verPerfil;
 window.cerrarSesion = cerrarSesion;
+window.agregarServicioCarrito = agregarServicioCarrito;

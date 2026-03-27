@@ -1,48 +1,31 @@
--- Final clean schema for Fiestalandia
--- Execute in MySQL Workbench to recreate database from scratch
-
-DROP DATABASE IF EXISTS fiestalandia;
-CREATE DATABASE fiestalandia CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE fiestalandia;
-
--- drop tables if exist (safe for re-run)
-DROP TABLE IF EXISTS auditoria,
-         mensajes_proveedor,
-         solicitudes_servicio,
-         detalle_cotizacion,
-         cotizaciones,
-         eventos,
-         servicios,
-         proveedores,
-         clientes,
-         tipos_evento,
-         subcategorias,
-         categorias;
-
--- reference tables
+-- CATEGORÍAS (Lugar, Música, Banquetes, Decoración)
 CREATE TABLE categorias (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL UNIQUE,
     descripcion TEXT,
+    imagen_url VARCHAR(255) NULL,
     creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- SUBCATEGORÍAS (Salones, Jardines, DJ, Mariachi, etc.)
 CREATE TABLE subcategorias (
     id INT AUTO_INCREMENT PRIMARY KEY,
     categoria_id INT NOT NULL,
     nombre VARCHAR(100) NOT NULL,
     descripcion TEXT,
+    imagen_url VARCHAR(255) NULL,
     creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE CASCADE,
-    UNIQUE(categoria_id,nombre)
+    UNIQUE(categoria_id, nombre)
 );
 
+-- TIPOS DE EVENTO (Boda, XV Años, Cumpleaños, etc.)
 CREATE TABLE tipos_evento (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL UNIQUE
 );
 
--- main entities
+-- CLIENTES (usuarios del sistema)
 CREATE TABLE clientes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -50,12 +33,11 @@ CREATE TABLE clientes (
     telefono VARCHAR(30),
     direccion TEXT,
     password_hash VARCHAR(255) NOT NULL,
-    rol ENUM('cliente','admin') NOT NULL DEFAULT 'cliente',
-    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CHECK (CHAR_LENGTH(password_hash) >= 60),
-    CHECK (email LIKE '%_@_%._%')
+    rol ENUM('cliente', 'admin') NOT NULL DEFAULT 'cliente',
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- PROVEEDORES (empresas que ofrecen servicios)
 CREATE TABLE proveedores (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -63,10 +45,10 @@ CREATE TABLE proveedores (
     telefono VARCHAR(30),
     direccion TEXT,
     aprobado TINYINT(1) NOT NULL DEFAULT 0,
-    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CHECK (email LIKE '%_@_%._%')
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- SERVICIOS (productos ofrecidos)
 CREATE TABLE servicios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     subcategoria_id INT NULL,
@@ -80,6 +62,7 @@ CREATE TABLE servicios (
     FOREIGN KEY (proveedor_id) REFERENCES proveedores(id) ON DELETE SET NULL
 );
 
+-- EVENTOS (eventos creados por clientes)
 CREATE TABLE eventos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     cliente_id INT,
@@ -94,30 +77,19 @@ CREATE TABLE eventos (
     FOREIGN KEY (tipo_id) REFERENCES tipos_evento(id) ON DELETE SET NULL
 );
 
+-- COTIZACIONES
 CREATE TABLE cotizaciones (
     id INT AUTO_INCREMENT PRIMARY KEY,
     evento_id INT NOT NULL,
     total DECIMAL(12,2) NOT NULL DEFAULT 0,
-    estado ENUM('pendiente','enviada','aceptada','cancelada') NOT NULL DEFAULT 'pendiente',
+    estado ENUM('pendiente', 'enviada', 'aceptada', 'cancelada') NOT NULL DEFAULT 'pendiente',
     impuesto DECIMAL(10,2) DEFAULT 0,
     descuento DECIMAL(10,2) DEFAULT 0,
     creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (evento_id) REFERENCES eventos(id) ON DELETE CASCADE
 );
 
-CREATE TABLE pagos_evento (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    evento_id INT NOT NULL,
-    cliente_id INT NOT NULL,
-    total DECIMAL(12,2) NOT NULL,
-    tarjeta_ultimos4 VARCHAR(4),
-    tarjeta_nombre VARCHAR(100),
-    estado ENUM('pendiente','aceptada','rechazada') NOT NULL DEFAULT 'pendiente',
-    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (evento_id) REFERENCES eventos(id) ON DELETE CASCADE,
-    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
-);
-
+-- DETALLE DE COTIZACIONES
 CREATE TABLE detalle_cotizacion (
     id INT AUTO_INCREMENT PRIMARY KEY,
     cotizacion_id INT NOT NULL,
@@ -131,72 +103,58 @@ CREATE TABLE detalle_cotizacion (
     FOREIGN KEY (servicio_id) REFERENCES servicios(id) ON DELETE SET NULL
 );
 
-CREATE TABLE solicitudes_servicio (
+-- SOLICITUDES DE REGISTRO DE SERVICIOS (clientes solicitan registrar nuevos servicios)
+CREATE TABLE solicitudes_registro_servicio (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    proveedor_id INT,
+    cliente_id INT NOT NULL,
     categoria_id INT,
     subcategoria_id INT,
+    nueva_subcategoria VARCHAR(100),
     nombre_servicio VARCHAR(100) NOT NULL,
     descripcion TEXT,
     precio_propuesto DECIMAL(10,2),
-    estado ENUM('pendiente','aprobada','rechazada') NOT NULL DEFAULT 'pendiente',
+    moneda VARCHAR(3) DEFAULT 'MXN',
+    proveedor_nombre VARCHAR(100) NOT NULL,
+    proveedor_email VARCHAR(150) NOT NULL,
+    proveedor_telefono VARCHAR(30),
+    proveedor_whatsapp VARCHAR(30),
+    proveedor_direccion TEXT,
+    sitio_web VARCHAR(255),
+    imagenes TEXT,
+    comentarios TEXT,
+    estado ENUM('pendiente', 'aprobada', 'rechazada') DEFAULT 'pendiente',
     fecha_solicitud TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (proveedor_id) REFERENCES proveedores(id) ON DELETE SET NULL,
+    fecha_atencion TIMESTAMP NULL,
+    atendido_por INT,
+    observaciones_admin TEXT,
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE,
     FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE SET NULL,
-    FOREIGN KEY (subcategoria_id) REFERENCES subcategorias(id) ON DELETE SET NULL
+    FOREIGN KEY (subcategoria_id) REFERENCES subcategorias(id) ON DELETE SET NULL,
+    FOREIGN KEY (atendido_por) REFERENCES clientes(id) ON DELETE SET NULL
 );
 
-CREATE TABLE mensajes_proveedor (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    proveedor_id INT NOT NULL,
-    asunto VARCHAR(150),
-    cuerpo TEXT,
-    leido TINYINT(1) NOT NULL DEFAULT 0,
-    enviado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (proveedor_id) REFERENCES proveedores(id) ON DELETE CASCADE
-);
-
-CREATE TABLE decoraciones (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    descripcion TEXT,
-    precio DECIMAL(10,2) NOT NULL,
-    tema VARCHAR(50)
-);
-
-CREATE TABLE auditoria (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    tabla_afectada VARCHAR(100),
-    fila_id INT,
-    operacion ENUM('INSERT','UPDATE','DELETE'),
-    usuario VARCHAR(150),
-    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    datos_anteriores JSON,
-    datos_nuevos JSON
-);
-
--- indexes
+-- ============================================
+-- ÍNDICES
+-- ============================================
 CREATE INDEX idx_evento_cliente ON eventos(cliente_id);
 CREATE INDEX idx_cotizacion_evento ON cotizaciones(evento_id);
 CREATE INDEX idx_detalle_cotizacion ON detalle_cotizacion(cotizacion_id);
 CREATE INDEX idx_servicio_subcategoria ON servicios(subcategoria_id);
 CREATE INDEX idx_proveedor_email ON proveedores(email);
+CREATE INDEX idx_solicitudes_cliente ON solicitudes_registro_servicio(cliente_id);
+CREATE INDEX idx_solicitudes_estado ON solicitudes_registro_servicio(estado);
 
 -- ============================================
--- VISTA PÚBLICA: Servicios activos (para todos)
+-- VISTAS
 -- ============================================
+
+-- Servicios públicos (para todos)
 CREATE OR REPLACE VIEW vista_servicios_publicos AS
 SELECT 
-    s.id,
-    s.nombre,
-    s.descripcion,
-    s.precio_base,
-    sc.nombre AS subcategoria,
-    sc.id AS subcategoria_id,
-    c.nombre AS categoria,
-    c.id AS categoria_id,
-    p.nombre AS proveedor,
-    p.id AS proveedor_id
+    s.id, s.nombre, s.descripcion, s.precio_base,
+    sc.nombre AS subcategoria, sc.id AS subcategoria_id,
+    c.nombre AS categoria, c.id AS categoria_id,
+    p.nombre AS proveedor, p.id AS proveedor_id
 FROM servicios s
 LEFT JOIN subcategorias sc ON s.subcategoria_id = sc.id
 LEFT JOIN categorias c ON sc.categoria_id = c.id
@@ -204,160 +162,81 @@ LEFT JOIN proveedores p ON s.proveedor_id = p.id
 WHERE s.activo = 1
 ORDER BY c.nombre, sc.nombre, s.nombre;
 
--- ============================================
--- VISTA PARA ADMIN: Todos los servicios
--- ============================================
+-- Admin: Todos los servicios
 CREATE OR REPLACE VIEW vista_admin_servicios AS
 SELECT 
-    s.id,
-    s.nombre,
-    s.descripcion,
-    s.precio_base,
-    s.activo,
-    s.creado_en,
-    sc.nombre AS subcategoria,
-    sc.id AS subcategoria_id,
-    c.nombre AS categoria,
-    c.id AS categoria_id,
-    p.nombre AS proveedor,
-    p.id AS proveedor_id,
-    p.email AS proveedor_email
+    s.id, s.nombre, s.descripcion, s.precio_base, s.activo, s.creado_en,
+    sc.nombre AS subcategoria, sc.id AS subcategoria_id,
+    c.nombre AS categoria, c.id AS categoria_id,
+    p.nombre AS proveedor, p.id AS proveedor_id, p.email AS proveedor_email
 FROM servicios s
 LEFT JOIN subcategorias sc ON s.subcategoria_id = sc.id
 LEFT JOIN categorias c ON sc.categoria_id = c.id
 LEFT JOIN proveedores p ON s.proveedor_id = p.id
 ORDER BY s.id DESC;
 
--- ============================================
--- VISTA PARA ADMIN: Todos los proveedores
--- ============================================
+-- Admin: Proveedores
 CREATE OR REPLACE VIEW vista_admin_proveedores AS
-SELECT 
-    id,
-    nombre,
-    email,
-    telefono,
-    direccion,
-    aprobado,
-    creado_en
-FROM proveedores
-ORDER BY id DESC;
+SELECT id, nombre, email, telefono, direccion, aprobado, creado_en
+FROM proveedores ORDER BY id DESC;
 
--- ============================================
--- VISTA PARA ADMIN: Todos los clientes
--- ============================================
+-- Admin: Clientes
 CREATE OR REPLACE VIEW vista_admin_clientes AS
-SELECT 
-    id,
-    nombre,
-    email,
-    telefono,
-    rol,
-    creado_en
-FROM clientes
-ORDER BY id DESC;
+SELECT id, nombre, email, telefono, rol, creado_en
+FROM clientes ORDER BY id DESC;
 
--- ============================================
--- VISTA PARA ADMIN: Todas las cotizaciones
--- ============================================
+-- Admin: Cotizaciones
 CREATE OR REPLACE VIEW vista_admin_cotizaciones AS
 SELECT 
-    c.id,
-    c.evento_id,
-    c.total,
-    c.estado,
-    c.creado_en,
-    cl.nombre AS cliente,
-    cl.email AS cliente_email,
-    cl.id AS cliente_id,
+    c.id, c.evento_id, c.total, c.estado, c.creado_en,
+    cl.nombre AS cliente, cl.email AS cliente_email, cl.id AS cliente_id,
     e.nombre_evento
 FROM cotizaciones c
 LEFT JOIN eventos e ON c.evento_id = e.id
 LEFT JOIN clientes cl ON e.cliente_id = cl.id
 ORDER BY c.id DESC;
 
--- ============================================
--- VISTA PARA ADMIN: Todos los eventos
--- ============================================
+-- Admin: Eventos
 CREATE OR REPLACE VIEW vista_admin_eventos AS
 SELECT 
-    e.id AS evento_id,
-    e.nombre_evento,
-    t.nombre AS tipo,
-    e.fecha,
-    e.invitados,
-    e.ubicacion,
-    e.mensaje,
-    c.id AS cliente_id,
-    c.nombre AS cliente_nombre,
-    c.email AS cliente_email
+    e.id AS evento_id, e.nombre_evento, t.nombre AS tipo,
+    e.fecha, e.invitados, e.ubicacion, e.mensaje,
+    c.id AS cliente_id, c.nombre AS cliente_nombre, c.email AS cliente_email
 FROM eventos e
 LEFT JOIN clientes c ON e.cliente_id = c.id
 LEFT JOIN tipos_evento t ON e.tipo_id = t.id
 ORDER BY e.id DESC;
 
--- ============================================
--- VISTA PARA CLIENTE: Sus cotizaciones
--- (NOTA: El filtro por cliente_id se hará en el backend)
--- ============================================
+-- Admin: Solicitudes de registro
+CREATE OR REPLACE VIEW vista_admin_solicitudes_registro AS
+SELECT 
+    s.*,
+    c.nombre AS cliente_nombre, c.email AS cliente_email, c.telefono AS cliente_telefono,
+    cat.nombre AS categoria_nombre,
+    sub.nombre AS subcategoria_nombre,
+    a.nombre AS atendido_por_nombre
+FROM solicitudes_registro_servicio s
+LEFT JOIN clientes c ON s.cliente_id = c.id
+LEFT JOIN categorias cat ON s.categoria_id = cat.id
+LEFT JOIN subcategorias sub ON s.subcategoria_id = sub.id
+LEFT JOIN clientes a ON s.atendido_por = a.id
+ORDER BY 
+    CASE s.estado 
+        WHEN 'pendiente' THEN 1
+        WHEN 'aprobada' THEN 2
+        WHEN 'rechazada' THEN 3
+    END,
+    s.fecha_solicitud DESC;
+
+-- Cliente: Sus cotizaciones
 CREATE OR REPLACE VIEW vista_cliente_cotizaciones AS
 SELECT 
-    c.id,
-    c.evento_id,
-    c.total,
-    c.estado,
-    c.creado_en,
-    e.nombre_evento,
-    e.cliente_id
+    c.id, c.evento_id, c.total, c.estado, c.creado_en,
+    e.nombre_evento, e.cliente_id
 FROM cotizaciones c
 JOIN eventos e ON c.evento_id = e.id;
 
--- ============================================
--- VISTA PARA CLIENTE: Sus eventos
--- (NOTA: El filtro por cliente_id se hará en el backend)
--- ============================================
+-- Cliente: Sus eventos
 CREATE OR REPLACE VIEW vista_cliente_eventos AS
-SELECT 
-    id,
-    nombre_evento,
-    fecha,
-    invitados,
-    ubicacion,
-    creado_en,
-    cliente_id
+SELECT id, nombre_evento, fecha, invitados, ubicacion, creado_en, cliente_id
 FROM eventos;
-
--- ============================================
--- VISTA PARA CLIENTE: Su carrito
--- (NOTA: Requiere que la tabla carrito exista)
--
-CREATE OR REPLACE VIEW vista_cliente_carrito AS
-SELECT 
-    ca.id AS carrito_id,
-    ca.cantidad,
-    ca.fecha_agregado,
-    ca.usuario_id,
-    s.id AS servicio_id,
-    s.nombre,
-    s.descripcion,
-    s.precio_base,
-    sc.nombre AS subcategoria,
-    p.nombre AS proveedor
-FROM carrito ca
-JOIN servicios s ON ca.servicio_id = s.id
-LEFT JOIN subcategorias sc ON s.subcategoria_id = sc.id
-LEFT JOIN proveedores p ON s.proveedor_id = p.id;
-
-
--- VERIFICAR VISTAS CREADAS
-SHOW FULL TABLES WHERE Table_type = 'VIEW';
-
--- user accounts creation (manual)
--- CREATE USER 'fiesta_admin'@'localhost' IDENTIFIED BY '12345678';
--- GRANT ALL PRIVILEGES ON fiestalandia.* TO 'fiesta_admin'@'localhost';
--- CREATE USER 'fiesta_cliente'@'localhost' IDENTIFIED BY 'temporal123';
--- GRANT SELECT ON fiestalandia.servicios TO 'fiesta_cliente'@'localhost';
--- GRANT SELECT ON fiestalandia.eventos TO 'fiesta_cliente'@'localhost';
--- GRANT SELECT ON fiestalandia.cotizaciones TO 'fiesta_cliente'@'localhost';
--- GRANT SELECT ON fiestalandia.detalle_cotizacion TO 'fiesta_cliente'@'localhost';
--- FLUSH PRIVILEGES;

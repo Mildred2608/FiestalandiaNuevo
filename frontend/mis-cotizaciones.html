@@ -10,18 +10,38 @@
     <nav>
         <div class="nav-container">
             <div class="logo">Fiestalandia</div>
-            <div class="menu">
-                <a href="index.html">← Volver al inicio</a>
+            <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="menu" id="navMenu">
+                <a href="index.html">Inicio</a>
+                <a href="carrito.html" class="cart-link">
+                    🛒 Carrito <span class="cart-badge" id="cartBadge">0</span>
+                </a>
                 <a href="#" class="btn-login" id="loginBtn">🔐 Login</a>
             </div>
         </div>
     </nav>
+
     <main class="container">
-        <h1>Mis Cotizaciones</h1>
-        <div id="cotizaciones-container">
-            <p class="no-data">Cargando cotizaciones...</p>
+        <div class="cotizaciones-header">
+            <h1>💰 Mis Cotizaciones</h1>
+            <div class="filtros">
+                <button class="filtro-btn active" data-estado="todas">Todas</button>
+                <button class="filtro-btn" data-estado="pendiente">Pendientes</button>
+                <button class="filtro-btn" data-estado="enviada">Enviadas</button>
+                <button class="filtro-btn" data-estado="aceptada">Aceptadas</button>
+                <button class="filtro-btn" data-estado="rechazada">Rechazadas</button>
+            </div>
+        </div>
+
+        <div id="cotizacionesContainer" class="cotizaciones-grid">
+            <div class="loading-spinner">Cargando cotizaciones...</div>
         </div>
     </main>
+
     <script src="js/auth.js"></script>
     <script src="js/mis-cotizaciones.js"></script>
 </body>

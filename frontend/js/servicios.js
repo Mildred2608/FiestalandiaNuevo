@@ -45,7 +45,7 @@ async function cargarServicios() {
         }
         
         const servicios = await response.json();
-        console.log(' Servicios encontrados:', servicios.length);
+        console.log('✅ Servicios encontrados:', servicios.length);
         
         if (servicios.length === 0) {
             grid.innerHTML = '<div class="no-results">No hay servicios disponibles en esta subcategoría</div>';
@@ -82,7 +82,7 @@ async function cargarServicios() {
         });
         
     } catch (error) {
-        console.error('Error:', error);
+        console.error('❌ Error:', error);
         grid.innerHTML = '<div class="no-results">Error al cargar servicios. Verifica la conexión.</div>';
     }
 }
@@ -142,6 +142,7 @@ function obtenerImagenPorTipo(nombre, descripcion) {
     return 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
 }
 
+// ===== SELECCIONAR EVENTO PARA CARRITO =====
 async function seleccionarEventoParaCarrito() {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -194,45 +195,57 @@ async function seleccionarEventoParaCarrito() {
     }
 }
 
-// ===== FUNCIÓN PARA AGREGAR AL CARRITO =====
+// ===== FUNCIÓN PARA AGREGAR AL CARRITO (CONECTADA A BD) =====
 async function agregarAlCarrito(id, nombre, precio) {
+    console.log('🛒 Agregando al carrito:', id, nombre, precio);
+    
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+        mostrarToast('Debes iniciar sesión para agregar al carrito', 'warning');
+        document.getElementById('authModal').style.display = 'flex';
+        return;
+    }
+    
+    // Obtener evento de la URL o seleccionar
     const urlParams = new URLSearchParams(window.location.search);
     const eventoIdFromUrl = urlParams.get('eventoId');
-
     let eventoSeleccionado = null;
+    
     if (eventoIdFromUrl) {
         eventoSeleccionado = { id: eventoIdFromUrl, nombre_evento: `Evento #${eventoIdFromUrl}` };
     } else {
         eventoSeleccionado = await seleccionarEventoParaCarrito();
     }
-
+    
     if (!eventoSeleccionado) {
         return;
     }
-
+    
     try {
-        const carrito = JSON.parse(localStorage.getItem('fiestalandia_carrito')) || [];
-
-        const existente = carrito.find(item => item.id === id && String(item.eventoId) === String(eventoSeleccionado.id));
-
-        if (existente) {
-            existente.cantidad = (existente.cantidad || 1) + 1;
-        } else {
-            carrito.push({
-                id: id,
-                nombre: nombre,
-                precio: precio,
+        const response = await fetch(`${API_URL}/carrito/agregar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ 
+                servicio_id: id, 
                 cantidad: 1,
-                fecha: new Date().toISOString(),
-                eventoId: eventoSeleccionado.id,
-                eventoNombre: eventoSeleccionado.nombre_evento || eventoSeleccionado.nombre || ''
-            });
+                evento_id: eventoSeleccionado.id,
+                evento_nombre: eventoSeleccionado.nombre_evento || eventoSeleccionado.nombre
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            mostrarToast(`"${nombre}" agregado al carrito para el evento "${eventoSeleccionado.nombre_evento || eventoSeleccionado.nombre}"`, 'success');
+            // Actualizar badge en todas las páginas
+            if (window.actualizarBadge) window.actualizarBadge();
+        } else {
+            mostrarToast(data.message || 'Error al agregar', 'error');
         }
-
-        localStorage.setItem('fiestalandia_carrito', JSON.stringify(carrito));
-        mostrarToast(`Servicio vinculado al evento "${eventoSeleccionado.nombre_evento || eventoSeleccionado.nombre}"`, 'success');
-        actualizarBadge();
-
     } catch (error) {
         console.error('Error:', error);
         mostrarToast('Error al agregar al carrito', 'error');
@@ -246,9 +259,14 @@ function mostrarToast(mensaje, tipo = 'info') {
 
     const toast = document.createElement('div');
     toast.classList.add('toast', tipo);
-    toast.innerHTML = `<span class="toast-icon">$}</span>${mensaje}`;
+    
+    let icono = '';
+    if (tipo === 'success') icono = '✅';
+    if (tipo === 'error') icono = '❌';
+    if (tipo === 'warning') icono = '⚠️';
+    
+    toast.innerHTML = `<span class="toast-icon">${icono}</span>${mensaje}`;
     document.body.appendChild(toast);
-
     setTimeout(() => toast.remove(), 2800);
 }
 
@@ -256,13 +274,39 @@ function mostrarToast(mensaje, tipo = 'info') {
 function actualizarBadge() {
     const badge = document.getElementById('cartBadge');
     if (!badge) return;
-    try {
-        const carrito = JSON.parse(localStorage.getItem('fiestalandia_carrito')) || [];
-        const total = carrito.reduce((sum, item) => sum + (item.cantidad || 1), 0);
-        badge.textContent = total;
-        badge.style.display = total > 0 ? 'inline-block' : 'none';
-    } catch (e) {
-        badge.style.display = 'none';
+    
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+        fetch(`${API_URL}/carrito/total`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(data => {
+            badge.textContent = data.total || 0;
+            badge.style.display = (data.total > 0) ? 'inline-block' : 'none';
+        })
+        .catch(err => {
+            console.error('Error al obtener total:', err);
+            // Fallback a localStorage
+            try {
+                const carrito = JSON.parse(localStorage.getItem('fiestalandia_carrito')) || [];
+                const total = carrito.reduce((sum, item) => sum + (item.cantidad || 1), 0);
+                badge.textContent = total;
+                badge.style.display = total > 0 ? 'inline-block' : 'none';
+            } catch (e) {
+                badge.style.display = 'none';
+            }
+        });
+    } else {
+        try {
+            const carrito = JSON.parse(localStorage.getItem('fiestalandia_carrito')) || [];
+            const total = carrito.reduce((sum, item) => sum + (item.cantidad || 1), 0);
+            badge.textContent = total;
+            badge.style.display = total > 0 ? 'inline-block' : 'none';
+        } catch (e) {
+            badge.style.display = 'none';
+        }
     }
 }
 
@@ -335,7 +379,7 @@ function mostrarMenuUsuario(user) {
 
 function verPerfil() {
     const user = auth.getCurrentUser();
-    alert(`👤 ${user.nombre}\n ${user.email}\n ${user.telefono || 'No especificado'}`);
+    alert(`👤 ${user.nombre}\n📧 ${user.email}\n📱 ${user.telefono || 'No especificado'}`);
     document.getElementById('userMenu').style.display = 'none';
 }
 
@@ -353,7 +397,7 @@ function toggleMenu() {
 
 // ===== INICIALIZACIÓN =====
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Servicios.js iniciado');
+    console.log('🚀 Servicios.js iniciado');
     actualizarBotonLogin();
     cargarServicios();
     actualizarBadge();

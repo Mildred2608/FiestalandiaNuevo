@@ -14,6 +14,7 @@ const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const solicitudesRoutes = require('./routes/solicitudesRoutes');
 const publicRoutes = require('./routes/publicRoutes');
+const carritoRoutes = require('./routes/carritoRoutes');
 
 const app = express();
 
@@ -21,6 +22,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/api/carrito', carritoRoutes); // Rutas d
 
 // Probar conexión a BD
 testConnection();
