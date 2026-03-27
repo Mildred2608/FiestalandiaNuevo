@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Solicitudes de Servicio | Fiestalandia</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .solicitudes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .filtros {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .filtro-btn {
+            padding: 8px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 25px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .filtro-btn.active {
+            background: #7c3aed;
+            color: white;
+            border-color: #7c3aed;
+        }
+        
+        .solicitudes-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .solicitud-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            overflow: hidden;
+            border-left: 4px solid #e5e7eb;
+        }
+        
+        .solicitud-card.pendiente { border-left-color: #f59e0b; }
+        .solicitud-card.aprobada { border-left-color: #10b981; }
+        .solicitud-card.rechazada { border-left-color: #ef4444; }
+        
+        .solicitud-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            cursor: pointer;
+            background: #f9fafb;
+        }
+        
+        .solicitud-info {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .solicitud-info-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        .solicitud-estado {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+        
+        .estado-pendiente { background: #fef3c7; color: #92400e; }
+        .estado-aprobada { background: #d1fae5; color: #065f46; }
+        .estado-rechazada { background: #fee2e2; color: #991b1b; }
+        
+        .expand-icon {
+            font-size: 0.8rem;
+            transition: transform 0.3s;
+            color: #9ca3af;
+        }
+        
+        .solicitud-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+            padding: 0 20px;
+        }
+        
+        .solicitud-body.open {
+            max-height: 800px;
+            padding: 0 20px 20px 20px;
+        }
+        
+        .solicitud-detalle {
+            margin-top: 15px;
+        }
+        
+        .detalle-item {
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .detalle-label {
+            font-weight: 600;
+            color: #374151;
+            width: 140px;
+            display: inline-block;
+        }
+        
+        .detalle-valor {
+            color: #6b7280;
+        }
+        
+        .btn-nueva-solicitud {
+            background: linear-gradient(135deg, #7c3aed, #ec4899);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-nueva-solicitud:hover {
+            transform: translateY(-2px);
+        }
+        
+        .no-solicitudes {
+            text-align: center;
+            padding: 60px;
+            color: #9ca3af;
+            background: white;
+            border-radius: 16px;
+        }
+        
+        .loading-spinner {
+            text-align: center;
+            padding: 60px;
+            color: #7c3aed;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 60px;
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">Fiestalandia</div>
+            <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="menu" id="navMenu">
+                <a href="index.html">Inicio</a>
+                <a href="carrito.html" class="cart-link">
+                    🛒 Carrito <span class="cart-badge" id="cartBadge">0</span>
+                </a>
+                <a href="#" class="btn-login" id="loginBtn">🔐 Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="solicitudes-header">
+            <h1>📋 Mis Solicitudes de Servicio</h1>
+            <button class="btn-nueva-solicitud" onclick="window.location.href='solicitar-registro-servicio.html'">
+                + Nueva Solicitud
+            </button>
+        </div>
+
+        <div class="filtros">
+            <button class="filtro-btn active" data-estado="todas">Todas</button>
+            <button class="filtro-btn" data-estado="pendiente">⏳ Pendientes</button>
+            <button class="filtro-btn" data-estado="aprobada">✅ Aprobadas</button>
+            <button class="filtro-btn" data-estado="rechazada">❌ Rechazadas</button>
+        </div>
+
+        <div id="solicitudesContainer" class="solicitudes-grid">
+            <div class="loading-spinner">Cargando solicitudes...</div>
+        </div>
+    </main>
+
+    <script src="js/auth.js"></script>
+    <script src="js/mis-solicitudes-servicio.js"></script>
+</body>
+</html>

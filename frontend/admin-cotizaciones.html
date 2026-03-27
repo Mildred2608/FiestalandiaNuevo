@@ -8,7 +8,21 @@
     <link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
-    <nav id="admin-navbar"></nav>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">Fiestalandia Admin</div>
+            <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="menu" id="navMenu">
+                <a href="admin.html">← Volver al panel</a>
+                <a href="index.html">Inicio</a>
+                <a href="#" class="btn-login" id="adminName">👤 Admin</a>
+            </div>
+        </div>
+    </nav>
 
     <main class="admin-container">
         <h1 class="admin-title">Gestión de Cotizaciones</h1>
@@ -17,11 +31,12 @@
             <div class="panel-header">
                 <h2>Lista de Cotizaciones</h2>
                 <select id="filtroEstado" class="filter-select">
-                    <option value="">Todos los estados</option>
-                    <option value="pendiente">Pendiente</option>
-                    <option value="enviada">Enviada</option>
-                    <option value="aceptada">Aceptada</option>
-                    <option value="cancelada">Cancelada</option>
+                    <option value="">📋 Todos los estados</option>
+                    <option value="pendiente">⏳ Pendiente</option>
+                    <option value="enviada">📨 Enviada</option>
+                    <option value="aceptada">✅ Aceptada</option>
+                    <option value="rechazada">❌ Rechazada</option>
+                    <option value="cancelada">🚫 Cancelada</option>
                 </select>
             </div>
 
@@ -35,19 +50,15 @@
                         <th>Estado</th>
                         <th>Fecha</th>
                         <th>Acciones</th>
-                    </tr>
-                </thead>
+                    </thead>
                 <tbody id="tablaCotizaciones">
-                    <tr>
-                        <td colspan="7" class="loading-row">Cargando cotizaciones...</td>
-                    </tr>
+                     <tr><td colspan="7" class="loading-row">Cargando cotizaciones...</td></tr>
                 </tbody>
             </table>
         </div>
     </main>
 
     <script src="js/auth.js"></script>
-    <script src="js/admin-header.js"></script>
     <script src="js/admin-cotizaciones.js"></script>
 </body>
 </html>

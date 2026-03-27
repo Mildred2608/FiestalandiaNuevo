@@ -275,4 +275,29 @@ router.post('/admin/solicitudes-registro/:id/rechazar', authMiddleware.verifyTok
     }
 });
 
+// ============================================
+// CLIENTE: OBTENER SUS SOLICITUDES DE REGISTRO
+// ============================================
+router.get('/cliente/mis-solicitudes', authMiddleware.verifyToken, async (req, res) => {
+    try {
+        const [rows] = await pool.query(`
+            SELECT s.*, 
+                   c.nombre as categoria_nombre,
+                   sub.nombre as subcategoria_nombre
+            FROM solicitudes_registro_servicio s
+            LEFT JOIN categorias c ON s.categoria_id = c.id
+            LEFT JOIN subcategorias sub ON s.subcategoria_id = sub.id
+            WHERE s.cliente_id = ?
+            ORDER BY s.fecha_solicitud DESC
+        `, [req.user.id]);
+        
+        res.json(rows);
+    } catch (error) {
+        console.error('Error al obtener solicitudes:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error al obtener solicitudes' 
+        });
+    }
+});
 module.exports = router;

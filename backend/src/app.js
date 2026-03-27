@@ -22,7 +22,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/api/carrito', carritoRoutes); // Rutas d
+
 
 // Probar conexión a BD
 testConnection();
@@ -42,6 +42,8 @@ app.use('/api', solicitudesRoutes);
 
 // 4. Rutas públicas (GENÉRICAS - VAN AL FINAL)
 app.use('/api', publicRoutes);
+
+app.use('/api/carrito', carritoRoutes); // Rutas del carrito de compras y cotizaciones  
 
 // ============================================
 // RUTA DE BIENVENIDA

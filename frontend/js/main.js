@@ -60,9 +60,6 @@ async function actualizarCardsInicio() {
                     <button class="btn btn-primary" onclick="irASubcategorias(${cat.id}, '${cat.nombre}')">
                         Ver opciones
                     </button>
-                    <button class="btn btn-secondary" onclick="agregarServicioCarrito('${cat.nombre}', 'Servicio de ${cat.nombre}', ${precioEjemplo})">
-                        🛒 Agregar
-                    </button>
                 </div>
             `;
             cardsContainer.appendChild(card);
@@ -123,6 +120,7 @@ function mostrarMenuUsuario(user) {
             <a href="mis-cotizaciones.html">💰 Mis Cotizaciones</a>
             <a href="mis-eventos.html">📅 Mis Eventos</a>
             <a href="solicitar-registro-servicio.html" class="menu-solicitar">📋 Registrar mi servicio</a>
+            <a href="mis-solicitudes-servicio.html" class="menu-solicitudes">📋 Mis solicitudes</a>
         `;
     }
     
