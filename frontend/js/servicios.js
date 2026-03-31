@@ -278,7 +278,7 @@ function actualizarBadge() {
     const token = localStorage.getItem('token');
     
     if (token) {
-        fetch(`${API_URL}/carrito/total`, {
+        fetch(`${API_URL}/carrito/cantidad`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
         .then(res => res.json())
