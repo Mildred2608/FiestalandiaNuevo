@@ -1570,3 +1570,20 @@ footer {
         width: 100%;
     }
 }
+
+/* PERFIL EXTRA */
+
+.opcion-card {
+    align-items: center;
+    text-align: center;
+}
+
+.btn-logout {
+    background: #f87171;
+    color: white;
+    margin-top: 10px;
+}
+
+.btn-logout:hover {
+    background: #ef4444;
+}

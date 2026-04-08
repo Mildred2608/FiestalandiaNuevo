@@ -154,8 +154,16 @@ function mostrarMenuUsuario(user) {
 
 function verPerfil() {
     const user = auth.getCurrentUser();
-    alert(`👤 ${user.nombre}\n📧 ${user.email}\n📱 ${user.telefono || 'No especificado'}`);
-    document.getElementById('userMenu').style.display = 'none';
+
+    if (!user) {
+        alert("Debes iniciar sesión");
+        return;
+    }
+
+    const menu = document.getElementById('userMenu');
+    if (menu) menu.style.display = 'none';
+
+    window.location.href = "perfil.html";
 }
 
 function cerrarSesion() {

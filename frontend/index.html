@@ -287,9 +287,11 @@
   </div>
 </div>
 
+
 <!-- ===== MODAL DE PERFIL ===== -->
 <div class="modal" id="perfilModal" style="display: none;">
   <div class="modal-content modal-perfil">
+    
     <span class="modal-close" id="closePerfilModal">&times;</span>
     
     <div class="modal-header">
@@ -298,9 +300,19 @@
       <p>Tus datos de cuenta</p>
     </div>
 
-    <div class="perfil-info" id="perfilInfo"></div>
+    <div class="perfil-info" id="perfilInfo">
+      <p>Consulta y administra tu información personal.</p>
+    </div>
 
-    <button class="modal-btn" id="btnCerrarPerfil">Cerrar</button>
+    <!-- 🔥 BOTÓN QUE MANDA AL PERFIL -->
+    <button class="modal-btn" onclick="irAPerfil()">
+      Ver perfil completo
+    </button>
+
+    <button class="modal-btn" id="btnCerrarPerfil">
+      Cerrar
+    </button>
+
   </div>
 </div>
 
@@ -368,5 +380,6 @@
 <!-- ===== SCRIPTS ===== -->
 <script src="js/auth.js"></script>
 <script src="js/main.js"></script>
+
 </body>
 </html>
