@@ -5,19 +5,19 @@
     padding: 20px;
 }
 
-/* ===== HEADER PRINCIPAL ===== */
-.eventos-header {
+/* ===== HEADER ===== */
+.eventos-card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
+    margin-bottom: 25px;
 }
 
-.eventos-header h1 {
+.eventos-card-header h1 {
     color: #7c3aed;
 }
 
-/* ===== BOTÓN NUEVO EVENTO ===== */
+/* ===== BOTÓN ===== */
 .btn-nuevo-evento {
     background: linear-gradient(135deg, #7c3aed, #ec4899);
     color: white;
@@ -26,7 +26,7 @@
     border-radius: 12px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: 0.3s;
 }
 
 .btn-nuevo-evento:hover {
@@ -34,32 +34,31 @@
     box-shadow: 0 8px 20px rgba(124,58,237,0.3);
 }
 
-/* ===== GRID ===== */
+/* ===== GRID AHORA EN COLUMNA ===== */
 .eventos-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 /* ===== CARD ===== */
-.eventos-card {
+.evento-card {
     background: white;
     border-radius: 18px;
-    padding: 22px;
+    padding: 20px;
     box-shadow: 0 6px 25px rgba(0,0,0,0.05);
     border: 1px solid #f3f4f6;
     transition: all 0.3s ease;
-    position: relative;
 }
 
-.eventos-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 15px 35px rgba(124,58,237,0.15);
+.evento-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(124,58,237,0.15);
     border-color: #c084fc;
 }
 
 /* ===== HEADER CARD ===== */
-.eventos-card-header {
+.evento-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -67,15 +66,14 @@
 }
 
 /* ===== TITULO ===== */
-.eventos-titulo {
+.evento-nombre {
     font-size: 1.2rem;
-    font-weight: 600;
+    font-weight: 700;
     color: #7c3aed;
-    margin: 0;
 }
 
 /* ===== ESTADOS ===== */
-.eventos-estado {
+.evento-estado {
     padding: 5px 12px;
     border-radius: 20px;
     font-size: 0.75rem;
@@ -84,12 +82,12 @@
 }
 
 /* Estados */
-.estado-pendiente {
+.estado-planificando {
     background: #f3e8ff;
     color: #7c3aed;
 }
 
-.estado-enviada {
+.estado-pendiente {
     background: #ede9fe;
     color: #6d28d9;
 }
@@ -104,25 +102,31 @@
     color: #dc2626;
 }
 
-/* ===== DETALLE ===== */
-.eventos-detalle {
-    margin: 15px 0;
-    padding: 12px 0;
-    border-top: 1px solid #f3f4f6;
-    border-bottom: 1px solid #f3f4f6;
-}
-
-.detalle-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
-    color: #6b7280;
+/* ===== TABLA ===== */
+.evento-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
     font-size: 0.9rem;
 }
 
+.evento-tabla th {
+    text-align: left;
+    padding: 10px;
+    background: #f9fafb;
+    color: #6b7280;
+    font-weight: 600;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.evento-tabla td {
+    padding: 10px;
+    border-bottom: 1px solid #f3f4f6;
+    color: #374151;
+}
+
 /* ===== ACCIONES ===== */
-.eventos-acciones {
+.evento-acciones {
     display: flex;
     gap: 10px;
     margin-top: 15px;
@@ -140,35 +144,31 @@
     border: none;
 }
 
-/* TIPOS */
 .btn-ver {
     background: #f3e8ff;
     color: #7c3aed;
 }
 
-.btn-aceptar {
-    background: linear-gradient(135deg, #7c3aed, #ec4899);
-    color: white;
+.btn-editar {
+    background: #ede9fe;
+    color: #6d28d9;
 }
 
-.btn-rechazar {
+.btn-eliminar {
     background: #fee2e2;
     color: #dc2626;
 }
 
-/* HOVER */
 .btn-accion:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 18px rgba(124,58,237,0.2);
 }
 
-/* ===== MENSAJE VACÍO ===== */
-.no-cotizaciones {
+/* ===== MENSAJES ===== */
+.no-eventos {
     text-align: center;
     padding: 50px;
     color: #9ca3af;
-    font-size: 1rem;
-    grid-column: 1 / -1;
 }
 
 /* ===== LOADING ===== */
@@ -176,17 +176,12 @@
     text-align: center;
     padding: 50px;
     color: #7c3aed;
-    font-size: 1.1rem;
-    grid-column: 1 / -1;
 }
 
 /* ===== MODAL ===== */
 .modal {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     background: rgba(0,0,0,0.4);
     display: flex;
     justify-content: center;
@@ -201,18 +196,6 @@
     width: 100%;
     max-width: 500px;
     position: relative;
-    animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 .modal-close {
@@ -223,14 +206,12 @@
     cursor: pointer;
 }
 
-/* ===== FORMULARIO ===== */
+/* ===== FORM ===== */
 .form-group {
     margin-bottom: 15px;
 }
 
 .form-group label {
-    display: block;
-    margin-bottom: 5px;
     font-weight: 600;
     color: #374151;
 }
@@ -242,28 +223,13 @@
     padding: 10px;
     border-radius: 10px;
     border: 1px solid #e5e7eb;
-    outline: none;
-    transition: 0.3s;
 }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-    border-color: #7c3aed;
-    box-shadow: 0 0 0 2px rgba(124,58,237,0.1);
-}
-
-/* FILA DOBLE */
 .form-row {
     display: flex;
     gap: 10px;
 }
 
-.form-row .form-group {
-    flex: 1;
-}
-
-/* BOTÓN MODAL */
 .modal-btn {
     width: 100%;
     background: linear-gradient(135deg, #7c3aed, #ec4899);
@@ -271,25 +237,12 @@
     padding: 12px;
     border-radius: 10px;
     border: none;
-    font-weight: 600;
     cursor: pointer;
-    transition: 0.3s;
-}
-
-.modal-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(124,58,237,0.3);
 }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-    .eventos-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-    }
-
-    .eventos-acciones {
+    .evento-acciones {
         flex-direction: column;
     }
 

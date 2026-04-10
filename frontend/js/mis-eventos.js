@@ -88,7 +88,7 @@ async function cargarEventos() {
             grid.innerHTML = `
                 <div class="no-eventos">
                     <p>No tienes eventos creados aún</p>
-                    <p>Usa el botón "+ Nuevo Evento" en la parte superior para crear uno.</p>
+                    <p>Usa el botón "+ Nuevo Evento" para comenzar.</p>
                 </div>
             `;
             return;
@@ -96,32 +96,39 @@ async function cargarEventos() {
         
         grid.innerHTML = eventos.map(evento => `
             <div class="evento-card">
+                
                 <div class="evento-header">
                     <h3 class="evento-nombre">${evento.nombre_evento}</h3>
                     <span class="evento-estado estado-${evento.estado || 'planificando'}">
                         ${evento.estado || 'Planificando'}
                     </span>
                 </div>
-                
-                <div class="evento-detalle">
-                    <div class="detalle-item">
-                        <i>📅</i> ${new Date(evento.fecha).toLocaleDateString()}
-                    </div>
-                    <div class="detalle-item">
-                        <i>👥</i> ${evento.invitados || 0} invitados
-                    </div>
-                    ${evento.ubicacion ? `
-                    <div class="detalle-item">
-                        <i>📍</i> ${evento.ubicacion}
-                    </div>
-                    ` : ''}
-                </div>
+
+                <table class="evento-tabla">
+                    <tr>
+                        <th>📅 Fecha</th>
+                        <td>${new Date(evento.fecha).toLocaleDateString()}</td>
+                    </tr>
+                    <tr>
+                        <th>👥 Invitados</th>
+                        <td>${evento.invitados || 0}</td>
+                    </tr>
+                    <tr>
+                        <th>📍 Ubicación</th>
+                        <td>${evento.ubicacion || 'No especificada'}</td>
+                    </tr>
+                    <tr>
+                        <th>📝 Notas</th>
+                        <td>${evento.mensaje || 'Sin notas'}</td>
+                    </tr>
+                </table>
                 
                 <div class="evento-acciones">
                     <button class="btn-accion btn-ver" onclick="verEvento(${evento.id})">👁️ Ver</button>
                     <button class="btn-accion btn-editar" onclick="editarEvento(${evento.id})">✏️ Editar</button>
                     <button class="btn-accion btn-eliminar" onclick="confirmarEliminar(${evento.id})">🗑️ Eliminar</button>
                 </div>
+
             </div>
         `).join('');
         
