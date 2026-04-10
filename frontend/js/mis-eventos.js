@@ -335,9 +335,11 @@ function mostrarMenuUsuario(user) {
             <small>${user.email}</small>
         </div>
         <div class="user-menu-items">
-            <a href="#" onclick="verPerfil()">👤 Mi Perfil</a>
+            <a href="perfil.html">👤 Mi Perfil</a>
             <a href="mis-eventos.html">📅 Mis Eventos</a>
             <a href="mis-cotizaciones.html">💰 Mis Cotizaciones</a>
+            <a href="solicitar-registro-servicio.html" class="menu-solicitar">📋 Registrar mi servicio</a>
+            <a href="mis-solicitudes-servicio.html" class="menu-solicitudes">📋 Mis solicitudes</a>
     `;
     
     if (user.rol === 'admin') {
