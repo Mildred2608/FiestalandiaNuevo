@@ -203,25 +203,42 @@ function mostrarToast(mensaje, tipo = 'info') {
 }
 
 // ===== ACTUALIZAR BADGE DEL CARRITO =====
-async function actualizarBadge() {
+function actualizarBadge() {
     const badge = document.getElementById('cartBadge');
     if (!badge) return;
     
     const token = localStorage.getItem('token');
     
     if (token) {
-        try {
-            const response = await fetch(`${API_URL}/carrito/cantidad`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await response.json();
+        fetch(`${API_URL}/carrito/cantidad`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(data => {
             badge.textContent = data.total || 0;
             badge.style.display = (data.total > 0) ? 'inline-block' : 'none';
-        } catch (error) {
+        })
+        .catch(err => {
+            console.error('Error al obtener total:', err);
+            // Fallback a localStorage
+            try {
+                const carrito = JSON.parse(localStorage.getItem('fiestalandia_carrito')) || [];
+                const total = carrito.reduce((sum, item) => sum + (item.cantidad || 1), 0);
+                badge.textContent = total;
+                badge.style.display = total > 0 ? 'inline-block' : 'none';
+            } catch (e) {
+                badge.style.display = 'none';
+            }
+        });
+    } else {
+        try {
+            const carrito = JSON.parse(localStorage.getItem('fiestalandia_carrito')) || [];
+            const total = carrito.reduce((sum, item) => sum + (item.cantidad || 1), 0);
+            badge.textContent = total;
+            badge.style.display = total > 0 ? 'inline-block' : 'none';
+        } catch (e) {
             badge.style.display = 'none';
         }
-    } else {
-        badge.style.display = 'none';
     }
 }
 
