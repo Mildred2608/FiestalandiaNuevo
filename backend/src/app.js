@@ -2,6 +2,7 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const path = require('path');
 
 // Cargar variables de entorno
 dotenv.config();
@@ -22,6 +23,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Servir carpeta de imágenes subidas como ruta pública
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 
 // Probar conexión a BD

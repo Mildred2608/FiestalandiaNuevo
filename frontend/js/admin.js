@@ -20,9 +20,16 @@ async function apiCall(url, options = {}) {
         'Authorization': `Bearer ${token}`
     };
 
+    const headers = { ...defaultHeaders, ...(options.headers || {}) };
+    
+    // Si enviamos FormData, el navegador debe establecer el Content-Type automáticamente con el boundary
+    if (options.body instanceof FormData) {
+        delete headers['Content-Type'];
+    }
+
     const response = await fetch(`${API_URL}${url}`, {
         ...options,
-        headers: { ...defaultHeaders, ...(options.headers || {}) }
+        headers
     });
 
     return response;
@@ -76,9 +83,16 @@ function cerrarModalAdmin(id) {
 // ===== HELPER: MINIATURA DE IMAGEN =====
 function renderMiniatura(imagenUrl, alt = 'Imagen') {
     if (imagenUrl && String(imagenUrl).trim() !== '') {
+        // Si es una ruta relativa que empieza con /uploads, añadir la URL base del backend
+        let src = imagenUrl;
+        if (imagenUrl.startsWith('/uploads')) {
+            const baseUrl = API_URL.replace('/api', '');
+            src = `${baseUrl}${imagenUrl}`;
+        }
+        
         return `
             <img 
-                src="${imagenUrl}" 
+                src="${src}" 
                 alt="${alt}" 
                 style="width:50px;height:50px;object-fit:cover;border-radius:10px;border:1px solid #e5e7eb;"
                 onerror="this.outerHTML='<span style=&quot;font-size:1.4rem&quot;>🖼️</span>';"
@@ -141,7 +155,7 @@ async function cargarCategorias() {
         tbody.innerHTML = `
             <tr>
                 <td colspan="6" class="loading-row error-row">
-                    ⚠️ No se pudo conectar al servidor. Verifica que el backend esté activo.
+                    No se pudo conectar al servidor. Verifica que el backend esté activo.
                 </td>
             </tr>
         `;
@@ -181,7 +195,7 @@ async function cargarSubcategorias() {
         const subcategorias = await response.json();
 
         if (!Array.isArray(subcategorias) || subcategorias.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="loading-row">📭 No hay subcategorías registradas</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="loading-row"> No hay subcategorías registradas</td></tr>';
             return;
         }
 
@@ -210,7 +224,7 @@ async function cargarSubcategorias() {
         tbody.innerHTML = `
             <tr>
                 <td colspan="6" class="loading-row error-row">
-                    ⚠️ No se pudo conectar al servidor. Verifica que el backend esté activo.
+                    No se pudo conectar al servidor. Verifica que el backend esté activo.
                 </td>
             </tr>
         `;
@@ -294,7 +308,7 @@ async function cargarServicios() {
         tbody.innerHTML = `
             <tr>
                 <td colspan="7" class="loading-row error-row">
-                    ⚠️ No se pudo conectar al servidor. Verifica que el backend esté activo.
+                    No se pudo conectar al servidor. Verifica que el backend esté activo.
                 </td>
             </tr>
         `;
@@ -458,23 +472,28 @@ function initModalCategoria() {
             return;
         }
 
+        const formData = new FormData();
+        formData.append('nombre', nombre);
+        if (descripcion) formData.append('descripcion', descripcion);
+        
+        const fileInput = document.getElementById('categoriaImagenFile');
+        if (fileInput.files.length > 0) {
+            formData.append('imagen', fileInput.files[0]);
+        }
+
         const submitBtn = form.querySelector('button[type="submit"]');
         setButtonLoading(submitBtn, true, 'Guardando...');
 
         try {
             const response = await apiCall('/admin/categorias', {
                 method: 'POST',
-                body: JSON.stringify({
-                    nombre,
-                    descripcion,
-                    imagen_url: imagenUrl || null
-                })
+                body: formData
             });
 
             const data = await response.json();
 
             if (response.ok && data.success) {
-                showAdminToast('¡Categoría creada exitosamente! ✨', 'success');
+                showAdminToast('¡Categoría creada exitosamente!', 'success');
                 cerrarModalAdmin('modalCategoria');
                 cargarCategorias();
             } else {
@@ -536,18 +555,23 @@ function initModalSubcategoria() {
 
         if (!valid) return;
 
+        const formData = new FormData();
+        formData.append('categoria_id', categoriaId);
+        formData.append('nombre', nombre);
+        if (descripcion) formData.append('descripcion', descripcion);
+
+        const fileInput = document.getElementById('subcategoriaImagenFile');
+        if (fileInput.files.length > 0) {
+            formData.append('imagen', fileInput.files[0]);
+        }
+
         const submitBtn = form.querySelector('button[type="submit"]');
         setButtonLoading(submitBtn, true, 'Guardando...');
 
         try {
             const response = await apiCall('/admin/subcategorias', {
                 method: 'POST',
-                body: JSON.stringify({
-                    categoria_id: categoriaId,
-                    nombre,
-                    descripcion,
-                    imagen_url: imagenUrl || null
-                })
+                body: formData
             });
 
             const data = await response.json();
@@ -628,21 +652,26 @@ function initModalServicio() {
 
         if (!valid) return;
 
+        const formData = new FormData();
+        formData.append('subcategoria_id', subcategoriaId);
+        formData.append('proveedor_id', proveedorId);
+        formData.append('nombre', nombre);
+        if (descripcion) formData.append('descripcion', descripcion);
+        formData.append('precio_base', precioBase);
+        formData.append('activo', activo);
+
+        const fileInput = document.getElementById('servicioImagenFile');
+        if (fileInput.files.length > 0) {
+            formData.append('imagen', fileInput.files[0]);
+        }
+
         const submitBtn = form.querySelector('button[type="submit"]');
         setButtonLoading(submitBtn, true, 'Guardando...');
 
         try {
             const response = await apiCall('/admin/servicios', {
                 method: 'POST',
-                body: JSON.stringify({
-                    subcategoria_id: subcategoriaId,
-                    proveedor_id: proveedorId,
-                    nombre,
-                    descripcion,
-                    precio_base: precioBase,
-                    activo,
-                    imagen_url: imagenUrl || null
-                })
+                body: formData
             });
 
             const data = await response.json();
@@ -706,4 +735,88 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Inicializar previsualización de imágenes
+    setupImagePreview('categoria');
+    setupImagePreview('subcategoria');
+    setupImagePreview('servicio');
 });
+
+// ===== PREVISUALIZACIÓN DE IMÁGENES =====
+function setupImagePreview(entityType) {
+    const fileInput = document.getElementById(`${entityType}ImagenFile`);
+    const previewContainer = document.getElementById(`${entityType}ImagenPreview`);
+    const removeBtn = document.getElementById(`${entityType}RemoveImg`);
+    
+    if (!fileInput || !previewContainer) return;
+
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Validar tamaño (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            showAdminToast('La imagen excede el límite de 5MB', 'error');
+            fileInput.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            previewContainer.innerHTML = `<img src="${event.target.result}" alt="Vista previa">`;
+            previewContainer.classList.add('has-image');
+            if (removeBtn) removeBtn.style.display = 'inline-block';
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Drag and drop events
+    previewContainer.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        previewContainer.style.borderColor = '#7c3aed';
+        previewContainer.style.background = '#faf5ff';
+    });
+
+    previewContainer.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        previewContainer.style.borderColor = '';
+        previewContainer.style.background = '';
+    });
+
+    previewContainer.addEventListener('drop', (e) => {
+        e.preventDefault();
+        previewContainer.style.borderColor = '';
+        previewContainer.style.background = '';
+        
+        if (e.dataTransfer.files.length) {
+            fileInput.files = e.dataTransfer.files;
+            // Trigger change event manually
+            const event = new Event('change');
+            fileInput.dispatchEvent(event);
+        }
+    });
+
+    // Click on preview to trigger file input
+    previewContainer.addEventListener('click', () => {
+        fileInput.click();
+    });
+}
+
+function removeImagePreview(entityType) {
+    const fileInput = document.getElementById(`${entityType}ImagenFile`);
+    const previewContainer = document.getElementById(`${entityType}ImagenPreview`);
+    const removeBtn = document.getElementById(`${entityType}RemoveImg`);
+    const urlInput = document.getElementById(`${entityType}ImagenUrl`);
+    
+    if (fileInput) fileInput.value = '';
+    if (urlInput) urlInput.value = '';
+    
+    if (previewContainer) {
+        previewContainer.innerHTML = '<span class="preview-placeholder">📷 Haz clic o arrastra una imagen</span>';
+        previewContainer.classList.remove('has-image');
+    }
+    
+    if (removeBtn) {
+        removeBtn.style.display = 'none';
+    }
+}

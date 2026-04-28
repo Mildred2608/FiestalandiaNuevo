@@ -60,7 +60,14 @@ async function cargarServicios() {
             const card = document.createElement('div');
             card.classList.add('servicio-card');
             
-            const imagenUrl = obtenerImagenPorTipo(serv.nombre, serv.descripcion);
+            let imagenUrl = serv.imagen_url;
+            if (imagenUrl && imagenUrl.startsWith('/uploads')) {
+                const baseUrl = API_URL.replace('/api', '');
+                imagenUrl = `${baseUrl}${imagenUrl}`;
+            }
+            if (!imagenUrl) {
+                imagenUrl = obtenerImagenPorTipo(serv.nombre, serv.descripcion);
+            }
             
             card.innerHTML = `
                 <img src="${imagenUrl}" alt="${serv.nombre}" class="servicio-imagen" onerror="this.src='https://images.unsplash.com/photo-1511795409834-ef04bbd61622'">

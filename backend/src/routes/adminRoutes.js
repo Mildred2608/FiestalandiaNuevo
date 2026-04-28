@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const { pool } = require('../config/database');
 const authMiddleware = require('../middlewares/authMiddleware');
+const upload = require('../middlewares/uploadMiddleware');
 
 // Middleware para verificar que es admin
 const isAdmin = (req, res, next) => {
@@ -294,7 +295,7 @@ router.put('/pagos/:id/estado', authMiddleware.verifyToken, isAdmin, async (req,
 router.get('/categorias', authMiddleware.verifyToken, isAdmin, async (req, res) => {
     try {
         const [rows] = await pool.query(`
-            SELECT id, nombre, descripcion, creado_en 
+            SELECT id, nombre, descripcion, imagen_url, creado_en 
             FROM categorias 
             ORDER BY id DESC
         `);
@@ -308,8 +309,8 @@ router.get('/categorias', authMiddleware.verifyToken, isAdmin, async (req, res) 
     }
 });
 
-// Crear nueva categoría
-router.post('/categorias', authMiddleware.verifyToken, isAdmin, async (req, res) => {
+// Crear nueva categoría (con imagen)
+router.post('/categorias', authMiddleware.verifyToken, isAdmin, upload.single('imagen'), async (req, res) => {
     try {
         const { nombre, descripcion } = req.body;
         
@@ -319,10 +320,16 @@ router.post('/categorias', authMiddleware.verifyToken, isAdmin, async (req, res)
                 message: 'El nombre de la categoría es requerido' 
             });
         }
+
+        // Si se subió archivo, usar ruta pública; si no, usar imagen_url del body
+        let imagenUrl = req.body.imagen_url || null;
+        if (req.file) {
+            imagenUrl = `/uploads/${req.file.filename}`;
+        }
         
         const [result] = await pool.query(
-            'INSERT INTO categorias (nombre, descripcion) VALUES (?, ?)',
-            [nombre, descripcion || null]
+            'INSERT INTO categorias (nombre, descripcion, imagen_url) VALUES (?, ?, ?)',
+            [nombre, descripcion || null, imagenUrl]
         );
         
         res.status(201).json({ 
@@ -339,6 +346,40 @@ router.post('/categorias', authMiddleware.verifyToken, isAdmin, async (req, res)
     }
 });
 
+// Actualizar categoría (con imagen)
+router.put('/categorias/:id', authMiddleware.verifyToken, isAdmin, upload.single('imagen'), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { nombre, descripcion } = req.body;
+
+        if (!nombre) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'El nombre es requerido' 
+            });
+        }
+
+        let imagenUrl = req.body.imagen_url || null;
+        if (req.file) {
+            imagenUrl = `/uploads/${req.file.filename}`;
+        }
+
+        const [result] = await pool.query(
+            'UPDATE categorias SET nombre = ?, descripcion = ?, imagen_url = ? WHERE id = ?',
+            [nombre, descripcion || null, imagenUrl, id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Categoría no encontrada' });
+        }
+
+        res.json({ success: true, message: 'Categoría actualizada exitosamente' });
+    } catch (error) {
+        console.error('Error al actualizar categoría:', error);
+        res.status(500).json({ success: false, message: 'Error al actualizar categoría' });
+    }
+});
+
 // ============================================
 // SUBCATEGORÍAS
 // ============================================
@@ -347,7 +388,7 @@ router.post('/categorias', authMiddleware.verifyToken, isAdmin, async (req, res)
 router.get('/subcategorias', authMiddleware.verifyToken, isAdmin, async (req, res) => {
     try {
         const [rows] = await pool.query(`
-            SELECT s.id, s.nombre, s.descripcion, s.creado_en,
+            SELECT s.id, s.nombre, s.descripcion, s.imagen_url, s.creado_en,
                    s.categoria_id, c.nombre as categoria_nombre
             FROM subcategorias s
             LEFT JOIN categorias c ON s.categoria_id = c.id
@@ -380,8 +421,8 @@ router.get('/subcategorias/:categoriaId', authMiddleware.verifyToken, async (req
     }
 });
 
-// Crear nueva subcategoría
-router.post('/subcategorias', authMiddleware.verifyToken, isAdmin, async (req, res) => {
+// Crear nueva subcategoría (con imagen)
+router.post('/subcategorias', authMiddleware.verifyToken, isAdmin, upload.single('imagen'), async (req, res) => {
     try {
         const { categoria_id, nombre, descripcion } = req.body;
         
@@ -391,10 +432,15 @@ router.post('/subcategorias', authMiddleware.verifyToken, isAdmin, async (req, r
                 message: 'La categoría y el nombre son requeridos' 
             });
         }
+
+        let imagenUrl = req.body.imagen_url || null;
+        if (req.file) {
+            imagenUrl = `/uploads/${req.file.filename}`;
+        }
         
         const [result] = await pool.query(
-            'INSERT INTO subcategorias (categoria_id, nombre, descripcion) VALUES (?, ?, ?)',
-            [categoria_id, nombre, descripcion || null]
+            'INSERT INTO subcategorias (categoria_id, nombre, descripcion, imagen_url) VALUES (?, ?, ?, ?)',
+            [categoria_id, nombre, descripcion || null, imagenUrl]
         );
         
         res.status(201).json({ 
@@ -408,6 +454,40 @@ router.post('/subcategorias', authMiddleware.verifyToken, isAdmin, async (req, r
             success: false, 
             message: 'Error al crear subcategoría' 
         });
+    }
+});
+
+// Actualizar subcategoría (con imagen)
+router.put('/subcategorias/:id', authMiddleware.verifyToken, isAdmin, upload.single('imagen'), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { categoria_id, nombre, descripcion } = req.body;
+
+        if (!categoria_id || !nombre) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'La categoría y el nombre son requeridos' 
+            });
+        }
+
+        let imagenUrl = req.body.imagen_url || null;
+        if (req.file) {
+            imagenUrl = `/uploads/${req.file.filename}`;
+        }
+
+        const [result] = await pool.query(
+            'UPDATE subcategorias SET categoria_id = ?, nombre = ?, descripcion = ?, imagen_url = ? WHERE id = ?',
+            [categoria_id, nombre, descripcion || null, imagenUrl, id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Subcategoría no encontrada' });
+        }
+
+        res.json({ success: true, message: 'Subcategoría actualizada exitosamente' });
+    } catch (error) {
+        console.error('Error al actualizar subcategoría:', error);
+        res.status(500).json({ success: false, message: 'Error al actualizar subcategoría' });
     }
 });
 
@@ -481,8 +561,8 @@ router.get('/proveedores-list', authMiddleware.verifyToken, isAdmin, async (req,
 // SERVICIOS (CRUD)
 // ============================================
 
-// Crear nuevo servicio
-router.post('/servicios', authMiddleware.verifyToken, isAdmin, async (req, res) => {
+// Crear nuevo servicio (con imagen)
+router.post('/servicios', authMiddleware.verifyToken, isAdmin, upload.single('imagen'), async (req, res) => {
     try {
         const { subcategoria_id, proveedor_id, nombre, descripcion, precio_base } = req.body;
         
@@ -499,12 +579,17 @@ router.post('/servicios', authMiddleware.verifyToken, isAdmin, async (req, res) 
                 message: 'El precio debe ser mayor a 0' 
             });
         }
+
+        let imagenUrl = req.body.imagen_url || null;
+        if (req.file) {
+            imagenUrl = `/uploads/${req.file.filename}`;
+        }
         
         const [result] = await pool.query(
             `INSERT INTO servicios 
-             (subcategoria_id, proveedor_id, nombre, descripcion, precio_base, activo) 
-             VALUES (?, ?, ?, ?, ?, 1)`,
-            [subcategoria_id, proveedor_id, nombre, descripcion || null, precio_base]
+             (subcategoria_id, proveedor_id, nombre, descripcion, precio_base, imagen_url, activo) 
+             VALUES (?, ?, ?, ?, ?, ?, 1)`,
+            [subcategoria_id, proveedor_id, nombre, descripcion || null, precio_base, imagenUrl]
         );
         
         res.status(201).json({ 
@@ -555,8 +640,8 @@ router.get('/servicios/:id', authMiddleware.verifyToken, isAdmin, async (req, re
     }
 });
 
-// Actualizar un servicio
-router.put('/servicios/:id', authMiddleware.verifyToken, isAdmin, async (req, res) => {
+// Actualizar un servicio (con imagen)
+router.put('/servicios/:id', authMiddleware.verifyToken, isAdmin, upload.single('imagen'), async (req, res) => {
     try {
         const { id } = req.params;
         const { subcategoria_id, proveedor_id, nombre, descripcion, precio_base, activo } = req.body;
@@ -567,13 +652,18 @@ router.put('/servicios/:id', authMiddleware.verifyToken, isAdmin, async (req, re
                 message: 'Todos los campos son requeridos' 
             });
         }
+
+        let imagenUrl = req.body.imagen_url || null;
+        if (req.file) {
+            imagenUrl = `/uploads/${req.file.filename}`;
+        }
         
         const [result] = await pool.query(
             `UPDATE servicios 
              SET subcategoria_id = ?, proveedor_id = ?, nombre = ?, 
-                 descripcion = ?, precio_base = ?, activo = ?
+                 descripcion = ?, precio_base = ?, imagen_url = ?, activo = ?
              WHERE id = ?`,
-            [subcategoria_id, proveedor_id, nombre, descripcion || null, precio_base, activo || 1, id]
+            [subcategoria_id, proveedor_id, nombre, descripcion || null, precio_base, imagenUrl, activo || 1, id]
         );
         
         if (result.affectedRows === 0) {

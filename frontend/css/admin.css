@@ -439,3 +439,113 @@
     .form-row { grid-template-columns: 1fr; }
     .admin-toast { left: 16px; right: 16px; bottom: 20px; max-width: none; }
 }
+
+/* ============================================
+   IMAGE UPLOAD COMPONENT
+   ============================================ */
+
+.image-upload-area {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.image-preview {
+    width: 100%;
+    height: 180px;
+    border: 2px dashed #d1d5db;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #f9fafb;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+.image-preview:hover {
+    border-color: #a855f7;
+    background: #faf5ff;
+}
+
+.image-preview.has-image {
+    border-style: solid;
+    border-color: #a855f7;
+    background: #faf5ff;
+}
+
+.image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 14px;
+}
+
+.preview-placeholder {
+    color: #9ca3af;
+    font-size: 0.92rem;
+    text-align: center;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.file-input-hidden {
+    display: none !important;
+}
+
+.image-upload-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-select-image {
+    flex: 1;
+    padding: 10px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    background: white;
+    color: #374151;
+    font-weight: 600;
+    font-size: 0.88rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+.btn-select-image:hover {
+    border-color: #a855f7;
+    color: #7c3aed;
+    background: #faf5ff;
+}
+
+.btn-remove-image {
+    padding: 10px 16px;
+    border: 2px solid #fee2e2;
+    border-radius: 12px;
+    background: #fef2f2;
+    color: #ef4444;
+    font-weight: 600;
+    font-size: 0.88rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+.btn-remove-image:hover {
+    background: #fee2e2;
+    border-color: #fca5a5;
+}
+
+/* Table image thumbnails — uniform size */
+.admin-table td img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+}

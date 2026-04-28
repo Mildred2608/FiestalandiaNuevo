@@ -72,12 +72,18 @@ async function cargarSubcategorias() {
             
             const imagenPorDefecto = 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3';
             const tieneImagen = sub.imagen_url && sub.imagen_url.trim() !== '';
-            console.log('Subcategoría:', sub.nombre, 'URL imagen:', sub.imagen_url);
+            let src = sub.imagen_url;
+            if (tieneImagen && src.startsWith('/uploads')) {
+                const baseUrl = API_URL.replace('/api', '');
+                src = `${baseUrl}${src}`;
+            }
+
+            console.log('Subcategoría:', sub.nombre, 'URL imagen:', src);
 
             const imagenHtml = tieneImagen
                 ? `
                     <img 
-                        src="${sub.imagen_url}" 
+                        src="${src}" 
                         alt="${sub.nombre}" 
                         class="subcategoria-imagen"
                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"

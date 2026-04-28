@@ -105,9 +105,19 @@
                 <input type="hidden" id="categoriaId">
 
                 <div class="form-group">
-                    <label>URL de imagen <span class="field-optional">(opcional)</span></label>
-                    <input type="text" id="categoriaImagenUrl" placeholder="https://ejemplo.com/imagen.jpg">
-                    <div class="input-hint">Pega la URL directa de la imagen de la categoría</div>
+                    <label>Imagen <span class="field-optional">(opcional)</span></label>
+                    <div class="image-upload-area" id="categoriaImagenArea">
+                        <div class="image-preview" id="categoriaImagenPreview">
+                            <span class="preview-placeholder">📷 Haz clic o arrastra una imagen</span>
+                        </div>
+                        <input type="file" id="categoriaImagenFile" accept="image/jpeg,image/png,image/webp" class="file-input-hidden">
+                        <input type="hidden" id="categoriaImagenUrl">
+                        <div class="image-upload-actions">
+                            <button type="button" class="btn-select-image" onclick="document.getElementById('categoriaImagenFile').click()">📁 Seleccionar imagen</button>
+                            <button type="button" class="btn-remove-image" id="categoriaRemoveImg" style="display:none" onclick="removeImagePreview('categoria')">✕ Quitar</button>
+                        </div>
+                        <div class="input-hint">Formatos: JPG, PNG, WEBP — Máx. 5 MB</div>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -158,9 +168,19 @@
                 </div>
 
                 <div class="form-group">
-                    <label>URL de imagen <span class="field-optional">(opcional)</span></label>
-                    <input type="text" id="subcategoriaImagenUrl" placeholder="https://ejemplo.com/imagen.jpg">
-                    <div class="input-hint">Pega la URL directa de la imagen de la subcategoría</div>
+                    <label>Imagen <span class="field-optional">(opcional)</span></label>
+                    <div class="image-upload-area" id="subcategoriaImagenArea">
+                        <div class="image-preview" id="subcategoriaImagenPreview">
+                            <span class="preview-placeholder">📷 Haz clic o arrastra una imagen</span>
+                        </div>
+                        <input type="file" id="subcategoriaImagenFile" accept="image/jpeg,image/png,image/webp" class="file-input-hidden">
+                        <input type="hidden" id="subcategoriaImagenUrl">
+                        <div class="image-upload-actions">
+                            <button type="button" class="btn-select-image" onclick="document.getElementById('subcategoriaImagenFile').click()">📁 Seleccionar imagen</button>
+                            <button type="button" class="btn-remove-image" id="subcategoriaRemoveImg" style="display:none" onclick="removeImagePreview('subcategoria')">✕ Quitar</button>
+                        </div>
+                        <div class="input-hint">Formatos: JPG, PNG, WEBP — Máx. 5 MB</div>
+                    </div>
                 </div>
 
                 <button type="submit" class="modal-btn">Guardar Subcategoría</button>
@@ -174,10 +194,11 @@
             <span class="modal-close" id="closeModalServicio">&times;</span>
             <div class="modal-header">
                 <div class="modal-logo">🎯</div>
-                <h2>Agregar Nuevo Servicio</h2>
+                <h2 id="modalServicioTitle">Agregar Nuevo Servicio</h2>
                 <p>Completa los datos del servicio</p>
             </div>
             <form id="formServicio">
+                <input type="hidden" id="servicioId">
                 <div class="form-group">
                     <label>Subcategoría <span class="field-required">*</span></label>
                     <select id="servicioSubcategoriaId">
@@ -206,9 +227,19 @@
                 </div>
 
                 <div class="form-group">
-                    <label>URL de imagen <span class="field-optional">(opcional)</span></label>
-                    <input type="text" id="servicioImagenUrl" placeholder="https://ejemplo.com/imagen.jpg">
-                    <div class="input-hint">Pega la URL directa de la imagen del servicio</div>
+                    <label>Imagen <span class="field-optional">(opcional)</span></label>
+                    <div class="image-upload-area" id="servicioImagenArea">
+                        <div class="image-preview" id="servicioImagenPreview">
+                            <span class="preview-placeholder">📷 Haz clic o arrastra una imagen</span>
+                        </div>
+                        <input type="file" id="servicioImagenFile" accept="image/jpeg,image/png,image/webp" class="file-input-hidden">
+                        <input type="hidden" id="servicioImagenUrl">
+                        <div class="image-upload-actions">
+                            <button type="button" class="btn-select-image" onclick="document.getElementById('servicioImagenFile').click()">📁 Seleccionar imagen</button>
+                            <button type="button" class="btn-remove-image" id="servicioRemoveImg" style="display:none" onclick="removeImagePreview('servicio')">✕ Quitar</button>
+                        </div>
+                        <div class="input-hint">Formatos: JPG, PNG, WEBP — Máx. 5 MB</div>
+                    </div>
                 </div>
 
                 <div class="form-row">

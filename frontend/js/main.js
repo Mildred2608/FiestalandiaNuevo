@@ -41,11 +41,17 @@ async function actualizarCardsInicio() {
             const card = document.createElement('div');
             card.classList.add('card');
             
-            const imagenHtml = cat.imagen_url 
-                ? `<img src="${cat.imagen_url}" alt="${cat.nombre}" class="card-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">`
+            let src = cat.imagen_url;
+            if (src && src.startsWith('/uploads')) {
+                const baseUrl = API_URL.replace('/api', '');
+                src = `${baseUrl}${src}`;
+            }
+
+            const imagenHtml = src
+                ? `<img src="${src}" alt="${cat.nombre}" class="card-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">`
                 : '';
             
-            const iconoHtml = `<div class="card-icon" ${cat.imagen_url ? 'style="display:none;"' : ''}>📁</div>`;
+            const iconoHtml = `<div class="card-icon" ${src ? 'style="display:none;"' : ''}>📁</div>`;
             
             // Obtener un servicio de ejemplo para esta categoría (el primero disponible)
             const servicioEjemplo = `Servicio de ${cat.nombre}`;
