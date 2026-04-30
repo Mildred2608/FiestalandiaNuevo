@@ -7,19 +7,19 @@
   // --- Respuestas predefinidas ---
   const respuestas = [
     {
-      palabras: ['servicio', 'servicios', 'ofrecen', 'ofreces', 'tienen', 'qué hacen', 'que hacen', 'qué ofrecen', 'que ofrecen'],
+      palabras: ['servicio', 'servicios', 'ofrecen', 'ofreces', 'tienen', 'qué hacen', 'que hacen', 'qué ofrecen', 'que ofrecen','1'],
       respuesta: '🎉 En Fiestalandia ofrecemos tres categorías principales de servicios:\n\n🍽️ <b>Comida</b> — Platillos típicos y banquetes para tu evento.\n🎨 <b>Decoración</b> — Decoraciones infantiles y temáticas.\n📍 <b>Lugar</b> — Opciones increíbles de salones y espacios.\n\nPuedes explorarlos en la sección de <b>Servicios</b> de nuestra página.'
     },
     {
-      palabras: ['carrito', 'agregar', 'agregar productos', 'añadir', 'cómo agrego', 'como agrego', 'comprar'],
+      palabras: ['carrito', 'agregar', 'agregar productos', 'añadir', 'cómo agrego', 'como agrego', 'comprar','2'],
       respuesta: '🛒 Para agregar servicios a tu carrito:\n\n1. Ve a la sección <b>Servicios</b>.\n2. Haz clic en <b>"Ver opciones"</b> en la categoría que te interese.\n3. Selecciona el servicio deseado y presiona <b>"Agregar al carrito"</b>.\n4. Puedes ver tu carrito haciendo clic en el botón <b>🛒 Carrito</b> en la barra de navegación.'
     },
     {
-      palabras: ['administrador', 'admin', 'contactar administrador', 'contacto admin', 'hablar con administrador'],
+      palabras: ['administrador', 'admin', 'contactar administrador', 'contacto admin', 'hablar con administrador','3'],
       respuesta: '👨‍💼 Para comunicarte con un administrador tienes varias opciones:\n\n• Usa la sección de <b>Contacto</b> en nuestra página y envía tu mensaje.\n• Llámanos al <b>(123) 456-7890</b>.\n• Envía un correo a <b>contacto@fiestalandia.com</b>.\n\n¡Te responderemos en menos de 24 horas!'
     },
     {
-      palabras: ['comida', 'decoración', 'decoracion', 'lugar', 'contratar', 'paquete', 'combo'],
+      palabras: ['comida', 'decoración', 'decoracion', 'lugar', 'contratar', 'paquete', 'combo',],
       respuesta: '✅ ¡Claro que sí! Puedes contratar servicios de <b>Comida</b>, <b>Decoración</b> y <b>Lugar</b> de forma individual o combinada.\n\nSimplemente agrega al carrito los servicios que necesites y solicita una cotización. ¡Arma el evento perfecto a tu medida! 🎊'
     },
     {
@@ -27,23 +27,23 @@
       respuesta: '📋 Para ver los servicios que has seleccionado, haz clic en el botón <b>🛒 Carrito</b> en la barra de navegación superior.\n\nAhí encontrarás un resumen con todos los servicios agregados, precios y la opción de solicitar una cotización formal.'
     },
     {
-      palabras: ['precio', 'precios', 'costo', 'costos', 'cuánto cuesta', 'cuanto cuesta', 'cotización', 'cotizacion', 'cotizar'],
+      palabras: ['precio', 'precios', 'costo', 'costos', 'cuánto cuesta', 'cuanto cuesta', 'cotización', 'cotizacion', 'cotizar','4'],
       respuesta: '💰 Los precios de cada servicio se muestran al hacer clic en <b>"Ver opciones"</b> dentro de cada categoría.\n\nPuedes agregar los que te interesen al carrito y solicitar una <b>cotización personalizada</b>. Un administrador te enviará el presupuesto detallado. 📩'
     },
     {
       palabras: ['hola', 'hey', 'buenas', 'buenos días', 'buenos dias', 'buenas tardes', 'buenas noches', 'hi', 'hello', 'saludos'],
-      respuesta: '¡Hola! 👋 Bienvenido al asistente de <b>Fiestalandia</b>.\n\nEstoy aquí para ayudarte con información sobre nuestros servicios, el carrito de compras, contacto y más. ¿En qué puedo ayudarte? 😊'
+      respuesta: '¡Hola! Bienvenido al asistente de <b>Fiestalandia</b>.\n\nEstoy aquí para ayudarte con información sobre nuestros servicios, el carrito de compras, contacto y más. ¿En qué puedo ayudarte? 😊'
     },
     {
       palabras: ['gracias', 'thank', 'muchas gracias', 'te agradezco', 'perfecto', 'genial', 'excelente'],
-      respuesta: '¡Con mucho gusto! 😄 Si tienes alguna otra pregunta no dudes en escribirme.\n\n¡En Fiestalandia queremos que tu evento sea inolvidable! 🎉'
+      respuesta: '¡Con mucho gusto! Si tienes alguna otra pregunta no dudes en escribirme.\n\n¡En Fiestalandia queremos que tu evento sea inolvidable! 🎉'
     },
     {
-      palabras: ['evento', 'eventos', 'tipo de evento', 'tipos de eventos', 'qué eventos', 'que eventos', 'boda', 'xv', 'cumpleaños', 'cumpleanos', 'bautizo', 'graduación', 'graduacion'],
+      palabras: ['evento', 'eventos', 'tipo de evento', 'tipos de eventos', 'qué eventos', 'que eventos', 'boda', 'xv', 'cumpleaños', 'cumpleanos', 'bautizo', 'graduación', 'graduacion','5'],
       respuesta: '🎊 Organizamos todo tipo de eventos:\n\n💒 <b>Bodas</b>\n👸 <b>XV Años</b>\n🎂 <b>Cumpleaños</b>\n⛪ <b>Bautizos</b>\n🎓 <b>Graduaciones</b>\n🏢 <b>Eventos Corporativos</b>\n\nCada evento se personaliza según tus necesidades. ¡Cuéntanos qué tienes en mente!'
     },
     {
-      palabras: ['horario', 'horarios', 'hora', 'abren', 'cierran', 'atienden', 'abierto'],
+      palabras: ['horario', 'horarios', 'hora', 'abren', 'cierran', 'atienden', 'abierto','6'],
       respuesta: '🕐 Nuestro horario de atención es:\n\n📅 <b>Lunes a Sábado</b>\n⏰ <b>9:00 AM — 7:00 PM</b>\n\n¡Te esperamos!'
     },
     {
@@ -51,16 +51,16 @@
       respuesta: '📍 Nos encontramos en:\n\n<b>Av. Celebración #100, Col. Fiesta, CP 01234</b>\n\n¡Ven a visitarnos y conoce nuestros servicios en persona!'
     },
     {
-      palabras: ['registro', 'registrarme', 'cuenta', 'crear cuenta', 'login', 'iniciar sesión', 'iniciar sesion'],
+      palabras: ['registro', 'registrarme', 'cuenta', 'crear cuenta', 'login', 'iniciar sesión', 'iniciar sesion','7'],
       respuesta: '🔐 Para crear tu cuenta o iniciar sesión:\n\n1. Haz clic en el botón <b>🔐 Login</b> en la barra de navegación.\n2. Si ya tienes cuenta, ingresa tu correo y contraseña.\n3. Si eres nuevo, haz clic en <b>"Regístrate aquí"</b> y completa tus datos.\n\n¡Es rápido y sencillo!'
     },
     {
       palabras: ['ayuda', 'help', 'información', 'informacion', 'info', 'opciones', 'qué puedo', 'que puedo', 'qué sabes', 'que sabes'],
-      respuesta: '💡 Puedo ayudarte con lo siguiente:\n\n• 🎉 Información sobre nuestros <b>servicios</b>\n• 🛒 Cómo usar el <b>carrito</b>\n• 👨‍💼 Cómo contactar al <b>administrador</b>\n• 💰 Información de <b>precios y cotizaciones</b>\n• 🎊 <b>Tipos de eventos</b> que organizamos\n• 🕐 <b>Horarios</b> y <b>ubicación</b>\n• 🔐 Ayuda con <b>registro e inicio de sesión</b>\n\n¡Pregúntame lo que necesites! 😊'
+      respuesta: 'Puedo ayudarte con lo siguiente:\n\n  <b>Ingresa la palabra clave o número</b>\n\n1.- 🎉 Información sobre nuestros <b>servicios</b>\n2.- 🛒 Cómo usar el <b>carrito</b>\n3.- 👨‍💼 Cómo contactar al <b>administrador</b>\n4.- 💰 Información de <b>precios y cotizaciones</b>\n5.- 🎊 <b>Tipos de eventos</b> que organizamos\n6.- 🕐 <b>Horarios</b> y <b>ubicación</b>\n7.- 🔐 Ayuda con <b>registro e inicio de sesión</b>\n\n¡Pregúntame lo que necesites!'
     }
   ];
 
-  const respuestaDefault = 'Por el momento solo puedo ayudarte con información básica de Fiestalandia. Puedes comunicarte con un administrador para más detalles. 📩\n\nEscribe <b>"ayuda"</b> para ver los temas con los que puedo asistirte.';
+  const respuestaDefault = 'Por el momento solo puedo ayudarte con información básica de Fiestalandia. Puedes comunicarte con un administrador para más detalles. \n\nEscribe <b>"ayuda"</b> para ver los temas con los que puedo asistirte.';
 
   // --- Buscar respuesta ---
   function buscarRespuesta(mensaje) {
