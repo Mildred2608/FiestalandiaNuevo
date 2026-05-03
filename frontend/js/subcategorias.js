@@ -1,5 +1,5 @@
 // frontend/js/subcategorias.js
-//const API_URL = 'http://localhost:3000/api';  // ← DESCOMENTADO
+//const API_URL = 'http://localhost:3000/api';
 
 // Obtener el ID de la categoría de la URL
 const urlParams = new URLSearchParams(window.location.search);
@@ -39,70 +39,54 @@ async function cargarSubcategorias() {
         });
         
         const subcategorias = await response.json();
-        console.log(' Subcategorías cargadas:', subcategorias);
         
         if (subcategorias.length === 0) {
             grid.innerHTML = '<div class="no-results">No hay subcategorías disponibles en esta categoría</div>';
             return;
         }
         
-        grid.innerHTML = '';
-        
         // Cargar servicios para contar
         const serviciosResponse = await fetch(`${API_URL}/servicios/publicos`);
         const servicios = await serviciosResponse.json();
-        console.log(' Servicios públicos:', servicios);
+        
+        grid.innerHTML = '';
         
         subcategorias.forEach(sub => {
-            // Contar servicios en esta subcategoría (CORREGIDO: usar ID en lugar de nombre)
-            const serviciosCount = servicios.filter(s => 
-                s.subcategoria_id === sub.id
-            ).length;
-            
-            console.log(` Subcategoría ${sub.nombre} (ID: ${sub.id}) tiene ${serviciosCount} servicios`);
+            const serviciosCount = servicios.filter(s => s.subcategoria_id === sub.id).length;
             
             const card = document.createElement('div');
             card.classList.add('subcategoria-card');
             
-            // CORREGIDO: Usar 'id' como parámetro, no 'subcategoria'
             card.onclick = () => {
-                console.log(' Click en subcategoría ID:', sub.id, 'Nombre:', sub.nombre);
                 window.location.href = `servicios.html?id=${sub.id}&nombre=${encodeURIComponent(sub.nombre)}`;
             };
             
-            const imagenPorDefecto = 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3';
-            const tieneImagen = sub.imagen_url && sub.imagen_url.trim() !== '';
-            let src = sub.imagen_url;
-            if (tieneImagen && src.startsWith('/uploads')) {
-                const baseUrl = API_URL.replace('/api', '');
-                src = `${baseUrl}${src}`;
-            }
-
-            console.log('Subcategoría:', sub.nombre, 'URL imagen:', src);
-
-            const imagenHtml = tieneImagen
-                ? `
+            // Construir imagen si existe
+            let imagenHtml = '';
+            if (sub.imagen_url && sub.imagen_url.trim() !== '') {
+                let src = sub.imagen_url;
+                if (src.startsWith('/uploads')) {
+                    const baseUrl = API_URL.replace('/api', '');
+                    src = `${baseUrl}${src}`;
+                }
+                
+                imagenHtml = `
                     <img 
                         src="${src}" 
                         alt="${sub.nombre}" 
                         class="subcategoria-imagen"
-                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                        onerror="this.style.display='none'"
                     >
-                 `
-                : '';
-
-            const iconoHtml = `
-                <div class="subcategoria-icon" ${tieneImagen ? 'style="display:none;"' : ''}></div>
-            `;
-
+                `;
+            }
+            
             card.innerHTML = `
                 ${imagenHtml}
-                ${iconoHtml}
                 <div class="subcategoria-info">
-                    <h3>${sub.nombre}</h3>
-                    <p>${sub.descripcion || 'Sin descripción'}</p>
+                    <h3>${escapeHtml(sub.nombre)}</h3>
+                    <p>${escapeHtml(sub.descripcion || 'Sin descripción')}</p>
                     <div class="subcategoria-footer">
-                        <span class="subcategoria-count">${serviciosCount} servicios</span>
+                        <span class="subcategoria-count">${serviciosCount} ${serviciosCount === 1 ? 'servicio' : 'servicios'}</span>
                         <button class="ver-servicios-btn" onclick="event.stopPropagation(); window.location.href='servicios.html?id=${sub.id}&nombre=${encodeURIComponent(sub.nombre)}'">
                             Ver servicios →
                         </button>
@@ -114,9 +98,17 @@ async function cargarSubcategorias() {
         });
         
     } catch (error) {
-        console.error(' Error cargando subcategorías:', error);
+        console.error('Error cargando subcategorías:', error);
         grid.innerHTML = '<div class="no-results">Error al cargar las subcategorías</div>';
     }
+}
+
+// Helper para escapar HTML
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // ===== FUNCIONES DE AUTENTICACIÓN =====
@@ -147,17 +139,15 @@ function mostrarMenuUsuario(user) {
     
     let menuContent = `
         <div class="user-menu-header">
-            <strong>${user.nombre}</strong>
-            <small>${user.email}</small>
+            <strong>${escapeHtml(user.nombre)}</strong>
+            <small>${escapeHtml(user.email)}</small>
         </div>
         <div class="user-menu-items">
             <a href="#" onclick="verPerfil()">👤 Mi Perfil</a>
     `;
     
     if (user.rol === 'admin') {
-        menuContent += `
-            <a href="admin.html">👑 Panel Admin</a>
-        `;
+        menuContent += `<a href="admin.html">👑 Panel Admin</a>`;
     }
     
     menuContent += `
@@ -190,8 +180,9 @@ function mostrarMenuUsuario(user) {
 
 function verPerfil() {
     const user = auth.getCurrentUser();
-    alert(`👤 ${user.nombre}\n ${user.email}\n ${user.telefono || 'No especificado'}`);
-    document.getElementById('userMenu').style.display = 'none';
+    alert(`👤 ${user.nombre}\n📧 ${user.email}\n📞 ${user.telefono || 'No especificado'}`);
+    const userMenu = document.getElementById('userMenu');
+    if (userMenu) userMenu.style.display = 'none';
 }
 
 function cerrarSesion() {
@@ -202,8 +193,8 @@ function cerrarSesion() {
 function toggleMenu() {
     const menu = document.getElementById('navMenu');
     const hamburger = document.getElementById('hamburger');
-    menu.classList.toggle('active');
-    hamburger.classList.toggle('active');
+    if (menu) menu.classList.toggle('active');
+    if (hamburger) hamburger.classList.toggle('active');
 }
 
 // ===== ACTUALIZAR BADGE DEL CARRITO =====
@@ -219,11 +210,11 @@ function actualizarBadge() {
         })
         .then(res => res.json())
         .then(data => {
-            badge.textContent = data.total || 0;
-            badge.style.display = (data.total > 0) ? 'inline-block' : 'none';
+            const total = data.total || 0;
+            badge.textContent = total;
+            badge.style.display = total > 0 ? 'inline-block' : 'none';
         })
-        .catch(err => {
-            console.error('Error al obtener total:', err);
+        .catch(() => {
             // Fallback a localStorage
             try {
                 const carrito = JSON.parse(localStorage.getItem('fiestalandia_carrito')) || [];
@@ -248,7 +239,6 @@ function actualizarBadge() {
 
 // ===== INICIALIZACIÓN =====
 document.addEventListener('DOMContentLoaded', () => {
-    console.log(' Subcategorias.js iniciado');
     actualizarBotonLogin();
     cargarSubcategorias();
     actualizarBadge();

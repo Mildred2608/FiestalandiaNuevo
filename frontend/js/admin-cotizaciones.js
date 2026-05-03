@@ -4,12 +4,7 @@
 function checkAdminAuth() {
     const user = auth.getCurrentUser();
     if (!user || user.rol !== 'admin') {
-        window.location.href = 'index.html';
-    } else {
-        const adminName = document.getElementById('adminName');
-        if (adminName) {
-            adminName.textContent = `👤 ${user.nombre}`;
-        }
+        window.location.href = 'admin.html';
     }
 }
 

@@ -13,7 +13,9 @@ function isValidPhone(phone) {
 }
 
 // ===== FUNCIONES DE AUTENTICACIÓN =====
-async function loginUser(email, password) {
+
+// Función de login - redirige según rol
+async function login(email, password) {
     try {
         const response = await fetch(`${API_URL}/auth/login`, {
             method: 'POST',
@@ -24,22 +26,36 @@ async function loginUser(email, password) {
         const data = await response.json();
 
         if (response.ok) {
+            // Guardar datos
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
-            
+
+            // Disparar evento de login
             window.dispatchEvent(new CustomEvent('userLogin', { detail: data.user }));
-            
-            return { success: true, data };
+
+            // REDIRIGIR SEGÚN ROL
+            if (data.user.rol === 'admin') {
+                window.location.href = 'admin.html';
+            } else {
+                window.location.href = 'index.html';
+            }
+
+            return { success: true };
         } else {
-            return { success: false, error: data.message };
+            return { success: false, error: data.message || 'Error al iniciar sesión' };
         }
     } catch (error) {
         console.error('Error en login:', error);
-        return { success: false, error: 'Error de conexión con el servidor' };
+        return { success: false, error: 'Error de conexión' };
     }
 }
 
-async function registerUser(userData) {
+// Alias para mantener compatibilidad
+async function loginUser(email, password) {
+    return login(email, password);
+}
+
+async function register(userData) {
     try {
         const response = await fetch(`${API_URL}/auth/register`, {
             method: 'POST',
@@ -55,6 +71,13 @@ async function registerUser(userData) {
             
             window.dispatchEvent(new CustomEvent('userLogin', { detail: data.user }));
             
+            // Redirigir según rol después del registro
+            if (data.user.rol === 'admin') {
+                window.location.href = 'admin.html';
+            } else {
+                window.location.href = 'index.html';
+            }
+            
             return { success: true, data };
         } else {
             return { success: false, error: data.message };
@@ -69,6 +92,7 @@ function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     window.dispatchEvent(new Event('userLogout'));
+    window.location.href = 'index.html';
 }
 
 function getCurrentUser() {
@@ -82,11 +106,11 @@ function isAuthenticated() {
 
 // Exponer funciones globalmente
 window.auth = {
-    login: loginUser,
-    register: registerUser,
+    login: login,
+    register: register,
     logout: logout,
     getCurrentUser: getCurrentUser,
     isAuthenticated: isAuthenticated,
-    isValidEmail,
-    isValidPhone
+    isValidEmail: isValidEmail,
+    isValidPhone: isValidPhone
 };

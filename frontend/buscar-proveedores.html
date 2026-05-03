@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscar Proveedores | Fiestalandia</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/buscar-proveedores.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">Fiestalandia</div>
+            <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="menu" id="navMenu">
+                <a href="index.html">Inicio</a>
+                <a href="carrito.html" class="cart-link">
+                    🛒 Carrito <span class="cart-badge" id="cartBadge">0</span>
+                </a>
+                <a href="#" class="btn-login" id="loginBtn">🔐 Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <h1>🔍 Buscar Proveedores</h1>
+        <p>Encuentra proveedores y solicita sus servicios</p>
+
+        <div class="filtros">
+            <select id="filtroCategoria" class="filtro-select">
+                <option value="">Todas las categorías</option>
+            </select>
+            <select id="filtroSubcategoria" class="filtro-select">
+                <option value="">Todas las subcategorías</option>
+            </select>
+        </div>
+
+        <div id="serviciosGrid" class="servicios-grid">
+            <div class="loading-spinner">Cargando servicios...</div>
+        </div>
+    </main>
+
+    <!-- Modal para solicitar servicio -->
+    <div class="modal" id="modalSolicitud" style="display: none;">
+        <div class="modal-content modal-solicitud">
+            <span class="modal-close" id="closeModalSolicitud">&times;</span>
+            <h2>Solicitar Servicio</h2>
+            
+            <div class="servicio-info-modal" id="servicioInfo">
+                <h3 id="servicioNombre"></h3>
+                <p id="servicioProveedorNombre"></p>
+                <p class="precio" id="servicioPrecio"></p>
+            </div>
+
+            <form id="formSolicitud">
+                <input type="hidden" id="servicioId">
+                
+                <div class="form-group">
+                    <label>Fecha del evento</label>
+                    <input type="date" id="fechaEvento">
+                </div>
+                
+                <div class="form-group">
+                    <label>Cantidad</label>
+                    <input type="number" id="cantidad" min="1" value="1">
+                </div>
+                
+                <div class="form-group">
+                    <label>Mensaje para el proveedor</label>
+                    <textarea id="mensaje" rows="3" placeholder="Cuéntale los detalles de tu evento..."></textarea>
+                </div>
+                
+                <button type="submit" class="modal-btn">Enviar Solicitud</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/buscar-proveedores.js"></script>
+</body>
+</html>

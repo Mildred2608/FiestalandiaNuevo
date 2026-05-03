@@ -287,8 +287,9 @@ router.put('/pagos/:id/estado', authMiddleware.verifyToken, isAdmin, async (req,
     }
 });
 
+
 // ============================================
-// CATEGORÍAS (CRUD)
+// CATEGORÍAS (CRUD COMPLETO)
 // ============================================
 
 // Obtener todas las categorías
@@ -302,60 +303,84 @@ router.get('/categorias', authMiddleware.verifyToken, isAdmin, async (req, res) 
         res.json(rows);
     } catch (error) {
         console.error('Error al obtener categorías:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error al obtener categorías' 
+        res.status(500).json({
+            success: false,
+            message: 'Error al obtener categorías'
         });
     }
 });
 
-// Crear nueva categoría (con imagen)
-router.post('/categorias', authMiddleware.verifyToken, isAdmin, upload.single('imagen'), async (req, res) => {
+// Obtener categoría por ID
+router.get('/categorias/:id', authMiddleware.verifyToken, isAdmin, async (req, res) => {
     try {
-        const { nombre, descripcion } = req.body;
-        
-        if (!nombre) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'El nombre de la categoría es requerido' 
+        const [rows] = await pool.query(
+            'SELECT id, nombre, descripcion, imagen_url FROM categorias WHERE id = ?',
+            [req.params.id]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Categoría no encontrada'
             });
         }
 
-        // Si se subió archivo, usar ruta pública; si no, usar imagen_url del body
+        res.json(rows[0]);
+    } catch (error) {
+        console.error('Error al obtener categoría:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al obtener categoría'
+        });
+    }
+});
+
+// Crear nueva categoría
+router.post('/categorias', authMiddleware.verifyToken, isAdmin, upload.single('imagen'), async (req, res) => {
+    try {
+        const { nombre, descripcion } = req.body;
+
+        if (!nombre) {
+            return res.status(400).json({
+                success: false,
+                message: 'El nombre de la categoría es requerido'
+            });
+        }
+
         let imagenUrl = req.body.imagen_url || null;
         if (req.file) {
             imagenUrl = `/uploads/${req.file.filename}`;
         }
-        
+
         const [result] = await pool.query(
             'INSERT INTO categorias (nombre, descripcion, imagen_url) VALUES (?, ?, ?)',
             [nombre, descripcion || null, imagenUrl]
         );
-        
-        res.status(201).json({ 
-            success: true, 
+
+        res.status(201).json({
+            success: true,
             id: result.insertId,
-            message: 'Categoría creada exitosamente' 
+            message: 'Categoría creada exitosamente'
         });
     } catch (error) {
         console.error('Error al crear categoría:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error al crear categoría' 
+        res.status(500).json({
+            success: false,
+            message: 'Error al crear categoría'
         });
     }
 });
 
-// Actualizar categoría (con imagen)
+// Actualizar categoría
 router.put('/categorias/:id', authMiddleware.verifyToken, isAdmin, upload.single('imagen'), async (req, res) => {
     try {
         const { id } = req.params;
         const { nombre, descripcion } = req.body;
 
         if (!nombre) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'El nombre es requerido' 
+            return res.status(400).json({
+                success: false,
+                message: 'El nombre es requerido'
             });
         }
 
@@ -380,8 +405,39 @@ router.put('/categorias/:id', authMiddleware.verifyToken, isAdmin, upload.single
     }
 });
 
+// Eliminar categoría
+router.delete('/categorias/:id', authMiddleware.verifyToken, isAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Verificar si hay subcategorías asociadas
+        const [subcategorias] = await pool.query(
+            'SELECT COUNT(*) as count FROM subcategorias WHERE categoria_id = ?',
+            [id]
+        );
+
+        if (subcategorias[0].count > 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'No se puede eliminar la categoría porque tiene subcategorías asociadas'
+            });
+        }
+
+        const [result] = await pool.query('DELETE FROM categorias WHERE id = ?', [id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Categoría no encontrada' });
+        }
+
+        res.json({ success: true, message: 'Categoría eliminada exitosamente' });
+    } catch (error) {
+        console.error('Error al eliminar categoría:', error);
+        res.status(500).json({ success: false, message: 'Error al eliminar categoría' });
+    }
+});
+
 // ============================================
-// SUBCATEGORÍAS
+// SUBCATEGORÍAS (CRUD COMPLETO)
 // ============================================
 
 // Obtener todas las subcategorías
@@ -397,15 +453,42 @@ router.get('/subcategorias', authMiddleware.verifyToken, isAdmin, async (req, re
         res.json(rows);
     } catch (error) {
         console.error('Error al obtener subcategorías:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error al obtener subcategorías' 
+        res.status(500).json({
+            success: false,
+            message: 'Error al obtener subcategorías'
+        });
+    }
+});
+
+// Obtener subcategoría por ID
+router.get('/subcategorias/:id', authMiddleware.verifyToken, isAdmin, async (req, res) => {
+    try {
+        const [rows] = await pool.query(`
+            SELECT s.*, c.nombre as categoria_nombre 
+            FROM subcategorias s
+            LEFT JOIN categorias c ON s.categoria_id = c.id
+            WHERE s.id = ?
+        `, [req.params.id]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Subcategoría no encontrada'
+            });
+        }
+
+        res.json(rows[0]);
+    } catch (error) {
+        console.error('Error al obtener subcategoría:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al obtener subcategoría'
         });
     }
 });
 
 // Obtener subcategorías por categoría (para selects)
-router.get('/subcategorias/:categoriaId', authMiddleware.verifyToken, async (req, res) => {
+router.get('/subcategorias/categoria/:categoriaId', authMiddleware.verifyToken, async (req, res) => {
     try {
         const [rows] = await pool.query(
             'SELECT id, nombre FROM subcategorias WHERE categoria_id = ? ORDER BY nombre',
@@ -414,22 +497,22 @@ router.get('/subcategorias/:categoriaId', authMiddleware.verifyToken, async (req
         res.json(rows);
     } catch (error) {
         console.error('Error al obtener subcategorías:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error al obtener subcategorías' 
+        res.status(500).json({
+            success: false,
+            message: 'Error al obtener subcategorías'
         });
     }
 });
 
-// Crear nueva subcategoría (con imagen)
+// Crear nueva subcategoría
 router.post('/subcategorias', authMiddleware.verifyToken, isAdmin, upload.single('imagen'), async (req, res) => {
     try {
         const { categoria_id, nombre, descripcion } = req.body;
-        
+
         if (!categoria_id || !nombre) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'La categoría y el nombre son requeridos' 
+            return res.status(400).json({
+                success: false,
+                message: 'La categoría y el nombre son requeridos'
             });
         }
 
@@ -437,36 +520,36 @@ router.post('/subcategorias', authMiddleware.verifyToken, isAdmin, upload.single
         if (req.file) {
             imagenUrl = `/uploads/${req.file.filename}`;
         }
-        
+
         const [result] = await pool.query(
             'INSERT INTO subcategorias (categoria_id, nombre, descripcion, imagen_url) VALUES (?, ?, ?, ?)',
             [categoria_id, nombre, descripcion || null, imagenUrl]
         );
-        
-        res.status(201).json({ 
-            success: true, 
+
+        res.status(201).json({
+            success: true,
             id: result.insertId,
-            message: 'Subcategoría creada exitosamente' 
+            message: 'Subcategoría creada exitosamente'
         });
     } catch (error) {
         console.error('Error al crear subcategoría:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error al crear subcategoría' 
+        res.status(500).json({
+            success: false,
+            message: 'Error al crear subcategoría'
         });
     }
 });
 
-// Actualizar subcategoría (con imagen)
+// Actualizar subcategoría
 router.put('/subcategorias/:id', authMiddleware.verifyToken, isAdmin, upload.single('imagen'), async (req, res) => {
     try {
         const { id } = req.params;
         const { categoria_id, nombre, descripcion } = req.body;
 
         if (!categoria_id || !nombre) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'La categoría y el nombre son requeridos' 
+            return res.status(400).json({
+                success: false,
+                message: 'La categoría y el nombre son requeridos'
             });
         }
 
@@ -495,42 +578,30 @@ router.put('/subcategorias/:id', authMiddleware.verifyToken, isAdmin, upload.sin
 router.delete('/subcategorias/:id', authMiddleware.verifyToken, isAdmin, async (req, res) => {
     try {
         const { id } = req.params;
-        
-        // Verificar si hay servicios asociados a esta subcategoría
+
+        // Verificar si hay servicios asociados
         const [servicios] = await pool.query(
             'SELECT COUNT(*) as count FROM servicios WHERE subcategoria_id = ? AND activo = 1',
             [id]
         );
-        
+
         if (servicios[0].count > 0) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'No se puede eliminar la subcategoría porque tiene servicios asociados' 
+            return res.status(400).json({
+                success: false,
+                message: 'No se puede eliminar la subcategoría porque tiene servicios asociados'
             });
         }
-        
-        const [result] = await pool.query(
-            'DELETE FROM subcategorias WHERE id = ?',
-            [id]
-        );
-        
+
+        const [result] = await pool.query('DELETE FROM subcategorias WHERE id = ?', [id]);
+
         if (result.affectedRows === 0) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Subcategoría no encontrada' 
-            });
+            return res.status(404).json({ success: false, message: 'Subcategoría no encontrada' });
         }
-        
-        res.json({ 
-            success: true, 
-            message: 'Subcategoría eliminada exitosamente' 
-        });
+
+        res.json({ success: true, message: 'Subcategoría eliminada exitosamente' });
     } catch (error) {
         console.error('Error al eliminar subcategoría:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error al eliminar subcategoría' 
-        });
+        res.status(500).json({ success: false, message: 'Error al eliminar subcategoría' });
     }
 });
 
@@ -550,63 +621,45 @@ router.get('/proveedores-list', authMiddleware.verifyToken, isAdmin, async (req,
         res.json(rows);
     } catch (error) {
         console.error('Error al obtener proveedores:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error al obtener proveedores' 
+        res.status(500).json({
+            success: false,
+            message: 'Error al obtener proveedores'
         });
     }
 });
 
 // ============================================
-// SERVICIOS (CRUD)
+// SERVICIOS (CRUD COMPLETO)
 // ============================================
 
-// Crear nuevo servicio (con imagen)
-router.post('/servicios', authMiddleware.verifyToken, isAdmin, upload.single('imagen'), async (req, res) => {
+// Obtener todos los servicios
+router.get('/servicios', authMiddleware.verifyToken, isAdmin, async (req, res) => {
     try {
-        const { subcategoria_id, proveedor_id, nombre, descripcion, precio_base } = req.body;
-        
-        if (!subcategoria_id || !proveedor_id || !nombre || !precio_base) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Todos los campos son requeridos' 
-            });
-        }
-        
-        if (precio_base <= 0) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'El precio debe ser mayor a 0' 
-            });
-        }
-
-        let imagenUrl = req.body.imagen_url || null;
-        if (req.file) {
-            imagenUrl = `/uploads/${req.file.filename}`;
-        }
-        
-        const [result] = await pool.query(
-            `INSERT INTO servicios 
-             (subcategoria_id, proveedor_id, nombre, descripcion, precio_base, imagen_url, activo) 
-             VALUES (?, ?, ?, ?, ?, ?, 1)`,
-            [subcategoria_id, proveedor_id, nombre, descripcion || null, precio_base, imagenUrl]
-        );
-        
-        res.status(201).json({ 
-            success: true, 
-            id: result.insertId,
-            message: 'Servicio creado exitosamente' 
-        });
+        const [rows] = await pool.query(`
+            SELECT s.*, 
+                   sc.nombre as subcategoria_nombre,
+                   sc.imagen_url as subcategoria_imagen,
+                   c.nombre as categoria_nombre,
+                   c.imagen_url as categoria_imagen,
+                   p.nombre as proveedor_nombre,
+                   p.email as proveedor_email
+            FROM servicios s
+            LEFT JOIN subcategorias sc ON s.subcategoria_id = sc.id
+            LEFT JOIN categorias c ON sc.categoria_id = c.id
+            LEFT JOIN proveedores p ON s.proveedor_id = p.id
+            ORDER BY s.id DESC
+        `);
+        res.json(rows);
     } catch (error) {
-        console.error('Error al crear servicio:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error al crear servicio' 
+        console.error('Error al obtener servicios:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al obtener servicios'
         });
     }
 });
 
-// Obtener un servicio específico para editar
+// Obtener servicio por ID
 router.get('/servicios/:id', authMiddleware.verifyToken, isAdmin, async (req, res) => {
     try {
         const [rows] = await pool.query(`
@@ -622,34 +675,40 @@ router.get('/servicios/:id', authMiddleware.verifyToken, isAdmin, async (req, re
             LEFT JOIN proveedores p ON s.proveedor_id = p.id
             WHERE s.id = ?
         `, [req.params.id]);
-        
+
         if (rows.length === 0) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Servicio no encontrado' 
+            return res.status(404).json({
+                success: false,
+                message: 'Servicio no encontrado'
             });
         }
-        
+
         res.json(rows[0]);
     } catch (error) {
         console.error('Error al obtener servicio:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error al obtener servicio' 
+        res.status(500).json({
+            success: false,
+            message: 'Error al obtener servicio'
         });
     }
 });
 
-// Actualizar un servicio (con imagen)
-router.put('/servicios/:id', authMiddleware.verifyToken, isAdmin, upload.single('imagen'), async (req, res) => {
+// Crear nuevo servicio
+router.post('/servicios', authMiddleware.verifyToken, isAdmin, upload.single('imagen'), async (req, res) => {
     try {
-        const { id } = req.params;
-        const { subcategoria_id, proveedor_id, nombre, descripcion, precio_base, activo } = req.body;
-        
+        const { subcategoria_id, proveedor_id, nombre, descripcion, precio_base } = req.body;
+
         if (!subcategoria_id || !proveedor_id || !nombre || !precio_base) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Todos los campos son requeridos' 
+            return res.status(400).json({
+                success: false,
+                message: 'Todos los campos son requeridos'
+            });
+        }
+
+        if (precio_base <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'El precio debe ser mayor a 0'
             });
         }
 
@@ -657,7 +716,46 @@ router.put('/servicios/:id', authMiddleware.verifyToken, isAdmin, upload.single(
         if (req.file) {
             imagenUrl = `/uploads/${req.file.filename}`;
         }
-        
+
+        const [result] = await pool.query(
+            `INSERT INTO servicios 
+             (subcategoria_id, proveedor_id, nombre, descripcion, precio_base, imagen_url, activo) 
+             VALUES (?, ?, ?, ?, ?, ?, 1)`,
+            [subcategoria_id, proveedor_id, nombre, descripcion || null, precio_base, imagenUrl]
+        );
+
+        res.status(201).json({
+            success: true,
+            id: result.insertId,
+            message: 'Servicio creado exitosamente'
+        });
+    } catch (error) {
+        console.error('Error al crear servicio:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al crear servicio'
+        });
+    }
+});
+
+// Actualizar servicio
+router.put('/servicios/:id', authMiddleware.verifyToken, isAdmin, upload.single('imagen'), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { subcategoria_id, proveedor_id, nombre, descripcion, precio_base, activo } = req.body;
+
+        if (!subcategoria_id || !proveedor_id || !nombre || !precio_base) {
+            return res.status(400).json({
+                success: false,
+                message: 'Todos los campos son requeridos'
+            });
+        }
+
+        let imagenUrl = req.body.imagen_url || null;
+        if (req.file) {
+            imagenUrl = `/uploads/${req.file.filename}`;
+        }
+
         const [result] = await pool.query(
             `UPDATE servicios 
              SET subcategoria_id = ?, proveedor_id = ?, nombre = ?, 
@@ -665,86 +763,87 @@ router.put('/servicios/:id', authMiddleware.verifyToken, isAdmin, upload.single(
              WHERE id = ?`,
             [subcategoria_id, proveedor_id, nombre, descripcion || null, precio_base, imagenUrl, activo || 1, id]
         );
-        
+
         if (result.affectedRows === 0) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Servicio no encontrado' 
+            return res.status(404).json({
+                success: false,
+                message: 'Servicio no encontrado'
             });
         }
-        
-        res.json({ 
-            success: true, 
-            message: 'Servicio actualizado exitosamente' 
+
+        res.json({
+            success: true,
+            message: 'Servicio actualizado exitosamente'
         });
     } catch (error) {
         console.error('Error al actualizar servicio:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error al actualizar servicio' 
+        res.status(500).json({
+            success: false,
+            message: 'Error al actualizar servicio'
         });
     }
 });
 
-// Desactivar un servicio
+// Desactivar servicio
 router.delete('/servicios/:id', authMiddleware.verifyToken, isAdmin, async (req, res) => {
     try {
         const { id } = req.params;
-        
+
         const [result] = await pool.query(
             'UPDATE servicios SET activo = 0 WHERE id = ?',
             [id]
         );
-        
+
         if (result.affectedRows === 0) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Servicio no encontrado' 
+            return res.status(404).json({
+                success: false,
+                message: 'Servicio no encontrado'
             });
         }
-        
-        res.json({ 
-            success: true, 
-            message: 'Servicio desactivado exitosamente' 
+
+        res.json({
+            success: true,
+            message: 'Servicio desactivado exitosamente'
         });
     } catch (error) {
         console.error('Error al desactivar servicio:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error al desactivar servicio' 
+        res.status(500).json({
+            success: false,
+            message: 'Error al desactivar servicio'
         });
     }
 });
 
-// Reactivar un servicio
+// Reactivar servicio
 router.post('/servicios/:id/reactivar', authMiddleware.verifyToken, isAdmin, async (req, res) => {
     try {
         const { id } = req.params;
-        
+
         const [result] = await pool.query(
             'UPDATE servicios SET activo = 1 WHERE id = ?',
             [id]
         );
-        
+
         if (result.affectedRows === 0) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Servicio no encontrado' 
+            return res.status(404).json({
+                success: false,
+                message: 'Servicio no encontrado'
             });
         }
-        
-        res.json({ 
-            success: true, 
-            message: 'Servicio reactivado exitosamente' 
+
+        res.json({
+            success: true,
+            message: 'Servicio reactivado exitosamente'
         });
     } catch (error) {
         console.error('Error al reactivar servicio:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error al reactivar servicio' 
+        res.status(500).json({
+            success: false,
+            message: 'Error al reactivar servicio'
         });
     }
 });
+
 
 // ============================================
 // RUTAS PÚBLICAS (NO REQUIEREN AUTENTICACIÓN)

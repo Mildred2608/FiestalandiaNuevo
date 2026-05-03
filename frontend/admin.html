@@ -9,7 +9,20 @@
 </head>
 <body>
     <!-- ===== NAVEGACIÓN ===== -->
-    <nav id="admin-navbar"></nav>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">Fiestalandia Admin</div>
+            <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="menu" id="navMenu">
+                <a href="index.html" target="_blank">👁️ Ver tienda</a>
+                <a href="#" class="btn-login" id="adminLoginBtn">👤 Admin</a>
+            </div>
+        </div>
+    </nav>
 
     <main class="admin-container">
         <h1 class="admin-title">Panel de Administración</h1>
@@ -31,7 +44,6 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Imagen</th>
                         <th>Nombre</th>
                         <th>Descripción</th>
                         <th>Fecha Creación</th>
@@ -39,7 +51,7 @@
                     </tr>
                 </thead>
                 <tbody id="tablaCategorias">
-                    <tr><td colspan="6" class="loading-row">⏳ Cargando categorías...</td></tr>
+                    <tr><td colspan="5" class="loading-row">⏳ Cargando categorías...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -62,7 +74,7 @@
                     </tr>
                 </thead>
                 <tbody id="tablaSubcategorias">
-                    <tr><td colspan="6" class="loading-row">⏳ Cargando subcategorías...</td></tr>
+                    <tr><td colspan="6" class="loading-row">⏳ Cargando subcategorías...</td><\/tr>
                 </tbody>
             </table>
         </div>
@@ -86,167 +98,219 @@
                     </tr>
                 </thead>
                 <tbody id="tablaServicios">
-                    <tr><td colspan="7" class="loading-row">⏳ Cargando servicios...</td></tr>
+                    <tr><td colspan="7" class="loading-row">⏳ Cargando servicios...</td><\/tr>
                 </tbody>
             </table>
         </div>
     </main>
 
-    <!-- ===== MODAL PARA CATEGORÍAS ===== -->
+    <!-- ===== MODALES ===== -->
+    <!-- MODAL NUEVA CATEGORÍA -->
     <div class="modal" id="modalCategoria" style="display: none;">
         <div class="modal-content modal-admin-content">
             <span class="modal-close" id="closeModalCategoria">&times;</span>
             <div class="modal-header">
                 <div class="modal-logo">📋</div>
-                <h2 id="modalCategoriaTitle">Nueva Categoría</h2>
+                <h2>Nueva Categoría</h2>
                 <p>Completa los datos de la categoría</p>
             </div>
             <form id="formCategoria">
-                <input type="hidden" id="categoriaId">
-
                 <div class="form-group">
                     <label>Imagen <span class="field-optional">(opcional)</span></label>
-                    <div class="image-upload-area" id="categoriaImagenArea">
+                    <div class="image-upload-area">
                         <div class="image-preview" id="categoriaImagenPreview">
                             <span class="preview-placeholder">📷 Haz clic o arrastra una imagen</span>
                         </div>
-                        <input type="file" id="categoriaImagenFile" accept="image/jpeg,image/png,image/webp" class="file-input-hidden">
-                        <input type="hidden" id="categoriaImagenUrl">
+                        <input type="file" id="categoriaImagenFile" accept="image/jpeg,image/png,image/webp" style="display: none;">
                         <div class="image-upload-actions">
                             <button type="button" class="btn-select-image" onclick="document.getElementById('categoriaImagenFile').click()">📁 Seleccionar imagen</button>
-                            <button type="button" class="btn-remove-image" id="categoriaRemoveImg" style="display:none" onclick="removeImagePreview('categoria')">✕ Quitar</button>
+                            <button type="button" class="btn-remove-image" id="categoriaRemoveImg" style="display:none">✕ Quitar</button>
                         </div>
                         <div class="input-hint">Formatos: JPG, PNG, WEBP — Máx. 5 MB</div>
                     </div>
                 </div>
-
                 <div class="form-group">
                     <label>Nombre <span class="field-required">*</span></label>
                     <input type="text" id="categoriaNombre" placeholder="Ej: Lugar, Música, Banquetes">
                     <div class="error-message" id="categoriaNombreError"></div>
                 </div>
-
                 <div class="form-group">
                     <label>Descripción <span class="field-optional">(opcional)</span></label>
                     <textarea id="categoriaDescripcion" rows="3" placeholder="Descripción de la categoría..."></textarea>
                 </div>
-
                 <button type="submit" class="modal-btn">Guardar Categoría</button>
             </form>
         </div>
     </div>
 
-    <!-- ===== MODAL PARA SUBCATEGORÍAS ===== -->
+    <!-- MODAL EDITAR CATEGORÍA -->
+    <div class="modal" id="modalEditarCategoria" style="display: none;">
+        <div class="modal-content modal-admin-content">
+            <span class="modal-close" id="closeModalEditarCategoria">&times;</span>
+            <div class="modal-header">
+                <h2>Editar Categoría</h2>
+                <p>Modifica los datos de la categoría</p>
+            </div>
+            <form id="formEditarCategoria">
+                <input type="hidden" id="editCategoriaId">
+                <div class="form-group">
+                    <label>Imagen <span class="field-optional">(opcional)</span></label>
+                    <div class="image-upload-area">
+                        <div class="image-preview" id="editCategoriaImagenPreview">
+                            <span class="preview-placeholder">📷 Haz clic o arrastra una imagen</span>
+                        </div>
+                        <input type="file" id="editCategoriaImagenFile" accept="image/jpeg,image/png,image/webp" style="display: none;">
+                        <div class="image-upload-actions">
+                            <button type="button" class="btn-select-image" onclick="document.getElementById('editCategoriaImagenFile').click()">📁 Seleccionar imagen</button>
+                            <button type="button" class="btn-remove-image" id="editCategoriaRemoveImg" style="display:none">✕ Quitar</button>
+                        </div>
+                        <div class="input-hint">Formatos: JPG, PNG, WEBP — Máx. 5 MB</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Nombre <span class="field-required">*</span></label>
+                    <input type="text" id="editCategoriaNombre" placeholder="Ej: Lugar, Música, Banquetes">
+                </div>
+                <div class="form-group">
+                    <label>Descripción <span class="field-optional">(opcional)</span></label>
+                    <textarea id="editCategoriaDescripcion" rows="3" placeholder="Descripción de la categoría..."></textarea>
+                </div>
+                <button type="submit" class="modal-btn">💾 Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL NUEVA SUBCATEGORÍA -->
     <div class="modal" id="modalSubcategoria" style="display: none;">
         <div class="modal-content modal-admin-content">
             <span class="modal-close" id="closeModalSubcategoria">&times;</span>
             <div class="modal-header">
                 <div class="modal-logo">📑</div>
-                <h2 id="modalSubcategoriaTitle">Agregar Nueva Subcategoría</h2>
+                <h2>Nueva Subcategoría</h2>
                 <p>Vincula una subcategoría a una categoría existente</p>
             </div>
             <form id="formSubcategoria">
-                <input type="hidden" id="subcategoriaId">
-
                 <div class="form-group">
                     <label>Categoría padre <span class="field-required">*</span></label>
                     <select id="subcategoriaCategoriaId">
                         <option value="">Cargando categorías...</option>
                     </select>
-                    <div class="error-message" id="subcategoriaCategoriaError"></div>
                 </div>
-
                 <div class="form-group">
                     <label>Nombre <span class="field-required">*</span></label>
                     <input type="text" id="subcategoriaNombre" placeholder="Ej: Salones de fiesta, DJ profesional">
-                    <div class="error-message" id="subcategoriaNombreError"></div>
                 </div>
-
                 <div class="form-group">
                     <label>Descripción <span class="field-optional">(opcional)</span></label>
                     <textarea id="subcategoriaDescripcion" rows="3" placeholder="Descripción de la subcategoría..."></textarea>
                 </div>
-
                 <div class="form-group">
                     <label>Imagen <span class="field-optional">(opcional)</span></label>
-                    <div class="image-upload-area" id="subcategoriaImagenArea">
+                    <div class="image-upload-area">
                         <div class="image-preview" id="subcategoriaImagenPreview">
                             <span class="preview-placeholder">📷 Haz clic o arrastra una imagen</span>
                         </div>
-                        <input type="file" id="subcategoriaImagenFile" accept="image/jpeg,image/png,image/webp" class="file-input-hidden">
-                        <input type="hidden" id="subcategoriaImagenUrl">
+                        <input type="file" id="subcategoriaImagenFile" accept="image/jpeg,image/png,image/webp" style="display: none;">
                         <div class="image-upload-actions">
                             <button type="button" class="btn-select-image" onclick="document.getElementById('subcategoriaImagenFile').click()">📁 Seleccionar imagen</button>
-                            <button type="button" class="btn-remove-image" id="subcategoriaRemoveImg" style="display:none" onclick="removeImagePreview('subcategoria')">✕ Quitar</button>
+                            <button type="button" class="btn-remove-image" id="subcategoriaRemoveImg" style="display:none">✕ Quitar</button>
                         </div>
-                        <div class="input-hint">Formatos: JPG, PNG, WEBP — Máx. 5 MB</div>
                     </div>
                 </div>
-
                 <button type="submit" class="modal-btn">Guardar Subcategoría</button>
             </form>
         </div>
     </div>
 
-    <!-- ===== MODAL PARA SERVICIOS ===== -->
+    <!-- MODAL EDITAR SUBCATEGORÍA -->
+    <div class="modal" id="modalEditarSubcategoria" style="display: none;">
+        <div class="modal-content modal-admin-content">
+            <span class="modal-close" id="closeModalEditarSubcategoria">&times;</span>
+            <div class="modal-header">
+                <h2>Editar Subcategoría</h2>
+                <p>Modifica los datos de la subcategoría</p>
+            </div>
+            <form id="formEditarSubcategoria">
+                <input type="hidden" id="editSubcategoriaId">
+                <div class="form-group">
+                    <label>Categoría padre <span class="field-required">*</span></label>
+                    <select id="editSubcategoriaCategoriaId">
+                        <option value="">Cargando categorías...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Nombre <span class="field-required">*</span></label>
+                    <input type="text" id="editSubcategoriaNombre" placeholder="Ej: Salones de fiesta, DJ profesional">
+                </div>
+                <div class="form-group">
+                    <label>Descripción <span class="field-optional">(opcional)</span></label>
+                    <textarea id="editSubcategoriaDescripcion" rows="3" placeholder="Descripción de la subcategoría..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Imagen <span class="field-optional">(opcional)</span></label>
+                    <div class="image-upload-area">
+                        <div class="image-preview" id="editSubcategoriaImagenPreview">
+                            <span class="preview-placeholder">📷 Haz clic o arrastra una imagen</span>
+                        </div>
+                        <input type="file" id="editSubcategoriaImagenFile" accept="image/jpeg,image/png,image/webp" style="display: none;">
+                        <div class="image-upload-actions">
+                            <button type="button" class="btn-select-image" onclick="document.getElementById('editSubcategoriaImagenFile').click()">📁 Seleccionar imagen</button>
+                            <button type="button" class="btn-remove-image" id="editSubcategoriaRemoveImg" style="display:none">✕ Quitar</button>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="modal-btn">💾 Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL NUEVO SERVICIO -->
     <div class="modal" id="modalServicio" style="display: none;">
         <div class="modal-content modal-admin-content">
             <span class="modal-close" id="closeModalServicio">&times;</span>
             <div class="modal-header">
                 <div class="modal-logo">🎯</div>
-                <h2 id="modalServicioTitle">Agregar Nuevo Servicio</h2>
+                <h2>Nuevo Servicio</h2>
                 <p>Completa los datos del servicio</p>
             </div>
             <form id="formServicio">
-                <input type="hidden" id="servicioId">
                 <div class="form-group">
                     <label>Subcategoría <span class="field-required">*</span></label>
                     <select id="servicioSubcategoriaId">
                         <option value="">Cargando subcategorías...</option>
                     </select>
-                    <div class="error-message" id="servicioSubcategoriaError"></div>
                 </div>
-
                 <div class="form-group">
                     <label>Proveedor <span class="field-required">*</span></label>
                     <select id="servicioProveedorId">
                         <option value="">Cargando proveedores...</option>
                     </select>
-                    <div class="error-message" id="servicioProveedorError"></div>
                 </div>
-
                 <div class="form-group">
                     <label>Nombre del servicio <span class="field-required">*</span></label>
                     <input type="text" id="servicioNombre" placeholder="Ej: Salón Imperial, DJ Carlos...">
-                    <div class="error-message" id="servicioNombreError"></div>
                 </div>
-
                 <div class="form-group">
                     <label>Descripción <span class="field-optional">(opcional)</span></label>
                     <textarea id="servicioDescripcion" rows="3" placeholder="Describe el servicio..."></textarea>
                 </div>
-
                 <div class="form-group">
                     <label>Imagen <span class="field-optional">(opcional)</span></label>
-                    <div class="image-upload-area" id="servicioImagenArea">
+                    <div class="image-upload-area">
                         <div class="image-preview" id="servicioImagenPreview">
                             <span class="preview-placeholder">📷 Haz clic o arrastra una imagen</span>
                         </div>
-                        <input type="file" id="servicioImagenFile" accept="image/jpeg,image/png,image/webp" class="file-input-hidden">
-                        <input type="hidden" id="servicioImagenUrl">
+                        <input type="file" id="servicioImagenFile" accept="image/jpeg,image/png,image/webp" style="display: none;">
                         <div class="image-upload-actions">
                             <button type="button" class="btn-select-image" onclick="document.getElementById('servicioImagenFile').click()">📁 Seleccionar imagen</button>
-                            <button type="button" class="btn-remove-image" id="servicioRemoveImg" style="display:none" onclick="removeImagePreview('servicio')">✕ Quitar</button>
+                            <button type="button" class="btn-remove-image" id="servicioRemoveImg" style="display:none">✕ Quitar</button>
                         </div>
-                        <div class="input-hint">Formatos: JPG, PNG, WEBP — Máx. 5 MB</div>
                     </div>
                 </div>
-
                 <div class="form-row">
                     <div class="form-group">
                         <label>Precio base <span class="field-required">*</span></label>
                         <input type="number" id="servicioPrecioBase" placeholder="Ej: 5000" step="0.01">
-                        <div class="error-message" id="servicioPrecioError"></div>
                     </div>
                     <div class="form-group">
                         <label>Estado</label>
@@ -256,14 +320,73 @@
                         </select>
                     </div>
                 </div>
-
                 <button type="submit" class="modal-btn">Guardar Servicio</button>
             </form>
         </div>
     </div>
 
+    <!-- MODAL EDITAR SERVICIO -->
+    <div class="modal" id="modalEditarServicio" style="display: none;">
+        <div class="modal-content modal-admin-content">
+            <span class="modal-close" id="closeModalEditarServicio">&times;</span>
+            <div class="modal-header">
+                <h2>Editar Servicio</h2>
+                <p>Modifica los datos del servicio</p>
+            </div>
+            <form id="formEditarServicio">
+                <input type="hidden" id="editServicioId">
+                <div class="form-group">
+                    <label>Subcategoría <span class="field-required">*</span></label>
+                    <select id="editServicioSubcategoriaId">
+                        <option value="">Cargando subcategorías...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Proveedor <span class="field-required">*</span></label>
+                    <select id="editServicioProveedorId">
+                        <option value="">Cargando proveedores...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Nombre del servicio <span class="field-required">*</span></label>
+                    <input type="text" id="editServicioNombre" placeholder="Ej: Salón Imperial, DJ Carlos...">
+                </div>
+                <div class="form-group">
+                    <label>Descripción <span class="field-optional">(opcional)</span></label>
+                    <textarea id="editServicioDescripcion" rows="3" placeholder="Describe el servicio..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Imagen <span class="field-optional">(opcional)</span></label>
+                    <div class="image-upload-area">
+                        <div class="image-preview" id="editServicioImagenPreview">
+                            <span class="preview-placeholder">📷 Haz clic o arrastra una imagen</span>
+                        </div>
+                        <input type="file" id="editServicioImagenFile" accept="image/jpeg,image/png,image/webp" style="display: none;">
+                        <div class="image-upload-actions">
+                            <button type="button" class="btn-select-image" onclick="document.getElementById('editServicioImagenFile').click()">📁 Seleccionar imagen</button>
+                            <button type="button" class="btn-remove-image" id="editServicioRemoveImg" style="display:none">✕ Quitar</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Precio base <span class="field-required">*</span></label>
+                        <input type="number" id="editServicioPrecioBase" placeholder="Ej: 5000" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select id="editServicioEstado">
+                            <option value="1">✅ Activo</option>
+                            <option value="0">❌ Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="modal-btn">💾 Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+
     <script src="js/auth.js"></script>
-    <script src="js/admin-header.js"></script>
     <script src="js/admin.js"></script>
 </body>
 </html>

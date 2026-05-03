@@ -1,6 +1,18 @@
 // frontend/js/main.js
 //const API_URL = 'http://localhost:3000/api';
 
+// ===== VERIFICAR QUE CLIENTE NO SEA ADMIN =====
+function checkClienteAccess() {
+    const user = auth.getCurrentUser();
+    
+    // Si es admin, redirigir al panel
+    if (user && user.rol === 'admin') {
+        window.location.href = 'admin.html';
+        return false;
+    }
+    return true;
+}
+
 // Variables globales
 let categoriasCache = [];
 
@@ -22,7 +34,7 @@ function irASubcategorias(categoriaId, categoriaNombre) {
     window.location.href = `subcategorias.html?id=${categoriaId}&nombre=${encodeURIComponent(categoriaNombre)}`;
 }
 
-// ===== ACTUALIZAR CARDS DE INICIO CON BOTÓN AGREGAR =====
+// ===== ACTUALIZAR CARDS DE INICIO =====
 async function actualizarCardsInicio() {
     const cardsContainer = document.querySelector('.cards');
     if (!cardsContainer) return;
@@ -53,10 +65,6 @@ async function actualizarCardsInicio() {
             
             const iconoHtml = `<div class="card-icon" ${src ? 'style="display:none;"' : ''}>📁</div>`;
             
-            // Obtener un servicio de ejemplo para esta categoría (el primero disponible)
-            const servicioEjemplo = `Servicio de ${cat.nombre}`;
-            const precioEjemplo = 5000;
-            
             card.innerHTML = `
                 ${imagenHtml}
                 ${iconoHtml}
@@ -81,6 +89,12 @@ async function actualizarCardsInicio() {
 function actualizarBotonLogin() {
     const loginBtn = document.getElementById('loginBtn');
     const user = auth.getCurrentUser();
+    
+    // Si es admin, no debe estar aquí - redirigir
+    if (user && user.rol === 'admin') {
+        window.location.href = 'admin.html';
+        return;
+    }
     
     if (user && loginBtn) {
         loginBtn.innerHTML = `👤 ${user.nombre}`;
@@ -110,27 +124,10 @@ function mostrarMenuUsuario(user) {
         </div>
         <div class="user-menu-items">
             <a href="#" onclick="verPerfil()">👤 Mi Perfil</a>
-    `;
-    
-    if (user.rol === 'admin') {
-        menuContent += `
-            <a href="admin.html">👑 Panel Admin</a>
-            <a href="admin-clientes.html">👥 Clientes</a>
-            <a href="admin-proveedores.html">🏢 Proveedores</a>
-            <a href="admin-cotizaciones.html">📊 Cotizaciones</a>
-            <a href="admin-eventos.html">📅 Eventos</a>
-            <a href="admin-solicitudes.html">📋 Solicitudes de Registro</a>
-        `;
-    } else {
-        menuContent += `
             <a href="mis-cotizaciones.html">💰 Mis Cotizaciones</a>
             <a href="mis-eventos.html">📅 Mis Eventos</a>
             <a href="solicitar-registro-servicio.html" class="menu-solicitar">📋 Registrar mi servicio</a>
             <a href="mis-solicitudes-servicio.html" class="menu-solicitudes">📋 Mis solicitudes</a>
-        `;
-    }
-    
-    menuContent += `
             <hr>
             <a href="#" onclick="cerrarSesion()" style="color: #dc3545;">🚪 Cerrar Sesión</a>
         </div>
@@ -231,7 +228,7 @@ function initSmoothScroll() {
     });
 }
 
-// ===== FUNCIONES DEL CARRITO (ACTUALIZADO: muestra cantidad, no total) =====
+// ===== FUNCIONES DEL CARRITO =====
 async function actualizarBadge() {
     const badge = document.getElementById('cartBadge');
     if (!badge) return;
@@ -240,7 +237,6 @@ async function actualizarBadge() {
     
     if (token) {
         try {
-            // Cambiado de /carrito/total a /carrito/cantidad
             const response = await fetch(`${API_URL}/carrito/cantidad`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -270,7 +266,7 @@ async function actualizarBadge() {
     }
 }
 
-// ===== FUNCIÓN PARA AGREGAR AL CARRITO (CON BÚSQUEDA POR NOMBRE) =====
+// ===== FUNCIÓN PARA AGREGAR AL CARRITO =====
 async function agregarServicioCarrito(nombre, descripcion, precio, evento_id = null, evento_nombre = null) {
     console.log('🛒 Agregando:', nombre, 'Precio:', precio);
     
@@ -278,7 +274,6 @@ async function agregarServicioCarrito(nombre, descripcion, precio, evento_id = n
     
     if (token) {
         try {
-            // Buscar el servicio por nombre en la BD
             const serviciosResponse = await fetch(`${API_URL}/servicios/publicos`);
             const servicios = await serviciosResponse.json();
             const servicio = servicios.find(s => s.nombre === nombre);
@@ -445,8 +440,8 @@ function corregirModalLogin() {
         if (result.success) {
             mostrarToast('¡Bienvenido! 🎉', 'success');
             document.getElementById('authModal').style.display = 'none';
-            actualizarBotonLogin();
-            actualizarBadge();
+            // No llamamos a actualizarBotonLogin() porque la página se va a recargar/redirigir
+            // actualizarBadge();
         } else {
             mostrarToast(result.error || 'Error al iniciar sesión', 'error');
         }
@@ -540,7 +535,12 @@ window.addEventListener('focus', () => {
 
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('Main.js iniciado');
+    // PRIMERO: Verificar que el usuario no sea admin (redirige si es admin)
+    if (!checkClienteAccess()) {
+        return; // Si es admin, checkClienteAccess ya redirigió, salimos
+    }
+    
+    console.log('Main.js iniciado - Cliente');
 
     await actualizarCardsInicio();
     actualizarBadge();
