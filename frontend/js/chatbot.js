@@ -20,7 +20,7 @@
     },
     {
       palabras: ['comida', 'decoración', 'decoracion', 'lugar', 'contratar', 'paquete', 'combo',],
-      respuesta: '✅ ¡Claro que sí! Puedes contratar servicios de <b>Comida</b>, <b>Decoración</b> y <b>Lugar</b> de forma individual o combinada.\n\nSimplemente agrega al carrito los servicios que necesites y solicita una cotización. ¡Arma el evento perfecto a tu medida! 🎊'
+      respuesta: '¡Claro que sí! Puedes contratar servicios de <b>Comida</b>, <b>Decoración</b> y <b>Lugar</b> de forma individual o combinada.\n\nSimplemente agrega al carrito los servicios que necesites y solicita una cotización. ¡Arma el evento perfecto a tu medida! 🎊'
     },
     {
       palabras: ['seleccionados', 'mis servicios', 'ver servicios', 'dónde veo', 'donde veo', 'mis productos', 'mi carrito'],
@@ -32,7 +32,7 @@
     },
     {
       palabras: ['hola', 'hey', 'buenas', 'buenos días', 'buenos dias', 'buenas tardes', 'buenas noches', 'hi', 'hello', 'saludos'],
-      respuesta: '¡Hola! Bienvenido al asistente de <b>Fiestalandia</b>.\n\nEstoy aquí para ayudarte con información sobre nuestros servicios, el carrito de compras, contacto y más. ¿En qué puedo ayudarte? 😊'
+      respuesta: '¡Hola! Bienvenido al asistente de <b>Fiestalandia</b>.\n\nEstoy aquí para ayudarte con información sobre nuestros servicios, el carrito de compras, contacto y más. ¿En qué puedo ayudarte?'
     },
     {
       palabras: ['gracias', 'thank', 'muchas gracias', 'te agradezco', 'perfecto', 'genial', 'excelente'],
