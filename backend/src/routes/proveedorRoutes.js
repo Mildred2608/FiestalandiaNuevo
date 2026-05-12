@@ -1,21 +1,19 @@
-//backend/src/routes/provedorRoutes.js
+// backend/src/routes/proveedorRoutes.js
 const express = require('express');
 const router = express.Router();
 const { pool } = require('../config/database');
-const authMiddleware = require('../middleware/authMiddleware');
+const authMiddleware = require('../middlewares/authMiddleware');
 
-//VERFIFICAR QUE EL USUARIO SEA PROVEEDOR O ADMIN
+// VERIFICAR QUE EL USUARIO SEA PROVEEDOR O ADMIN
 const isProveedor = (req, res, next) => {
     if (req.user.rol !== 'proveedor' && req.user.rol !== 'admin') {
-        return res.status(403).json({ message: 'Acceso denegado. Solo proveedores o administradores.' 
-
-        });
+        return res.status(403).json({ message: 'Acceso denegado. Solo proveedores o administradores.' });
     }
     next();
 };
 
-//OBTENER LOS SERVICOS DEL PROVEEDOR
-router.get('mis-servicos', authMiddleware.verifyToken, isProveedor, async (req, res) => {
+// OBTENER LOS SERVICIOS DEL PROVEEDOR
+router.get('/mis-servicios', authMiddleware.verifyToken, isProveedor, async (req, res) => {
 
     try {
         const [proveedor] = await pool.query('SELECT * FROM proveedores WHERE id = ?', [req.user.id]);
@@ -24,20 +22,27 @@ router.get('mis-servicos', authMiddleware.verifyToken, isProveedor, async (req, 
         };
 
         const [rows] = await pool.query(
-        `SELECT s.*, sc.nombre as subcategoria, c.nombre as categoria FROM servicios s LEFT JOIN subcategorias sc ON s.subcategoria_id = sc.id LEFT JOIN categorias c ON sc.categoria_id = sc.id WHERE s.proveedor_id = ? ORDER BY s.id DESC `, [proveedor[0].id]);
+            `SELECT s.*, sc.nombre as subcategoria, c.nombre as categoria 
+             FROM servicios s 
+             LEFT JOIN subcategorias sc ON s.subcategoria_id = sc.id 
+             LEFT JOIN categorias c ON sc.categoria_id = c.id 
+             WHERE s.proveedor_id = ? 
+             ORDER BY s.id DESC`, 
+            [proveedor[0].id]
+        );
 
-            res.json(rows);
-        } catch (error) {
-            console.error('Error al obtner el servicio del proveedor:', error);
-            res.status(500).json({
-                success: false, message: 'Error al obtener servicos'
-      });
-    }      
+        res.json(rows);
+    } catch (error) {
+        console.error('Error al obtener los servicios del proveedor:', error);
+        res.status(500).json({
+            success: false, 
+            message: 'Error al obtener servicios'
+        });
+    }
 });
 
-
-//Obtner solicitudes de clientes paea servicios del proveedor
-router.get('/solicitudes', authMiddleware.veryfyToken, isProveedor, async (req, res) => {
+// Obtener solicitudes de clientes para servicios del proveedor
+router.get('/solicitudes', authMiddleware.verifyToken, isProveedor, async (req, res) => {
     try {
         //obtener el id del proveedor
         const [proveedor] = await pool.query(

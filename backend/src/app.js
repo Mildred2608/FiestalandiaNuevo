@@ -16,6 +16,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const solicitudesRoutes = require('./routes/solicitudesRoutes');
 const publicRoutes = require('./routes/publicRoutes');
 const carritoRoutes = require('./routes/carritoRoutes');
+const proveedorRoutes = require('./routes/proveedorRoutes');
 
 const app = express();
 
@@ -41,7 +42,10 @@ app.use('/api/auth', authRoutes);
 // 2. Rutas de administrador (protegidas)
 app.use('/api/admin', adminRoutes);
 
-// 3. Rutas de solicitudes (ESPECÍFICAS - VAN PRIMERO)
+// 3. Rutas de proveedores (protegidas)
+app.use('/api/proveedor', proveedorRoutes);
+
+// 4. Rutas de solicitudes (ESPECÍFICAS - VAN PRIMERO)
 app.use('/api', solicitudesRoutes);
 
 // 4. Rutas públicas (GENÉRICAS - VAN AL FINAL)
