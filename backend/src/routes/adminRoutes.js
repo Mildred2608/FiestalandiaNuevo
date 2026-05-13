@@ -76,10 +76,30 @@ router.get('/cotizaciones', authMiddleware.verifyToken, isAdmin, async (req, res
     }
 });
 
-// Obtener todos los eventos (usando vista_admin_eventos)
+// Obtener todos los eventos (admin)
 router.get('/eventos', authMiddleware.verifyToken, isAdmin, async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM vista_admin_eventos');
+        const { fecha } = req.query;
+        let query = `
+            SELECT 
+                e.id AS evento_id, e.nombre_evento, 
+                COALESCE(t.nombre, 'Sin tipo') AS tipo,
+                e.fecha, e.invitados, e.ubicacion, e.mensaje,
+                c.id AS cliente_id, c.nombre AS cliente_nombre, c.email AS cliente_email
+            FROM eventos e
+            LEFT JOIN clientes c ON e.cliente_id = c.id
+            LEFT JOIN tipos_evento t ON e.tipo_id = t.id
+        `;
+        const params = [];
+
+        if (fecha) {
+            query += ' WHERE DATE(e.fecha) = ?';
+            params.push(fecha);
+        }
+
+        query += ' ORDER BY e.id DESC';
+
+        const [rows] = await pool.query(query, params);
         res.json(rows);
     } catch (error) {
         console.error('Error al obtener eventos:', error);
@@ -87,6 +107,100 @@ router.get('/eventos', authMiddleware.verifyToken, isAdmin, async (req, res) => 
             success: false, 
             message: 'Error al obtener eventos' 
         });
+    }
+});
+
+// Obtener evento por ID (admin)
+router.get('/eventos/:id', authMiddleware.verifyToken, isAdmin, async (req, res) => {
+    try {
+        const [rows] = await pool.query(`
+            SELECT 
+                e.id AS evento_id, e.nombre_evento, 
+                COALESCE(t.nombre, 'Sin tipo') AS tipo,
+                e.tipo_id,
+                e.fecha, e.invitados, e.ubicacion, e.mensaje,
+                c.id AS cliente_id, c.nombre AS cliente_nombre, c.email AS cliente_email
+            FROM eventos e
+            LEFT JOIN clientes c ON e.cliente_id = c.id
+            LEFT JOIN tipos_evento t ON e.tipo_id = t.id
+            WHERE e.id = ?
+        `, [req.params.id]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Evento no encontrado' });
+        }
+
+        res.json(rows[0]);
+    } catch (error) {
+        console.error('Error al obtener evento:', error);
+        res.status(500).json({ success: false, message: 'Error al obtener evento' });
+    }
+});
+
+// Actualizar evento (admin)
+router.put('/eventos/:id', authMiddleware.verifyToken, isAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { nombre_evento, tipo_id, fecha, invitados, ubicacion, mensaje } = req.body;
+
+        if (!nombre_evento || !fecha) {
+            return res.status(400).json({ success: false, message: 'Nombre del evento y fecha son requeridos' });
+        }
+
+        const [result] = await pool.query(
+            `UPDATE eventos 
+             SET nombre_evento = ?, tipo_id = ?, fecha = ?, invitados = ?, ubicacion = ?, mensaje = ?
+             WHERE id = ?`,
+            [nombre_evento, tipo_id || null, fecha, invitados || 0, ubicacion || null, mensaje || null, id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Evento no encontrado' });
+        }
+
+        res.json({ success: true, message: 'Evento actualizado exitosamente' });
+    } catch (error) {
+        console.error('Error al actualizar evento:', error);
+        res.status(500).json({ success: false, message: 'Error al actualizar evento' });
+    }
+});
+
+// Eliminar evento (admin)
+router.delete('/eventos/:id', authMiddleware.verifyToken, isAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Verificar si hay cotizaciones asociadas
+        const [cotizaciones] = await pool.query(
+            'SELECT COUNT(*) as count FROM cotizaciones WHERE evento_id = ?',
+            [id]
+        );
+
+        if (cotizaciones[0].count > 0) {
+            // Eliminar cotizaciones asociadas primero
+            await pool.query('DELETE FROM cotizaciones WHERE evento_id = ?', [id]);
+        }
+
+        // Verificar si hay items de carrito asociados
+        const [carrito] = await pool.query(
+            'SELECT COUNT(*) as count FROM carrito WHERE evento_id = ?',
+            [id]
+        );
+
+        if (carrito[0].count > 0) {
+            await pool.query('DELETE FROM carrito WHERE evento_id = ?', [id]);
+        }
+
+        const [result] = await pool.query('DELETE FROM eventos WHERE id = ?', [id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Evento no encontrado' });
+        }
+
+        res.json({ success: true, message: 'Evento eliminado exitosamente' });
+    } catch (error) {
+        console.error('Error al eliminar evento:', error);
+        res.status(500).json({ success: false, message: 'Error al eliminar evento' });
     }
 });
 
@@ -1137,19 +1251,8 @@ router.get('/cotizaciones/:id', authMiddleware.verifyToken, isAdmin, async (req,
 // EVENTOS - CRUD
 // ============================================
 
-// Obtener todos los eventos (usando vista)
-router.get('/eventos', authMiddleware.verifyToken, isAdmin, async (req, res) => {
-    try {
-        const [rows] = await pool.query('SELECT * FROM vista_admin_eventos');
-        res.json(rows);
-    } catch (error) {
-        console.error('Error al obtener eventos:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error al obtener eventos' 
-        });
-    }
-});
+// NOTA: La ruta GET /eventos ya está definida arriba (línea ~80)
+// No duplicar para evitar conflictos de Express
 
 // Obtener un evento específico
 router.get('/eventos/:id', authMiddleware.verifyToken, isAdmin, async (req, res) => {

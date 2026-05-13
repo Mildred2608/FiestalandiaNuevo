@@ -56,8 +56,15 @@
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .panel-header {
@@ -223,8 +230,15 @@
 }
 
 @keyframes modalSlideIn {
-    from { opacity: 0; transform: translateY(24px) scale(0.97); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
+    from {
+        opacity: 0;
+        transform: translateY(24px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .modal-close {
@@ -339,8 +353,15 @@
 }
 
 @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-6px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* ===== IMAGE UPLOAD ===== */
@@ -492,10 +513,21 @@
     transform: translateX(0);
 }
 
-.admin-toast-success { border-left-color: #10b981; }
-.admin-toast-error { border-left-color: #ef4444; }
-.admin-toast-warning { border-left-color: #f59e0b; }
-.admin-toast-info { border-left-color: #7c3aed; }
+.admin-toast-success {
+    border-left-color: #10b981;
+}
+
+.admin-toast-error {
+    border-left-color: #ef4444;
+}
+
+.admin-toast-warning {
+    border-left-color: #f59e0b;
+}
+
+.admin-toast-info {
+    border-left-color: #7c3aed;
+}
 
 /* ===== SCROLLBAR ===== */
 .modal-content::-webkit-scrollbar {
@@ -518,7 +550,7 @@
         display: block;
         overflow-x: auto;
     }
-    
+
     .panel-header {
         flex-direction: column;
         gap: 15px;
@@ -529,11 +561,11 @@
     .modal-content {
         padding: 28px 20px;
     }
-    
+
     .form-row {
         grid-template-columns: 1fr;
     }
-    
+
     .admin-toast {
         left: 16px;
         right: 16px;
@@ -542,3 +574,202 @@
     }
 }
 
+/* ===== EVENTOS: MODALES Y FILTRO ===== */
+
+/* Filtro de fecha grupo */
+.eventos-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-limpiar-filtro {
+    padding: 6px 14px;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    background: white;
+    color: #6b7280;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.btn-limpiar-filtro:hover {
+    border-color: #dc2626;
+    color: #dc2626;
+    background: #fef2f2;
+}
+
+/* Detalle del evento (Ver) */
+.evento-detalle-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.detalle-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 14px;
+    background: #f9fafb;
+    border-radius: 12px;
+    border-left: 3px solid #e5e7eb;
+    transition: all 0.2s ease;
+}
+
+.detalle-row:hover {
+    background: #faf5ff;
+    border-left-color: #a855f7;
+}
+
+.detalle-label {
+    font-weight: 700;
+    color: #7c3aed;
+    font-size: 0.85rem;
+    min-width: 110px;
+    flex-shrink: 0;
+}
+
+.detalle-value {
+    color: #374151;
+    font-size: 0.92rem;
+    word-break: break-word;
+}
+
+/* Modal de confirmación (Eliminar) */
+.modal-content-small {
+    max-width: 420px;
+}
+
+.modal-confirm-body {
+    text-align: center;
+    padding: 10px 0 20px;
+}
+
+.modal-confirm-body p {
+    color: #374151;
+    font-size: 1rem;
+    margin-bottom: 10px;
+}
+
+.evento-nombre-confirmar {
+    font-weight: 700;
+    color: #7c3aed;
+    font-size: 1.1rem;
+    padding: 10px 16px;
+    background: #faf5ff;
+    border-radius: 10px;
+    border: 1px solid #ede9fe;
+    display: inline-block;
+}
+
+.modal-confirm-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    padding-top: 10px;
+}
+
+.btn-cancelar {
+    flex: 1;
+    padding: 12px 20px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    background: white;
+    color: #6b7280;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancelar:hover {
+    border-color: #9ca3af;
+    color: #374151;
+    background: #f9fafb;
+}
+
+.btn-eliminar {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: white;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-eliminar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(220, 38, 38, 0.35);
+}
+
+.btn-eliminar:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* View btn (verde/esmeralda para diferenciar del edit) */
+.view-btn {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.view-btn:hover {
+    background: #a7f3d0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(5, 150, 105, 0.2);
+}
+
+/* Date input styling */
+.date-input {
+    padding: 8px 12px;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    color: #374151;
+    background: white;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.date-input:focus {
+    outline: none;
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+}
+
+.date-input:hover {
+    border-color: #c084fc;
+}
+
+/* Status badge for events */
+.status-evento {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.status-evento.activo {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.status-evento.pendiente {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.status-evento.cancelado {
+    background: #fee2e2;
+    color: #dc2626;
+}

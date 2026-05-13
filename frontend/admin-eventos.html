@@ -16,7 +16,10 @@
         <div class="admin-panel active">
             <div class="panel-header">
                 <h2>Lista de Eventos</h2>
-                <input type="date" id="filtroFecha" class="date-input">
+                <div class="eventos-filter-group">
+                    <input type="date" id="filtroFecha" class="date-input">
+                    <button id="btnLimpiarFiltro" class="btn-limpiar-filtro" style="display:none;" title="Limpiar filtro">✕ Limpiar</button>
+                </div>
             </div>
 
             <table class="admin-table">
@@ -39,6 +42,90 @@
             </table>
         </div>
     </main>
+
+    <!-- ===== MODAL VER EVENTO ===== -->
+    <div class="modal" id="modalVerEvento">
+        <div class="modal-content">
+            <span class="modal-close" id="closeModalVer">&times;</span>
+            <div class="modal-header">
+                <h2>📋 Detalle del Evento</h2>
+                <p>Información completa del evento</p>
+            </div>
+            <div id="eventoDetalleContent" class="evento-detalle-grid">
+                <!-- Se llena dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL EDITAR EVENTO ===== -->
+    <div class="modal" id="modalEditarEvento">
+        <div class="modal-content">
+            <span class="modal-close" id="closeModalEditar">&times;</span>
+            <div class="modal-header">
+                <h2>✏️ Editar Evento</h2>
+                <p>Modifica los datos del evento</p>
+            </div>
+            <form id="formEditarEvento">
+                <input type="hidden" id="editEventoId">
+
+                <div class="form-group">
+                    <label>Nombre del evento <span class="field-required">*</span></label>
+                    <input type="text" id="editEventoNombre" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tipo de evento</label>
+                        <select id="editEventoTipo">
+                            <option value="">Cargando...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha <span class="field-required">*</span></label>
+                        <input type="date" id="editEventoFecha" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Número de invitados</label>
+                        <input type="number" id="editEventoInvitados" min="0" placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Ubicación</label>
+                        <input type="text" id="editEventoUbicacion" placeholder="Dirección o lugar">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Notas <span class="field-optional">(opcional)</span></label>
+                    <textarea id="editEventoNotas" rows="3" placeholder="Notas adicionales..."></textarea>
+                </div>
+
+                <button type="submit" class="modal-btn">💾 Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== MODAL CONFIRMAR ELIMINAR ===== -->
+    <div class="modal" id="modalEliminarEvento">
+        <div class="modal-content modal-content-small">
+            <span class="modal-close" id="closeModalEliminar">&times;</span>
+            <div class="modal-header">
+                <h2 style="color: #dc2626;">🗑️ Eliminar Evento</h2>
+                <p>Esta acción no se puede deshacer</p>
+            </div>
+            <div class="modal-confirm-body">
+                <p>¿Seguro que deseas eliminar este evento?</p>
+                <p class="evento-nombre-confirmar" id="eliminarEventoNombre"></p>
+            </div>
+            <input type="hidden" id="eliminarEventoId">
+            <div class="modal-confirm-actions">
+                <button class="btn-cancelar" id="btnCancelarEliminar">Cancelar</button>
+                <button class="btn-eliminar" id="btnConfirmarEliminar">🗑️ Eliminar</button>
+            </div>
+        </div>
+    </div>
 
     <script src="js/auth.js"></script>
     <script src="js/admin-header.js"></script>

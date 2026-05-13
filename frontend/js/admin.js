@@ -32,7 +32,7 @@ function initAdminMenu() {
 function mostrarMenuAdmin(user) {
     const existingMenu = document.getElementById('userMenu');
     if (existingMenu) existingMenu.remove();
-    
+
     const menuContent = `
         <div class="user-menu-header">
             <strong>${escapeHtml(user.nombre)}</strong>
@@ -49,19 +49,19 @@ function mostrarMenuAdmin(user) {
             <a href="#" onclick="adminLogout()" style="color: #dc3545;">🚪 Cerrar Sesión</a>
         </div>
     `;
-    
+
     const userMenu = document.createElement('div');
     userMenu.id = 'userMenu';
     userMenu.className = 'user-menu';
     userMenu.innerHTML = menuContent;
     document.body.appendChild(userMenu);
-    
+
     const loginBtn = document.getElementById('adminLoginBtn');
     const rect = loginBtn.getBoundingClientRect();
     userMenu.style.top = (rect.bottom + window.scrollY + 5) + 'px';
     userMenu.style.left = (rect.left + window.scrollX - 150) + 'px';
     userMenu.style.display = 'block';
-    
+
     setTimeout(() => {
         document.addEventListener('click', function cerrarMenu(e) {
             if (!userMenu.contains(e.target) && e.target !== loginBtn) {
@@ -476,9 +476,9 @@ async function cargarServicios() {
                 <td>
                     <button class="action-btn edit-btn" onclick="editarServicio(${s.id})">✏️ Editar<\/button>
                     ${s.activo
-                        ? `<button class="action-btn delete-btn" onclick="toggleServicio(${s.id}, 'desactivar')">🗑️ Desactivar<\/button>`
-                        : `<button class="action-btn edit-btn" onclick="toggleServicio(${s.id}, 'reactivar')">🔄 Reactivar<\/button>`
-                    }
+                ? `<button class="action-btn delete-btn" onclick="toggleServicio(${s.id}, 'desactivar')">🗑️ Desactivar<\/button>`
+                : `<button class="action-btn edit-btn" onclick="toggleServicio(${s.id}, 'reactivar')">🔄 Reactivar<\/button>`
+            }
                 </td>
             </tr>
         `).join('');
@@ -910,6 +910,25 @@ document.addEventListener('DOMContentLoaded', () => {
     initModalCategoria();
     initModalSubcategoria();
     initModalServicio();
+
+    // ===== CERRAR MODALES DE EDICIÓN (X y fondo) =====
+    // Editar Categoría
+    const closeEditCat = document.getElementById('closeModalEditarCategoria');
+    const modalEditCat = document.getElementById('modalEditarCategoria');
+    if (closeEditCat) closeEditCat.addEventListener('click', () => cerrarModalAdmin('modalEditarCategoria'));
+    if (modalEditCat) modalEditCat.addEventListener('click', (e) => { if (e.target === modalEditCat) cerrarModalAdmin('modalEditarCategoria'); });
+
+    // Editar Subcategoría
+    const closeEditSub = document.getElementById('closeModalEditarSubcategoria');
+    const modalEditSub = document.getElementById('modalEditarSubcategoria');
+    if (closeEditSub) closeEditSub.addEventListener('click', () => cerrarModalAdmin('modalEditarSubcategoria'));
+    if (modalEditSub) modalEditSub.addEventListener('click', (e) => { if (e.target === modalEditSub) cerrarModalAdmin('modalEditarSubcategoria'); });
+
+    // Editar Servicio
+    const closeEditServ = document.getElementById('closeModalEditarServicio');
+    const modalEditServ = document.getElementById('modalEditarServicio');
+    if (closeEditServ) closeEditServ.addEventListener('click', () => cerrarModalAdmin('modalEditarServicio'));
+    if (modalEditServ) modalEditServ.addEventListener('click', (e) => { if (e.target === modalEditServ) cerrarModalAdmin('modalEditarServicio'); });
 
     setupImagePreview('categoria');
     setupImagePreview('subcategoria');

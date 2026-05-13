@@ -1,386 +1,392 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fiestalandia | Organización de Eventos</title>
-  <meta name="description" content="Fiestalandia — Organiza tu evento ideal en un solo lugar. Servicios de decoración, banquetes, música y más.">
+  <meta name="description"
+    content="Fiestalandia — Organiza tu evento ideal en un solo lugar. Servicios de decoración, banquetes, música y más.">
   <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
 
-<!-- ===== HEADER ===== -->
-<header id="inicio">
-  <h1>🎉 Fiestalandia</h1>
-  <p>Organiza tu evento ideal en un solo lugar</p>
-</header>
+  <!-- ===== HEADER ===== -->
+  <header id="inicio">
+    <h1>🎉 Fiestalandia</h1>
+    <p>Organiza tu evento ideal en un solo lugar</p>
+  </header>
 
-<!-- ===== NAVEGACIÓN ===== -->
-<nav>
-  <div class="nav-container">
-    <div class="logo">Fiestalandia</div>
+  <!-- ===== NAVEGACIÓN ===== -->
+  <nav>
+    <div class="nav-container">
+      <div class="logo">Fiestalandia</div>
 
-    <div class="hamburger" id="hamburger" onclick="toggleMenu()">
-      <span></span>
-      <span></span>
-      <span></span>
+      <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+
+      <div class="menu" id="navMenu">
+        <a href="#inicio">Inicio</a>
+        <a href="#servicios">Servicios</a>
+        <a href="#contacto">Contacto</a>
+        <a href="carrito.html" class="cart-link">
+          🛒 Carrito <span class="cart-badge" id="cartBadge">0</span>
+        </a>
+        <a href="#" class="btn-login" id="loginBtn">🔐 Login</a>
+      </div>
     </div>
+  </nav>
 
-    <div class="menu" id="navMenu">
-      <a href="#inicio">Inicio</a>
-      <a href="#servicios">Servicios</a>
-      <a href="#contacto">Contacto</a>
-      <a href="carrito.html" class="cart-link">
-        🛒 Carrito <span class="cart-badge" id="cartBadge">0</span>
-      </a>
-      <a href="#" class="btn-login" id="loginBtn">🔐 Login</a>
-    </div>
-  </div>
-</nav>
+  <!-- ===== CONTENIDO PRINCIPAL ===== -->
+  <main class="container">
 
-<!-- ===== CONTENIDO PRINCIPAL ===== -->
-<main class="container">
+    <!-- ===== SERVICIOS ===== -->
+    <section id="servicios" class="fade-in">
+      <div class="section-title">
+        <h2>Servicios principales</h2>
+        <p>Selecciona una categoría para ver sus opciones y arma tu evento ideal.</p>
+      </div>
 
-  <!-- ===== SERVICIOS ===== -->
-  <section id="servicios" class="fade-in">
-    <div class="section-title">
-      <h2>Servicios principales</h2>
-      <p>Selecciona una categoría para ver sus opciones y arma tu evento ideal.</p>
-    </div>
+      <div class="cards">
+        <!-- Las cards se cargarán dinámicamente desde la base de datos -->
+      </div>
+    </section>
 
-    <div class="cards">
-      <!-- Las cards se cargarán dinámicamente desde la base de datos -->
-    </div>
-  </section>
+    <!-- ===== DETALLE DE SERVICIOS ===== -->
+    <section id="detalle" class="details-section">
+      <h3 id="titulo-detalle">Detalle del servicio</h3>
+      <div id="contenido-detalle" class="subcards"></div>
+    </section>
 
-  <!-- ===== DETALLE DE SERVICIOS ===== -->
-  <section id="detalle" class="details-section">
-    <h3 id="titulo-detalle">Detalle del servicio</h3>
-    <div id="contenido-detalle" class="subcards"></div>
-  </section>
+    <!-- ===== CONTACTO ===== -->
+    <section id="contacto" class="contact-section fade-in">
+      <div class="section-title">
+        <h2>Solicita tu evento</h2>
+        <p>Contáctanos y haz realidad la fiesta de tus sueños. ¡Te asesoramos sin compromiso!</p>
+      </div>
 
-  <!-- ===== CONTACTO ===== -->
-  <section id="contacto" class="contact-section fade-in">
-    <div class="section-title">
-      <h2>Solicita tu evento</h2>
-      <p>Contáctanos y haz realidad la fiesta de tus sueños. ¡Te asesoramos sin compromiso!</p>
-    </div>
+      <div class="contact-grid">
+        <!-- Formulario de contacto -->
+        <div class="contact-form-card">
+          <h3>Envíanos un mensaje</h3>
+          <p class="form-subtitle">Completa el formulario y te responderemos en menos de 24 horas.</p>
 
-    <div class="contact-grid">
-      <!-- Formulario de contacto -->
-      <div class="contact-form-card">
-        <h3>Envíanos un mensaje</h3>
-        <p class="form-subtitle">Completa el formulario y te responderemos en menos de 24 horas.</p>
-
-        <form id="contactForm" onsubmit="enviarFormulario(event)">
-          <div class="form-group">
-            <label for="nombre">Nombre completo</label>
-            <input type="text" id="nombre" name="nombre" placeholder="Ej: María García" required>
-          </div>
-
-          <div class="form-row">
+          <form id="contactForm" onsubmit="enviarFormulario(event)">
             <div class="form-group">
-              <label for="email">Correo electrónico</label>
-              <input type="email" id="email" name="email" placeholder="correo@ejemplo.com" required>
+              <label for="nombre">Nombre completo</label>
+              <input type="text" id="nombre" name="nombre" placeholder="Ej: María García" required>
             </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="email">Correo electrónico</label>
+                <input type="email" id="email" name="email" placeholder="correo@ejemplo.com" required>
+              </div>
+              <div class="form-group">
+                <label for="telefono">Teléfono</label>
+                <input type="tel" id="telefono" name="telefono" placeholder="(123) 456-7890" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="tipoEvento">Tipo de evento</label>
+                <select id="tipoEvento" name="tipoEvento" required>
+                  <option value="">Selecciona uno...</option>
+                  <option value="boda">Boda</option>
+                  <option value="xv">XV Años</option>
+                  <option value="cumpleanos">Cumpleaños</option>
+                  <option value="bautizo">Bautizo</option>
+                  <option value="corporativo">Evento Corporativo</option>
+                  <option value="graduacion">Graduación</option>
+                  <option value="otro">Otro</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="fechaEvento">Fecha del evento</label>
+                <input type="date" id="fechaEvento" name="fechaEvento" required>
+              </div>
+            </div>
+
             <div class="form-group">
-              <label for="telefono">Teléfono</label>
-              <input type="tel" id="telefono" name="telefono" placeholder="(123) 456-7890" required>
+              <label for="mensaje">Mensaje</label>
+              <textarea id="mensaje" name="mensaje" placeholder="Cuéntanos sobre tu evento ideal..."
+                rows="4"></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit">📩 Enviar solicitud</button>
+          </form>
+        </div>
+
+        <!-- Información de contacto -->
+        <div class="contact-info-card">
+          <div class="info-box">
+            <h4> Información de contacto</h4>
+            <div class="info-item">
+              <div class="info-icon">📞</div>
+              <div class="info-text">
+                <p><strong>Teléfono</strong></p>
+                <p>(123) 456-7890</p>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-icon">📧</div>
+              <div class="info-text">
+                <p><strong>Correo electrónico</strong></p>
+                <p>contacto@fiestalandia.com</p>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-icon">📍</div>
+              <div class="info-text">
+                <p><strong>Dirección</strong></p>
+                <p>Av. Celebración #100, Col. Fiesta, CP 01234</p>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-icon">🕐</div>
+              <div class="info-text">
+                <p><strong>Horario</strong></p>
+                <p>Lunes a Sábado, 9:00 - 19:00</p>
+              </div>
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="tipoEvento">Tipo de evento</label>
-              <select id="tipoEvento" name="tipoEvento" required>
-                <option value="">Selecciona uno...</option>
-                <option value="boda">Boda</option>
-                <option value="xv">XV Años</option>
-                <option value="cumpleanos">Cumpleaños</option>
-                <option value="bautizo">Bautizo</option>
-                <option value="corporativo">Evento Corporativo</option>
-                <option value="graduacion">Graduación</option>
-                <option value="otro">Otro</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="fechaEvento">Fecha del evento</label>
-              <input type="date" id="fechaEvento" name="fechaEvento" required>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="mensaje">Mensaje</label>
-            <textarea id="mensaje" name="mensaje" placeholder="Cuéntanos sobre tu evento ideal..." rows="4"></textarea>
-          </div>
-
-          <button type="submit" class="btn-submit">📩 Enviar solicitud</button>
-        </form>
-      </div> 
-
-      <!-- Información de contacto -->
-      <div class="contact-info-card">
-        <div class="info-box">
-          <h4> Información de contacto</h4>
-          <div class="info-item">
-            <div class="info-icon">📞</div>
-            <div class="info-text">
-              <p><strong>Teléfono</strong></p>
-              <p>(123) 456-7890</p>
-            </div>
-          </div>
-          <div class="info-item">
-            <div class="info-icon">📧</div>
-            <div class="info-text">
-              <p><strong>Correo electrónico</strong></p>
-              <p>contacto@fiestalandia.com</p>
-            </div>
-          </div>
-          <div class="info-item">
-            <div class="info-icon">📍</div>
-            <div class="info-text">
-              <p><strong>Dirección</strong></p>
-              <p>Av. Celebración #100, Col. Fiesta, CP 01234</p>
-            </div>
-          </div>
-          <div class="info-item">
-            <div class="info-icon">🕐</div>
-            <div class="info-text">
-              <p><strong>Horario</strong></p>
-              <p>Lunes a Sábado, 9:00 - 19:00</p>
+          <div class="info-box">
+            <h4>🌐 Síguenos en redes</h4>
+            <div class="social-links">
+              <a href="#" class="social-link" title="Facebook">📘</a>
+              <a href="#" class="social-link" title="Instagram">📷</a>
+              <a href="#" class="social-link" title="TikTok">🎵</a>
+              <a href="#" class="social-link" title="WhatsApp">💬</a>
             </div>
           </div>
         </div>
+      </div>
+    </section>
+  </main>
 
-        <div class="info-box">
-          <h4>🌐 Síguenos en redes</h4>
-          <div class="social-links">
-            <a href="#" class="social-link" title="Facebook">📘</a>
-            <a href="#" class="social-link" title="Instagram">📷</a>
-            <a href="#" class="social-link" title="TikTok">🎵</a>
-            <a href="#" class="social-link" title="WhatsApp">💬</a>
-          </div>
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3>🎉 Fiestalandia</h3>
+        <p>Organizamos momentos inolvidables. Desde bodas y XV años hasta eventos corporativos, somos tu mejor opción
+          para celebrar.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Enlaces rápidos</h4>
+        <ul>
+          <li><a href="#inicio">Inicio</a></li>
+          <li><a href="#servicios">Servicios</a></li>
+          <li><a href="decoracion.html">Decoración</a></li>
+          <li><a href="#contacto">Contacto</a></li>
+          <li><a href="carrito.html">Mi carrito</a></li>
+        </ul>
+      </div>
+      <div class="footer-social">
+        <h4>Redes sociales</h4>
+        <div class="footer-social-icons">
+          <a href="#" class="footer-social-icon" title="Facebook">📘</a>
+          <a href="#" class="footer-social-icon" title="Instagram">📷</a>
+          <a href="#" class="footer-social-icon" title="TikTok">🎵</a>
+          <a href="#" class="footer-social-icon" title="WhatsApp">💬</a>
         </div>
       </div>
     </div>
-  </section>
-</main>
+    <div class="footer-bottom">
+      <p>© 2026 Fiestalandia — Todos los derechos reservados</p>
+    </div>
+  </footer>
 
-<!-- ===== FOOTER ===== -->
-<footer>
-  <div class="footer-content">
-    <div class="footer-brand">
-      <h3>🎉 Fiestalandia</h3>
-      <p>Organizamos momentos inolvidables. Desde bodas y XV años hasta eventos corporativos, somos tu mejor opción para celebrar.</p>
-    </div>
-    <div class="footer-links">
-      <h4>Enlaces rápidos</h4>
-      <ul>
-        <li><a href="#inicio">Inicio</a></li>
-        <li><a href="#servicios">Servicios</a></li>
-        <li><a href="decoracion.html">Decoración</a></li>
-        <li><a href="#contacto">Contacto</a></li>
-        <li><a href="carrito.html">Mi carrito</a></li>
-      </ul>
-    </div>
-    <div class="footer-social">
-      <h4>Redes sociales</h4>
-      <div class="footer-social-icons">
-        <a href="#" class="footer-social-icon" title="Facebook">📘</a>
-        <a href="#" class="footer-social-icon" title="Instagram">📷</a>
-        <a href="#" class="footer-social-icon" title="TikTok">🎵</a>
-        <a href="#" class="footer-social-icon" title="WhatsApp">💬</a>
+  <!-- ===== MODAL DE LOGIN/REGISTRO ===== -->
+  <div class="modal" id="authModal" style="display: none;">
+    <div class="modal-content modal-auth">
+      <span class="modal-close" id="closeAuthModal">&times;</span>
+
+      <div class="modal-header">
+        <div class="modal-logo"></div>
+        <h2>¡Bienvenido!</h2>
+        <p>Inicia sesión para continuar</p>
       </div>
+
+      <!-- FORMULARIO DE LOGIN -->
+      <form id="formLogin" class="auth-form active">
+        <div class="form-group">
+          <label></i> Correo electrónico</label>
+          <input type="email" id="loginEmail" placeholder="tu@email.com" required>
+          <div class="error-message" id="loginEmailError"></div>
+        </div>
+
+        <div class="form-group">
+          <label></i> Contraseña</label>
+          <input type="password" id="loginPassword" placeholder="••••••••" required>
+          <div class="error-message" id="loginPasswordError"></div>
+        </div>
+
+        <button type="submit" class="modal-btn" id="btnLogin">
+          <span>Iniciar Sesión</span>
+        </button>
+
+        <div class="auth-switch">
+          ¿No tienes cuenta?
+          <a href="#" id="switchToRegister">Regístrate aquí</a>
+        </div>
+      </form>
+
+      <!-- FORMULARIO DE REGISTRO -->
+      <form id="formRegister" class="auth-form">
+        <div class="form-group">
+          <label></i> Nombre completo</label>
+          <input type="text" id="regName" placeholder="Juan Pérez García" required>
+          <div class="error-message" id="regNameError"></div>
+        </div>
+
+        <div class="form-group">
+          <label></i> Correo electrónico</label>
+          <input type="email" id="regEmail" placeholder="tu@email.com" required>
+          <div class="error-message" id="regEmailError"></div>
+        </div>
+
+        <div class="form-group">
+          <label></i> Teléfono</label>
+          <input type="tel" id="regTelefono" placeholder="55-1234-5678" required>
+          <div class="input-hint">10 dígitos, formato: 55-1234-5678</div>
+          <div class="error-message" id="regTelefonoError"></div>
+        </div>
+
+        <div class="form-group">
+          <label></i> Contraseña</label>
+          <input type="password" id="regPassword" placeholder="••••••••" required>
+          <div class="password-strength">
+            <div class="strength-bar">
+              <div class="strength-segment"></div>
+              <div class="strength-segment"></div>
+              <div class="strength-segment"></div>
+              <div class="strength-segment"></div>
+            </div>
+            <div class="strength-text">Mínimo 8 caracteres, 1 mayúscula, 1 número</div>
+          </div>
+          <div class="error-message" id="regPasswordError"></div>
+        </div>
+
+        <div class="form-group">
+          <label><i>✓</i> Confirmar contraseña</label>
+          <input type="password" id="regConfirmPassword" placeholder="••••••••" required>
+          <div class="error-message" id="regConfirmError"></div>
+        </div>
+
+        <button type="submit" class="modal-btn" id="btnRegister">
+          <span>Crear Cuenta</span>
+        </button>
+
+        <div class="auth-switch">
+          ¿Ya tienes cuenta?
+          <a href="#" id="switchToLogin">Inicia sesión</a>
+        </div>
+      </form>
     </div>
   </div>
-  <div class="footer-bottom">
-    <p>© 2026 Fiestalandia — Todos los derechos reservados</p>
-  </div>
-</footer>
 
-<!-- ===== MODAL DE LOGIN/REGISTRO ===== -->
-<div class="modal" id="authModal" style="display: none;">
-  <div class="modal-content modal-auth">
-    <span class="modal-close" id="closeAuthModal">&times;</span>
-    
-    <div class="modal-header">
-      <div class="modal-logo"></div>
-      <h2>¡Bienvenido!</h2>
-      <p>Inicia sesión para continuar</p>
-    </div>
 
-    <!-- FORMULARIO DE LOGIN -->
-    <form id="formLogin" class="auth-form active">
-      <div class="form-group">
-        <label></i> Correo electrónico</label>
-        <input type="email" id="loginEmail" placeholder="tu@email.com" required>
-        <div class="error-message" id="loginEmailError"></div>
+  <!-- ===== MODAL DE PERFIL ===== -->
+  <div class="modal" id="perfilModal" style="display: none;">
+    <div class="modal-content modal-perfil">
+
+      <span class="modal-close" id="closePerfilModal">&times;</span>
+
+      <div class="modal-header">
+        <div class="modal-logo">👤</div>
+        <h2>Mi Perfil</h2>
+        <p>Tus datos de cuenta</p>
       </div>
 
-      <div class="form-group">
-        <label></i> Contraseña</label>
-        <input type="password" id="loginPassword" placeholder="••••••••" required>
-        <div class="error-message" id="loginPasswordError"></div>
+      <div class="perfil-info" id="perfilInfo">
+        <p>Consulta y administra tu información personal.</p>
       </div>
 
-      <button type="submit" class="modal-btn" id="btnLogin">
-        <span>Iniciar Sesión</span>
+      <!-- BOTÓN QUE MANDA AL PERFIL -->
+      <button class="modal-btn" onclick="irAPerfil()">
+        Ver perfil completo
       </button>
 
-      <div class="auth-switch">
-        ¿No tienes cuenta? 
-        <a href="#" id="switchToRegister">Regístrate aquí</a>
-      </div>
-    </form>
-
-    <!-- FORMULARIO DE REGISTRO -->
-    <form id="formRegister" class="auth-form">
-      <div class="form-group">
-        <label></i> Nombre completo</label>
-        <input type="text" id="regName" placeholder="Juan Pérez García" required>
-        <div class="error-message" id="regNameError"></div>
-      </div>
-
-      <div class="form-group">
-        <label></i> Correo electrónico</label>
-        <input type="email" id="regEmail" placeholder="tu@email.com" required>
-        <div class="error-message" id="regEmailError"></div>
-      </div>
-
-      <div class="form-group">
-        <label></i> Teléfono</label>
-        <input type="tel" id="regTelefono" placeholder="55-1234-5678" required>
-        <div class="input-hint">10 dígitos, formato: 55-1234-5678</div>
-        <div class="error-message" id="regTelefonoError"></div>
-      </div>
-
-      <div class="form-group">
-        <label></i> Contraseña</label>
-        <input type="password" id="regPassword" placeholder="••••••••" required>
-        <div class="password-strength">
-          <div class="strength-bar">
-            <div class="strength-segment"></div>
-            <div class="strength-segment"></div>
-            <div class="strength-segment"></div>
-            <div class="strength-segment"></div>
-          </div>
-          <div class="strength-text">Mínimo 8 caracteres, 1 mayúscula, 1 número</div>
-        </div>
-        <div class="error-message" id="regPasswordError"></div>
-      </div>
-
-      <div class="form-group">
-        <label><i>✓</i> Confirmar contraseña</label>
-        <input type="password" id="regConfirmPassword" placeholder="••••••••" required>
-        <div class="error-message" id="regConfirmError"></div>
-      </div>
-
-      <button type="submit" class="modal-btn" id="btnRegister">
-        <span>Crear Cuenta</span>
+      <button class="modal-btn" id="btnCerrarPerfil">
+        Cerrar
       </button>
 
-      <div class="auth-switch">
-        ¿Ya tienes cuenta? 
-        <a href="#" id="switchToLogin">Inicia sesión</a>
-      </div>
-    </form>
-  </div>
-</div>
-
-
-<!-- ===== MODAL DE PERFIL ===== -->
-<div class="modal" id="perfilModal" style="display: none;">
-  <div class="modal-content modal-perfil">
-    
-    <span class="modal-close" id="closePerfilModal">&times;</span>
-    
-    <div class="modal-header">
-      <div class="modal-logo">👤</div>
-      <h2>Mi Perfil</h2>
-      <p>Tus datos de cuenta</p>
     </div>
-
-    <div class="perfil-info" id="perfilInfo">
-      <p>Consulta y administra tu información personal.</p>
-    </div>
-
-    <!-- 🔥 BOTÓN QUE MANDA AL PERFIL -->
-    <button class="modal-btn" onclick="irAPerfil()">
-      Ver perfil completo
-    </button>
-
-    <button class="modal-btn" id="btnCerrarPerfil">
-      Cerrar
-    </button>
-
   </div>
-</div>
 
-<!-- ===== BOTÓN FLOTANTE PARA ADMIN (solo visible para administradores) ===== -->
-<div class="admin-float-btn" id="adminFloatBtn" style="display: none;" onclick="abrirModalServicio()">
+  <!-- ===== BOTÓN FLOTANTE PARA ADMIN (solo visible para administradores) ===== -->
+  <div class="admin-float-btn" id="adminFloatBtn" style="display: none;" onclick="abrirModalServicio()">
     <span class="float-icon">+</span>
     <span class="float-text">Agregar Servicio</span>
-</div>
+  </div>
 
-<!-- ===== MODAL PARA AGREGAR SERVICIOS ===== -->
-<div class="modal" id="modalServicio" style="display: none;">
+  <!-- ===== MODAL PARA AGREGAR SERVICIOS ===== -->
+  <div class="modal" id="modalServicio" style="display: none;">
     <div class="modal-content" style="max-width: 500px;">
-        <span class="modal-close" id="closeModalServicio">&times;</span>
-        
-        <div class="modal-header">
-            <div class="modal-logo"></div>
-            <h2>Agregar Nuevo Servicio</h2>
-            <p>Completa los datos del servicio</p>
+      <span class="modal-close" id="closeModalServicio">&times;</span>
+
+      <div class="modal-header">
+        <div class="modal-logo"></div>
+        <h2>Agregar Nuevo Servicio</h2>
+        <p>Completa los datos del servicio</p>
+      </div>
+
+      <form id="formServicio">
+        <div class="form-group">
+          <label></i> Categoría</label>
+          <select id="servicioCategoria" required>
+            <option value="">Seleccionar categoría...</option>
+          </select>
         </div>
 
-        <form id="formServicio">
-            <div class="form-group">
-                <label></i> Categoría</label>
-                <select id="servicioCategoria" required>
-                    <option value="">Seleccionar categoría...</option>
-                </select>
-            </div>
+        <div class="form-group">
+          <label></i> Subcategoría</label>
+          <select id="servicioSubcategoria" required>
+            <option value="">Primero selecciona una categoría</option>
+          </select>
+        </div>
 
-            <div class="form-group">
-                <label></i> Subcategoría</label>
-                <select id="servicioSubcategoria" required>
-                    <option value="">Primero selecciona una categoría</option>
-                </select>
-            </div>
+        <div class="form-group">
+          <label></i> Nombre del Servicio</label>
+          <input type="text" id="servicioNombre" placeholder="Ej: Salón Imperial, DJ Carlos, etc." required>
+        </div>
 
-            <div class="form-group">
-                <label></i> Nombre del Servicio</label>
-                <input type="text" id="servicioNombre" placeholder="Ej: Salón Imperial, DJ Carlos, etc." required>
-            </div>
+        <div class="form-group">
+          <label></i> Descripción</label>
+          <textarea id="servicioDescripcion" rows="3" placeholder="Describe el servicio..." required></textarea>
+        </div>
 
-            <div class="form-group">
-                <label></i> Descripción</label>
-                <textarea id="servicioDescripcion" rows="3" placeholder="Describe el servicio..." required></textarea>
-            </div>
+        <div class="form-group">
+          <label></i> Precio Base</label>
+          <input type="number" id="servicioPrecio" placeholder="Ej: 5000" min="0" step="100" required>
+        </div>
 
-            <div class="form-group">
-                <label></i> Precio Base</label>
-                <input type="number" id="servicioPrecio" placeholder="Ej: 5000" min="0" step="100" required>
-            </div>
+        <div class="form-group">
+          <label></i> Proveedor</label>
+          <select id="servicioProveedor" required>
+            <option value="">Seleccionar proveedor...</option>
+          </select>
+        </div>
 
-            <div class="form-group">
-                <label></i> Proveedor</label>
-                <select id="servicioProveedor" required>
-                    <option value="">Seleccionar proveedor...</option>
-                </select>
-            </div>
-
-            <button type="submit" class="modal-btn" id="btnGuardarServicio">
-                <span>Guardar Servicio</span>
-            </button>
-        </form>
+        <button type="submit" class="modal-btn" id="btnGuardarServicio">
+          <span>Guardar Servicio</span>
+        </button>
+      </form>
     </div>
-</div>
+  </div>
 
-<!-- ===== SCRIPTS ===== -->
-<script src="js/auth.js"></script>
-<script src="js/main.js"></script>
-<script src="js/chatbot.js"></script>
+  <!-- ===== SCRIPTS ===== -->
+  <script src="js/auth.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/chatbot.js"></script>
 
 </body>
+
 </html>
