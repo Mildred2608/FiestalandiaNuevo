@@ -280,8 +280,7 @@ function actualizarBotonLogin() {
         loginBtn.classList.remove('logged-in');
         loginBtn.onclick = (e) => {
             e.preventDefault();
-            const authModal = document.getElementById('authModal');
-            if (authModal) authModal.style.display = 'flex';
+            document.getElementById('authModal').style.display = 'flex';
         };
     }
 }
@@ -292,15 +291,21 @@ function mostrarMenuUsuario(user) {
     
     let menuContent = `
         <div class="user-menu-header">
-            <strong>${escapeHtml(user.nombre)}</strong>
-            <small>${escapeHtml(user.email)}</small>
+            <strong>${user.nombre}</strong>
+            <small>${user.email}</small>
         </div>
         <div class="user-menu-items">
-            <a href="#" onclick="verPerfil()">👤 Mi Perfil</a>
+            <a href="perfil.html">👤 Mi Perfil</a>
+            <a href="mis-eventos.html">📅 Mis Eventos</a>
+            <a href="mis-cotizaciones.html">💰 Mis Cotizaciones</a>
+            <a href="solicitar-registro-servicio.html" class="menu-solicitar">📋 Registrar mi servicio</a>
+            <a href="mis-solicitudes-servicio.html" class="menu-solicitudes">📋 Mis solicitudes</a>
     `;
     
     if (user.rol === 'admin') {
-        menuContent += `<a href="admin.html">👑 Panel Admin</a>`;
+        menuContent += `
+            <a href="admin.html">👑 Panel Admin</a>
+        `;
     }
     
     menuContent += `
@@ -317,25 +322,15 @@ function mostrarMenuUsuario(user) {
     
     const loginBtn = document.getElementById('loginBtn');
     const rect = loginBtn.getBoundingClientRect();
-    userMenu.style.top = `${rect.bottom + window.scrollY + 5}px`;
-    userMenu.style.left = `${rect.left + window.scrollX - 100}px`;
+    userMenu.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+    userMenu.style.left = (rect.left + window.scrollX - 100) + 'px';
     userMenu.style.display = 'block';
-    
-    setTimeout(() => {
-        document.addEventListener('click', function cerrarMenu(e) {
-            if (!userMenu.contains(e.target) && e.target !== loginBtn) {
-                userMenu.style.display = 'none';
-                document.removeEventListener('click', cerrarMenu);
-            }
-        });
-    }, 100);
 }
 
 function verPerfil() {
     const user = auth.getCurrentUser();
     alert(`👤 ${user.nombre}\n📧 ${user.email}\n📱 ${user.telefono || 'No especificado'}`);
-    const userMenu = document.getElementById('userMenu');
-    if (userMenu) userMenu.style.display = 'none';
+    document.getElementById('userMenu').style.display = 'none';
 }
 
 function cerrarSesion() {
@@ -346,8 +341,8 @@ function cerrarSesion() {
 function toggleMenu() {
     const menu = document.getElementById('navMenu');
     const hamburger = document.getElementById('hamburger');
-    if (menu) menu.classList.toggle('active');
-    if (hamburger) hamburger.classList.toggle('active');
+    menu.classList.toggle('active');
+    hamburger.classList.toggle('active');
 }
 
 // ===== INICIALIZACIÓN =====
