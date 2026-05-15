@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Proveedor | Fiestalandia</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <!-- ===== NAVEGACIÓN ===== -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">Fiestalandia Proveedor</div>
+            <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="menu" id="navMenu">
+                <a href="index.html" target="_blank"> Ver tienda</a>
+                <a href="perfil.html">👤 Perfil</a>
+                <a href="#" class="btn-login" id="proveedorLoginBtn">👤 Proveedor</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="admin-container">
+        <h1 class="admin-title">Panel de Proveedor</h1>
+
+        <!-- ===== TABS ===== -->
+        <div class="admin-tabs">
+            <button class="admin-tab active" data-tab="mis-servicios">🎯 Mis Servicios</button>
+            <button class="admin-tab" data-tab="cotizaciones">💰 Cotizaciones</button>
+            <button class="admin-tab" data-tab="solicitudes">📋 Solicitudes</button>
+        </div>
+
+        <!-- ===== PANEL DE MIS SERVICIOS ===== -->
+        <div id="mis-servicios" class="admin-panel active">
+            <div class="panel-header">
+                <h2>Mis Servicios Registrados</h2>
+                <button class="btn-primary" id="btnNuevoServicio">+ Nuevo Servicio</button>
+            </div>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Subcategoría</th>
+                        <th>Precio Base</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="serviciosTableBody">
+                    <!-- Servicios se cargarán aquí -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ===== PANEL DE COTIZACIONES ===== -->
+        <div id="cotizaciones" class="admin-panel">
+            <div class="panel-header">
+                <h2>Cotizaciones Enviadas</h2>
+            </div>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Servicio</th>
+                        <th>Precio</th>
+                        <th>Estado</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="cotizacionesTableBody">
+                    <!-- Cotizaciones se cargarán aquí -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ===== PANEL DE SOLICITUDES ===== -->
+        <div id="solicitudes" class="admin-panel">
+            <div class="panel-header">
+                <h2>Solicitudes de Clientes</h2>
+            </div>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Servicio Solicitado</th>
+                        <th>Detalles</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="solicitudesTableBody">
+                    <!-- Solicitudes se cargarán aquí -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- ===== MODALES ===== -->
+    <!-- Modal para nuevo servicio -->
+    <div id="modalNuevoServicio" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModal('modalNuevoServicio')">&times;</span>
+            <h2>Registrar Nuevo Servicio</h2>
+            <form id="formNuevoServicio">
+                <div class="form-group">
+                    <label for="servicioNombre">Nombre del Servicio:</label>
+                    <input type="text" id="servicioNombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="servicioCategoria">Categoría:</label>
+                    <select id="servicioCategoria" required>
+                        <option value="">Seleccionar categoría</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="servicioSubcategoria">Subcategoría:</label>
+                    <select id="servicioSubcategoria" required>
+                        <option value="">Seleccionar subcategoría</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="servicioPrecio">Precio Base:</label>
+                    <input type="number" id="servicioPrecio" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="servicioDescripcion">Descripción:</label>
+                    <textarea id="servicioDescripcion" required></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Registrar Servicio</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para cotización -->
+    <div id="modalCotizacion" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModal('modalCotizacion')">&times;</span>
+            <h2>Enviar Cotización</h2>
+            <form id="formCotizacion">
+                <input type="hidden" id="solicitudId">
+                <div class="form-group">
+                    <label for="cotizacionPrecio">Precio Propuesto:</label>
+                    <input type="number" id="cotizacionPrecio" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="cotizacionMensaje">Mensaje:</label>
+                    <textarea id="cotizacionMensaje" placeholder="Describe tu propuesta..."></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Enviar Cotización</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/proveedor.js"></script>
+</body>
+</html>

@@ -26,15 +26,18 @@ async function login(email, password) {
         const data = await response.json();
 
         if (response.ok) {
+            // Asegurar compatibilidad con user.rol para las vistas existentes
+            const normalizedUser = normalizeUser(data.user);
+
             // Guardar datos
             localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('user', JSON.stringify(normalizedUser));
 
             // Disparar evento de login
-            window.dispatchEvent(new CustomEvent('userLogin', { detail: data.user }));
+            window.dispatchEvent(new CustomEvent('userLogin', { detail: normalizedUser }));
 
-            // REDIRIGIR SEGÚN ROL
-            if (data.user.rol === 'admin') {
+            // REDIRIGIR SEGÚN ROL - Admin va a admin.html, otros a index.html
+            if (normalizedUser.roles.includes('admin')) {
                 window.location.href = 'admin.html';
             } else {
                 window.location.href = 'index.html';
@@ -66,13 +69,15 @@ async function register(userData) {
         const data = await response.json();
 
         if (response.ok) {
+            const normalizedUser = normalizeUser(data.user);
+
             localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('user', JSON.stringify(normalizedUser));
             
-            window.dispatchEvent(new CustomEvent('userLogin', { detail: data.user }));
+            window.dispatchEvent(new CustomEvent('userLogin', { detail: normalizedUser }));
             
-            // Redirigir según rol después del registro
-            if (data.user.rol === 'admin') {
+            // Redirigir según rol después del registro - Admin va a admin.html, otros a index.html
+            if (normalizedUser.roles.includes('admin')) {
                 window.location.href = 'admin.html';
             } else {
                 window.location.href = 'index.html';
@@ -95,9 +100,61 @@ function logout() {
     window.location.href = 'index.html';
 }
 
+function normalizeUser(user) {
+    if (!user) return null;
+
+    const roles = user.roles || (user.rol ? [user.rol] : []);
+    const normalizedRoles = Array.isArray(roles)
+        ? roles
+        : String(roles).split(',').map(r => r.trim()).filter(Boolean);
+
+    user.roles = normalizedRoles;
+    user.rol = user.rol || (normalizedRoles.includes('admin') ? 'admin' : normalizedRoles[0] || 'cliente');
+
+    return user;
+}
+
 function getCurrentUser() {
-    const user = localStorage.getItem('user');
-    return user ? JSON.parse(user) : null;
+    const userData = localStorage.getItem('user');
+    if (!userData) return null;
+
+    try {
+        const user = JSON.parse(userData);
+        return normalizeUser(user);
+    } catch (error) {
+        console.error('Error parseando user desde localStorage:', error);
+        return null;
+    }
+}
+
+// ===== FUNCIONES DE VERIFICACIÓN DE ROLES =====
+
+// Obtener roles del usuario (como array)
+function getUserRoles() {
+    const user = getCurrentUser();
+    if (!user) return [];
+    return user.roles;
+}
+
+// Verificar si el usuario tiene un rol específico
+function hasRole(role) {
+    const roles = getUserRoles();
+    return roles.includes(role);
+}
+
+// Verificar si es admin
+function isAdmin() {
+    return hasRole('admin');
+}
+
+// Verificar si es proveedor
+function isProveedor() {
+    return hasRole('proveedor');
+}
+
+// Verificar si es cliente
+function isCliente() {
+    return hasRole('cliente');
 }
 
 function isAuthenticated() {
@@ -112,5 +169,11 @@ window.auth = {
     getCurrentUser: getCurrentUser,
     isAuthenticated: isAuthenticated,
     isValidEmail: isValidEmail,
-    isValidPhone: isValidPhone
+    isValidPhone: isValidPhone,
+    // Nuevas funciones de roles
+    getUserRoles: getUserRoles,
+    hasRole: hasRole,
+    isAdmin: isAdmin,
+    isProveedor: isProveedor,
+    isCliente: isCliente
 };

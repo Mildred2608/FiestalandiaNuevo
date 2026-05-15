@@ -6,7 +6,7 @@ function checkClienteAccess() {
     const user = auth.getCurrentUser();
     
     // Si es admin, redirigir al panel
-    if (user && user.rol === 'admin') {
+    if (user && auth.isAdmin()) {
         window.location.href = 'admin.html';
         return false;
     }
@@ -91,7 +91,7 @@ function actualizarBotonLogin() {
     const user = auth.getCurrentUser();
     
     // Si es admin, no debe estar aquí - redirigir
-    if (user && user.rol === 'admin') {
+    if (user && auth.isAdmin()) {
         window.location.href = 'admin.html';
         return;
     }
@@ -127,7 +127,14 @@ function mostrarMenuUsuario(user) {
             <a href="mis-cotizaciones.html">💰 Mis Cotizaciones</a>
             <a href="mis-eventos.html">📅 Mis Eventos</a>
             <a href="solicitar-registro-servicio.html" class="menu-solicitar">📋 Registrar mi servicio</a>
-            <a href="mis-solicitudes-servicio.html" class="menu-solicitudes">📋 Mis solicitudes</a>
+            <a href="mis-solicitudes-servicio.html" class="menu-solicitudes">📋 Mis solicitudes</a>`;
+    
+    // Agregar opción de proveedor si tiene el rol
+    if (auth.hasRole('proveedor')) {
+        menuContent += '<a href="proveedor.html">🏢 Panel Proveedor</a>';
+    }
+    
+    menuContent += `
             <hr>
             <a href="#" onclick="cerrarSesion()" style="color: #dc3545;">🚪 Cerrar Sesión</a>
         </div>

@@ -209,7 +209,28 @@ router.post('/admin/solicitudes-registro/:id/aprobar', authMiddleware.verifyToke
             ]
         );
 
-        // 5. ACTUALIZAR ESTADO DE LA SOLICITUD
+        // 5. AGREGAR ROL PROVEEDOR AL CLIENTE
+        const [clienteActual] = await connection.query(
+            'SELECT rol FROM clientes WHERE id = ?',
+            [sol.cliente_id]
+        );
+
+        if (clienteActual.length > 0) {
+            const rolesActuales = clienteActual[0].rol ? clienteActual[0].rol.split(',').map(r => r.trim()) : ['cliente'];
+            
+            // Si no tiene el rol de proveedor, agregarlo
+            if (!rolesActuales.includes('proveedor')) {
+                rolesActuales.push('proveedor');
+                const rolesActualizados = rolesActuales.join(',');
+                
+                await connection.query(
+                    'UPDATE clientes SET rol = ? WHERE id = ?',
+                    [rolesActualizados, sol.cliente_id]
+                );
+            }
+        }
+
+        // 6. ACTUALIZAR ESTADO DE LA SOLICITUD
         await connection.query(
             `UPDATE solicitudes_registro_servicio 
              SET estado = 'aprobada', atendido_por = ?, 
@@ -222,7 +243,7 @@ router.post('/admin/solicitudes-registro/:id/aprobar', authMiddleware.verifyToke
         
         res.json({ 
             success: true, 
-            message: 'Solicitud aprobada. Proveedor y servicio creados exitosamente.',
+            message: 'Solicitud aprobada. Proveedor, servicio y rol proveedor asignado exitosamente.',
             proveedor_id: proveedorId
         });
 

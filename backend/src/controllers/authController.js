@@ -41,19 +41,23 @@ const authController = {
                 });
             }
 
+            // Parsear roles como array
+            const roles = Cliente.parseRoles(user.rol);
+
             // Generar token JWT
             const token = jwt.sign(
                 {
                     id: user.id,
                     email: user.email,
                     nombre: user.nombre,
-                    rol: user.rol
+                    roles: roles,
+                    rol: roles.includes('admin') ? 'admin' : roles[0]
                 },
                 process.env.JWT_SECRET,
                 { expiresIn: process.env.JWT_EXPIRES_IN }
             );
 
-            console.log(' Login exitoso para:', email);
+            console.log(' Login exitoso para:', email, 'con roles:', roles);
 
             // Responder con éxito
             res.json({
@@ -64,7 +68,8 @@ const authController = {
                     id: user.id,
                     nombre: user.nombre,
                     email: user.email,
-                    rol: user.rol
+                    roles: roles,
+                    rol: roles.includes('admin') ? 'admin' : roles[0]
                 }
             });
 
@@ -120,9 +125,12 @@ const authController = {
                 [nombre, email, telefono || null, direccion || null, password_hash]
             );
 
+            const roles = ['cliente'];
+            const rol = 'cliente';
+
             // Generar token
             const token = jwt.sign(
-                { id: result.insertId, email, nombre, rol: 'cliente' },
+                { id: result.insertId, email, nombre, roles, rol },
                 process.env.JWT_SECRET,
                 { expiresIn: process.env.JWT_EXPIRES_IN }
             );
@@ -137,7 +145,8 @@ const authController = {
                     id: result.insertId,
                     nombre,
                     email,
-                    rol: 'cliente'
+                    roles,
+                    rol
                 }
             });
 
