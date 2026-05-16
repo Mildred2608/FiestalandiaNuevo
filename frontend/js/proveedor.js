@@ -1,5 +1,5 @@
-// frontend/js/proveedor.js
-//const API_URL = 'http://localhost:3000/api';
+// frontend/js/proveedor.js - CÓDIGO COMPLETO E INTEGRADO
+// const API_URL = 'http://localhost:3000/api';
 
 // ===== VERIFICAR SESIÓN DE PROVEEDOR =====
 function checkProveedorAuth() {
@@ -12,12 +12,12 @@ function checkProveedorAuth() {
             proveedorBtn.innerHTML = `👤 ${user.nombre}`;
             proveedorBtn.classList.add('logged-in');
         }
-        // Cargar datos iniciales
+        // Carga inicial obligatoria de la pestaña por defecto
         cargarServiciosProveedor();
     }
 }
 
-// ===== FUNCIONES DEL MENÚ PROVEEDOR =====
+// ===== MENÚ DESPLEGABLE CON CAPA FLOTANTE AISLADA =====
 function initProveedorMenu() {
     const loginBtn = document.getElementById('proveedorLoginBtn');
     if (loginBtn) {
@@ -42,25 +42,30 @@ function mostrarMenuProveedor(user) {
         </div>
         <div class="user-menu-items">
             <a href="perfil.html">👤 Mi Perfil</a>
-            <a href="proveedor.html">🏢 Panel Proveedor</a>
-            <a href="mis-cotizaciones.html">💰 Mis Cotizaciones</a>
-            <a href="mis-eventos.html">📅 Mis Eventos</a>
-            <hr>
-            <a href="#" onclick="proveedorLogout()" style="color: #dc3545;">🚪 Cerrar Sesión</a>
+            <a href="mis-solicitudes-servicio.html">📅 Mis Eventos</a>
+            <a href="cotizaciones.html">💰 Mis Cotizaciones</a>
+            <a href="proveedor.html" style="color: #7c3aed; background: #f3e8ff; font-weight: 600;">🏢 Panel Proveedor</a>
+            <a href="#" onclick="proveedorLogout()" class="btn-logout" style="text-align: center; margin-top: 8px; border-radius: 8px; display: block;">🚪 Cerrar Sesión</a>
         </div>
     `;
 
     const userMenu = document.createElement('div');
     userMenu.id = 'userMenu';
-    userMenu.className = 'user-menu';
+    userMenu.className = 'user-menu'; // Activa los estilos de tu archivo CSS
     userMenu.innerHTML = menuContent;
+    
+    // Inyección aislada directo al body para romper cualquier flujo heredado del header
     document.body.appendChild(userMenu);
 
     const loginBtn = document.getElementById('proveedorLoginBtn');
     const rect = loginBtn.getBoundingClientRect();
-    userMenu.style.top = (rect.bottom + window.scrollY + 5) + 'px';
-    userMenu.style.left = (rect.left + window.scrollX - 150) + 'px';
+
+    // Posicionamiento absoluto exacto debajo del botón verde
+    userMenu.style.position = 'absolute';
+    userMenu.style.top = (rect.bottom + window.scrollY + 6) + 'px';
+    userMenu.style.left = (rect.left + window.scrollX - 40) + 'px';
     userMenu.style.display = 'block';
+    userMenu.style.zIndex = '9999';
 
     setTimeout(() => {
         document.addEventListener('click', function cerrarMenu(e) {
@@ -77,23 +82,33 @@ function proveedorLogout() {
     window.location.href = 'index.html';
 }
 
-// ===== FUNCIONES PARA CARGAR DATOS =====
+// ===== PESTAÑA 1: CARGAR Y MOSTRAR SERVICIOS =====
 async function cargarServiciosProveedor() {
+    const tbody = document.getElementById('serviciosTableBody');
+    if (!tbody) return;
+
     try {
         const user = auth.getCurrentUser();
-        const response = await fetch(`${API_URL}/servicios/proveedor/${user.id}`, {
-            headers: {
-                'Authorization': `Bearer ${auth.getToken()}`
-            }
+        const token = localStorage.getItem('token');
+        
+        const response = await fetch(`${API_URL}/proveedor/servicios/proveedor/${user.id}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
         });
 
         if (!response.ok) throw new Error('Error al cargar servicios');
-
+        
         const servicios = await response.json();
         mostrarServiciosProveedor(servicios);
     } catch (error) {
         console.error('Error:', error);
-        mostrarError('Error al cargar servicios');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7">
+                    <div class="error" style="box-shadow: none; padding: 20px;">
+                        ⚠️ Error al sincronizar los servicios con el servidor.
+                    </div>
+                </td>
+            </tr>`;
     }
 }
 
@@ -101,43 +116,56 @@ function mostrarServiciosProveedor(servicios) {
     const tbody = document.getElementById('serviciosTableBody');
     if (!tbody) return;
 
-    if (servicios.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="no-data">No tienes servicios registrados</td></tr>';
+    if (!servicios || servicios.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="no-cotizaciones" style="box-shadow: none; padding: 30px;">No tienes servicios registrados actualmente.</td></tr>';
         return;
     }
 
     tbody.innerHTML = servicios.map(servicio => `
         <tr>
-            <td>${servicio.id}</td>
+            <td><strong>#${servicio.id}</strong></td>
             <td>${escapeHtml(servicio.nombre)}</td>
-            <td>${escapeHtml(servicio.categoria_nombre || 'N/A')}</td>
+            <td><span class="cotizacion-estado estado-enviada" style="text-transform: none; font-size: 0.85rem;">${escapeHtml(servicio.categoria_nombre || 'N/A')}</span></td>
             <td>${escapeHtml(servicio.subcategoria_nombre || 'N/A')}</td>
-            <td>$${servicio.precio_base}</td>
-            <td><span class="status-${servicio.estado}">${servicio.estado}</span></td>
+            <td style="font-weight: 700; color: #7c3aed;">$${servicio.precio_base}</td>
+            <td><span class="cotizacion-estado estado-${servicio.estado === 'activo' ? 'aceptada' : 'rechazada'}">${servicio.estado || 'activo'}</span></td>
             <td>
-                <button class="btn-edit" onclick="editarServicio(${servicio.id})">✏️</button>
-                <button class="btn-delete" onclick="eliminarServicio(${servicio.id})">🗑️</button>
+                <div class="card-buttons" style="gap: 6px;">
+                    <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="prepararEditarServicio(${servicio.id}, '${escapeHtml(servicio.nombre)}', ${servicio.categoria_id}, ${servicio.subcategoria_id}, ${servicio.precio_base}, '${escapeHtml(servicio.descripcion || '')}')" title="Editar">✏️ Editar</button>
+                    <button class="btn btn-primary" style="background: linear-gradient(135deg, #ef4444, #b91c1c); padding: 6px 12px; font-size: 0.8rem;" onclick="eliminarServicio(${servicio.id})" title="Eliminar">🗑️ Eliminar</button>
+                </div>
             </td>
         </tr>
     `).join('');
 }
 
+// ===== PESTAÑA 2: CARGAR Y MOSTRAR COTIZACIONES =====
 async function cargarCotizacionesProveedor() {
+    const tbody = document.getElementById('cotizacionesTableBody');
+    if (!tbody) return;
+
     try {
         const user = auth.getCurrentUser();
-        const response = await fetch(`${API_URL}/cotizaciones/proveedor/${user.id}`, {
-            headers: {
-                'Authorization': `Bearer ${auth.getToken()}`
-            }
+        const token = localStorage.getItem('token');
+        
+        const response = await fetch(`${API_URL}/proveedor/cotizaciones/proveedor/${user.id}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
         });
 
         if (!response.ok) throw new Error('Error al cargar cotizaciones');
-
+        
         const cotizaciones = await response.json();
         mostrarCotizacionesProveedor(cotizaciones);
     } catch (error) {
         console.error('Error:', error);
-        mostrarError('Error al cargar cotizaciones');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7">
+                    <div class="error" style="box-shadow: none; padding: 20px;">
+                        ⚠️ Error al sincronizar las cotizaciones.
+                    </div>
+                </td>
+            </tr>`;
     }
 }
 
@@ -145,41 +173,55 @@ function mostrarCotizacionesProveedor(cotizaciones) {
     const tbody = document.getElementById('cotizacionesTableBody');
     if (!tbody) return;
 
-    if (cotizaciones.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="no-data">No tienes cotizaciones enviadas</td></tr>';
+    if (!cotizaciones || cotizaciones.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="no-cotizaciones" style="box-shadow: none; padding: 30px;">No tienes cotizaciones enviadas.</td></tr>';
         return;
     }
 
-    tbody.innerHTML = cotizaciones.map(cot => `
-        <tr>
-            <td>${cot.id}</td>
-            <td>${escapeHtml(cot.cliente_nombre)}</td>
-            <td>${escapeHtml(cot.servicio_nombre)}</td>
-            <td>$${cot.precio}</td>
-            <td><span class="status-${cot.estado}">${cot.estado}</span></td>
-            <td>${new Date(cot.fecha_creacion).toLocaleDateString()}</td>
-            <td>
-                <button class="btn-view" onclick="verCotizacion(${cot.id})">👁️</button>
-            </td>
-        </tr>
-    `).join('');
+    tbody.innerHTML = cotizaciones.map(cot => {
+        const estadoClase = cot.estado.toLowerCase();
+        return `
+            <tr>
+                <td><strong>#${cot.id}</strong></td>
+                <td>${escapeHtml(cot.cliente_nombre)}</td>
+                <td>${escapeHtml(cot.servicio_nombre)}</td>
+                <td style="font-weight: 700; color: #ec4899;">$${cot.precio}</td>
+                <td><span class="cotizacion-estado estado-${estadoClase}">${cot.estado}</span></td>
+                <td>${new Date(cot.fecha_creacion || cot.creado_en).toLocaleDateString()}</td>
+                <td>
+                    <button class="btn btn-secondary" style="padding: 6px 14px;" onclick="mostrarToast('Detalle Cotización #' + ${cot.id}, 'info')">👁️ Ver</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
 }
 
+// ===== PESTAÑA 3: CARGAR Y MOSTRAR SOLICITUDES DEL MERCADO =====
 async function cargarSolicitudesProveedor() {
+    const tbody = document.getElementById('solicitudesTableBody');
+    if (!tbody) return;
+
     try {
-        const response = await fetch(`${API_URL}/solicitudes/disponibles`, {
-            headers: {
-                'Authorization': `Bearer ${auth.getToken()}`
-            }
+        const token = localStorage.getItem('token');
+        
+        const response = await fetch(`${API_URL}/proveedor/solicitudes/disponibles`, {
+            headers: { 'Authorization': `Bearer ${token}` }
         });
 
         if (!response.ok) throw new Error('Error al cargar solicitudes');
-
+        
         const solicitudes = await response.json();
         mostrarSolicitudesProveedor(solicitudes);
     } catch (error) {
         console.error('Error:', error);
-        mostrarError('Error al cargar solicitudes');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7">
+                    <div class="error" style="box-shadow: none; padding: 20px;">
+                        ⚠️ Error al sincronizar las solicitudes de mercado.
+                    </div>
+                </td>
+            </tr>`;
     }
 }
 
@@ -187,62 +229,123 @@ function mostrarSolicitudesProveedor(solicitudes) {
     const tbody = document.getElementById('solicitudesTableBody');
     if (!tbody) return;
 
-    if (solicitudes.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="no-data">No hay solicitudes disponibles</td></tr>';
+    if (!solicitudes || solicitudes.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="no-cotizaciones" style="box-shadow: none; padding: 30px;">No hay solicitudes disponibles en este momento.</td></tr>';
         return;
     }
 
     tbody.innerHTML = solicitudes.map(sol => `
         <tr>
-            <td>${sol.id}</td>
+            <td><strong>#${sol.id}</strong></td>
             <td>${escapeHtml(sol.cliente_nombre)}</td>
             <td>${escapeHtml(sol.servicio_solicitado)}</td>
-            <td>${escapeHtml(sol.detalles || 'Sin detalles')}</td>
-            <td>${new Date(sol.fecha_creacion).toLocaleDateString()}</td>
-            <td><span class="status-${sol.estado}">${sol.estado}</span></td>
+            <td><small style="color: #6b7280; font-size: 0.85rem;">${escapeHtml(sol.detalles || 'Sin detalles adicionales')}</small></td>
+            <td>${new Date(sol.fecha_creacion || sol.fecha_solicitud).toLocaleDateString()}</td>
+            <td><span class="cotizacion-estado estado-pendiente">${sol.estado}</span></td>
             <td>
-                <button class="btn-primary" onclick="enviarCotizacion(${sol.id})">💰 Cotizar</button>
+                <button class="btn btn-primary" style="padding: 8px 16px; font-size: 0.85rem;" onclick="enviarCotizacion(${sol.id})">💰 Cotizar</button>
             </td>
         </tr>
     `).join('');
 }
 
-// ===== FUNCIONES DE GESTIÓN =====
+// ===== ACCIÓN: REGISTRAR / ACTUALIZAR SERVICIO (POST / PUT) =====
 async function registrarNuevoServicio() {
     const form = document.getElementById('formNuevoServicio');
     const formData = new FormData(form);
+    const token = localStorage.getItem('token');
+    const servicioId = document.getElementById('servicioIdHidden')?.value;
 
     const servicioData = {
         nombre: formData.get('servicioNombre'),
-        categoria_id: formData.get('servicioCategoria'),
-        subcategoria_id: formData.get('servicioSubcategoria'),
+        categoria_id: parseInt(formData.get('servicioCategoria')),
+        subcategoria_id: parseInt(formData.get('servicioSubcategoria')),
         precio_base: parseFloat(formData.get('servicioPrecio')),
-        descripcion: formData.get('servicioDescripcion'),
-        proveedor_id: auth.getCurrentUser().id
+        descripcion: formData.get('servicioDescripcion')
     };
 
+    const esEdicion = (servicioId && servicioId !== "");
+    const url = esEdicion ? `${API_URL}/proveedor/servicios/${servicioId}` : `${API_URL}/proveedor/servicios`;
+    const metodo = esEdicion ? 'PUT' : 'POST';
+
     try {
-        const response = await fetch(`${API_URL}/servicios`, {
-            method: 'POST',
+        const response = await fetch(url, {
+            method: metodo,
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth.getToken()}`
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(servicioData)
         });
 
-        if (!response.ok) throw new Error('Error al registrar servicio');
-
-        alert('Servicio registrado exitosamente');
+        if (!response.ok) throw new Error(esEdicion ? 'Error al actualizar el servicio' : 'Error al registrar servicio');
+        
+        mostrarToast(esEdicion ? '¡Servicio actualizado exitosamente! 🎉' : '¡Servicio registrado exitosamente! 🎉', 'success');
         cerrarModal('modalNuevoServicio');
         form.reset();
+        
+        if (document.getElementById('servicioIdHidden')) {
+            document.getElementById('servicioIdHidden').value = "";
+        }
         cargarServiciosProveedor();
     } catch (error) {
         console.error('Error:', error);
-        alert('Error al registrar servicio: ' + error.message);
+        mostrarToast('Error en la operación: ' + error.message, 'error');
     }
 }
 
+// ===== ACCIÓN: PREPARAR EL FORMULARIO EN MODO EDICIÓN =====
+async function prepararEditarServicio(id, nombre, categoriaId, subcategoriaId, precio, descripcion) {
+    let hiddenInput = document.getElementById('servicioIdHidden');
+    if (!hiddenInput) {
+        hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.id = 'servicioIdHidden';
+        document.getElementById('formNuevoServicio').appendChild(hiddenInput);
+    }
+    hiddenInput.value = id;
+
+    document.getElementById('servicioNombre').value = nombre;
+    document.getElementById('servicioPrecio').value = precio;
+    document.getElementById('servicioDescripcion').value = descripcion;
+
+    const modalTitle = document.querySelector('#modalNuevoServicio h3');
+    if (modalTitle) modalTitle.textContent = '✏️ Editar Servicio';
+
+    await cargarCategoriasParaServicio();
+    document.getElementById('servicioCategoria').value = categoriaId;
+    
+    await cargarSubcategoriasParaServicio();
+    document.getElementById('servicioSubcategoria').value = subcategoriaId;
+
+    abrirModal('modalNuevoServicio');
+}
+
+// ===== ACCIÓN: ELIMINAR SERVICIO (DELETE) =====
+async function eliminarServicio(id) {
+    if (!confirm('¿Estás completamente seguro de que deseas eliminar este servicio? 🗑️')) return;
+
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await fetch(`${API_URL}/proveedor/servicios/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) throw new Error('No se pudo eliminar el servicio del servidor.');
+
+        mostrarToast('Servicio eliminado correctamente.', 'success');
+        cargarServiciosProveedor();
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarToast('Error al eliminar el servicio: ' + error.message, 'error');
+    }
+}
+
+// ===== ACCIÓN: ENVIAR NUEVA COTIZACIÓN A UNA SOLICITUD =====
 function enviarCotizacion(solicitudId) {
     document.getElementById('solicitudId').value = solicitudId;
     abrirModal('modalCotizacion');
@@ -251,67 +354,114 @@ function enviarCotizacion(solicitudId) {
 async function enviarCotizacionSubmit() {
     const form = document.getElementById('formCotizacion');
     const formData = new FormData(form);
+    const token = localStorage.getItem('token');
 
     const cotizacionData = {
         solicitud_id: parseInt(formData.get('solicitudId')),
         precio: parseFloat(formData.get('cotizacionPrecio')),
-        mensaje: formData.get('cotizacionMensaje'),
-        proveedor_id: auth.getCurrentUser().id
+        mensaje: formData.get('cotizacionMensaje')
     };
 
     try {
-        const response = await fetch(`${API_URL}/cotizaciones`, {
+        const response = await fetch(`${API_URL}/proveedor/cotizaciones`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth.getToken()}`
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(cotizacionData)
         });
 
         if (!response.ok) throw new Error('Error al enviar cotización');
-
-        alert('Cotización enviada exitosamente');
+        
+        mostrarToast('Cotización enviada exitosamente 💰', 'success');
         cerrarModal('modalCotizacion');
         form.reset();
         cargarSolicitudesProveedor();
     } catch (error) {
         console.error('Error:', error);
-        alert('Error al enviar cotización: ' + error.message);
+        mostrarToast('Error al enviar cotización: ' + error.message, 'error');
     }
 }
 
-// ===== FUNCIONES DE UI =====
+// ===== SELECTORES ASÍNCRONOS DE CATEGORÍAS Y SUBCATEGORÍAS =====
+async function cargarCategoriasParaServicio() {
+    try {
+        const response = await fetch(`${API_URL}/categorias`);
+        const categorias = await response.json();
+        const selectCategoria = document.getElementById('servicioCategoria');
+        
+        selectCategoria.innerHTML = '<option value="">Seleccionar categoría</option>';
+        categorias.forEach(cat => {
+            selectCategoria.innerHTML += `<option value="${cat.id}">${cat.nombre}</option>`;
+        });
+
+        selectCategoria.removeEventListener('change', cargarSubcategoriasParaServicio);
+        selectCategoria.addEventListener('change', cargarSubcategoriasParaServicio);
+    } catch (error) {
+        console.error('Error cargando categorías:', error);
+    }
+}
+
+async function cargarSubcategoriasParaServicio() {
+    const categoriaId = document.getElementById('servicioCategoria').value;
+    const selectSubcategoria = document.getElementById('servicioSubcategoria');
+    if (!categoriaId) {
+        selectSubcategoria.innerHTML = '<option value="">Seleccionar subcategoría</option>';
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/subcategorias/categoria/${categoriaId}`);
+        const subcategorias = await response.json();
+
+        selectSubcategoria.innerHTML = '<option value="">Seleccionar subcategoría</option>';
+        subcategorias.forEach(sub => {
+            selectSubcategoria.innerHTML += `<option value="${sub.id}">${sub.nombre}</option>`;
+        });
+    } catch (error) {
+        console.error('Error cargando subcategorías:', error);
+    }
+}
+
+// ===== CONTROLADORES DE INTERFAZ (TABS Y MODALES) =====
 function initTabs() {
     const tabs = document.querySelectorAll('.admin-tab');
     const panels = document.querySelectorAll('.admin-panel');
 
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
-            // Remover active de todos
             tabs.forEach(t => t.classList.remove('active'));
             panels.forEach(p => p.classList.remove('active'));
 
-            // Agregar active al seleccionado
             tab.classList.add('active');
             const tabId = tab.getAttribute('data-tab');
-            document.getElementById(tabId).classList.add('active');
-
-            // Cargar datos según el tab
-            if (tabId === 'cotizaciones') {
-                cargarCotizacionesProveedor();
-            } else if (tabId === 'solicitudes') {
-                cargarSolicitudesProveedor();
+            
+            const targetPanel = document.getElementById(tabId);
+            if (targetPanel) {
+                targetPanel.classList.add('active');
             }
+
+            if (tabId === 'servicios') cargarServiciosProveedor();
+            if (tabId === 'cotizaciones') cargarCotizacionesProveedor();
+            if (tabId === 'solicitudes') cargarSolicitudesProveedor();
         });
     });
 }
 
 function initModals() {
-    // Modal nuevo servicio
     const btnNuevoServicio = document.getElementById('btnNuevoServicio');
     if (btnNuevoServicio) {
         btnNuevoServicio.addEventListener('click', () => {
+            if (document.getElementById('servicioIdHidden')) {
+                document.getElementById('servicioIdHidden').value = "";
+            }
+            const form = document.getElementById('formNuevoServicio');
+            if (form) form.reset();
+            
+            const modalTitle = document.querySelector('#modalNuevoServicio h3');
+            if (modalTitle) modalTitle.textContent = '+ Registrar Nuevo Servicio';
+            
             cargarCategoriasParaServicio();
             abrirModal('modalNuevoServicio');
         });
@@ -334,73 +484,52 @@ function initModals() {
     }
 }
 
-async function cargarCategoriasParaServicio() {
-    try {
-        const response = await fetch(`${API_URL}/categorias`);
-        const categorias = await response.json();
+// ===== NOTIFICACIONES TOAST =====
+function mostrarToast(mensaje, tipo = 'info') {
+    const existente = document.querySelector('.toast');
+    if (existente) existente.remove();
 
-        const selectCategoria = document.getElementById('servicioCategoria');
-        selectCategoria.innerHTML = '<option value="">Seleccionar categoría</option>';
+    const toast = document.createElement('div');
+    toast.className = `toast ${tipo}`;
+    
+    let icono = 'ℹ️';
+    if (tipo === 'success') icono = '✅';
+    if (tipo === 'error') icono = '❌';
+    if (tipo === 'warning') icono = '⚠️';
+        
+    toast.innerHTML = `<span class="toast-icon">${icono}</span> ${mensaje}`;
+    document.body.appendChild(toast);
 
-        categorias.forEach(cat => {
-            selectCategoria.innerHTML += `<option value="${cat.id}">${cat.nombre}</option>`;
-        });
-
-        // Event listener para cargar subcategorías
-        selectCategoria.addEventListener('change', cargarSubcategoriasParaServicio);
-    } catch (error) {
-        console.error('Error cargando categorías:', error);
-    }
+    setTimeout(() => {
+        if (toast.parentNode) toast.remove();
+    }, 3200);
 }
 
-async function cargarSubcategoriasParaServicio() {
-    const categoriaId = document.getElementById('servicioCategoria').value;
-    if (!categoriaId) return;
-
-    try {
-        const response = await fetch(`${API_URL}/subcategorias/categoria/${categoriaId}`);
-        const subcategorias = await response.json();
-
-        const selectSubcategoria = document.getElementById('servicioSubcategoria');
-        selectSubcategoria.innerHTML = '<option value="">Seleccionar subcategoría</option>';
-
-        subcategorias.forEach(sub => {
-            selectSubcategoria.innerHTML += `<option value="${sub.id}">${sub.nombre}</option>`;
-        });
-    } catch (error) {
-        console.error('Error cargando subcategorías:', error);
-    }
-}
-
-// ===== UTILIDADES =====
+// ===== UTILIDADES GLOBALES =====
 function escapeHtml(text) {
+    if (!text) return '';
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
 }
 
-function mostrarError(mensaje) {
-    // Implementar notificación de error
-    alert(mensaje);
-}
-
 function abrirModal(modalId) {
     const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
+    if (modal) { 
+        modal.style.display = 'flex'; 
+        document.body.style.overflow = 'hidden'; 
     }
 }
 
 function cerrarModal(modalId) {
     const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
+    if (modal) { 
+        modal.style.display = 'none'; 
+        document.body.style.overflow = 'auto'; 
     }
 }
 
-// ===== INICIALIZACIÓN =====
+// ===== CARGA INICIAL DE LA APP =====
 document.addEventListener('DOMContentLoaded', () => {
     checkProveedorAuth();
     initProveedorMenu();

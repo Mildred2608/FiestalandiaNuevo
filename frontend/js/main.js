@@ -1,11 +1,15 @@
 // frontend/js/main.js
-//const API_URL = 'http://localhost:3000/api';
+
+// ===== CONFIGURACIÓN GLOBAL =====
+// Definir API_URL si no viene declarada en otro script previo
+if (typeof API_URL === 'undefined') {
+    window.API_URL = 'http://localhost:3000/api';
+}
 
 // ===== VERIFICAR QUE CLIENTE NO SEA ADMIN =====
 function checkClienteAccess() {
     const user = auth.getCurrentUser();
     
-    // Si es admin, redirigir al panel
     if (user && auth.isAdmin()) {
         window.location.href = 'admin.html';
         return false;
@@ -18,6 +22,7 @@ let categoriasCache = [];
 
 // ===== FUNCIONES PARA CARGAR CATEGORÍAS =====
 async function cargarCategorias() {
+    if (categoriasCache.length > 0) return categoriasCache;
     try {
         const response = await fetch(`${API_URL}/categorias`);
         if (!response.ok) throw new Error('Error al cargar categorías');
@@ -29,7 +34,6 @@ async function cargarCategorias() {
     }
 }
 
-// ===== FUNCIÓN PRINCIPAL - REDIRIGIR A SUBCATEGORÍAS =====
 function irASubcategorias(categoriaId, categoriaNombre) {
     window.location.href = `subcategorias.html?id=${categoriaId}&nombre=${encodeURIComponent(categoriaNombre)}`;
 }
@@ -85,12 +89,11 @@ async function actualizarCardsInicio() {
     }
 }
 
-// ===== FUNCIONES DE AUTENTICACIÓN =====
+// ===== FUNCIONES DE AUTENTICACIÓN Y MENÚS =====
 function actualizarBotonLogin() {
     const loginBtn = document.getElementById('loginBtn');
     const user = auth.getCurrentUser();
     
-    // Si es admin, no debe estar aquí - redirigir
     if (user && auth.isAdmin()) {
         window.location.href = 'admin.html';
         return;
@@ -113,10 +116,15 @@ function actualizarBotonLogin() {
     }
 }
 
+// ===== DESBLOQUEO AUTOMÁTICO DE SECCIONES DE PROVEEDOR =====
 function mostrarMenuUsuario(user) {
     const existingMenu = document.getElementById('userMenu');
     if (existingMenu) existingMenu.remove();
     
+    // Obtenemos de forma segura los roles del usuario logueado
+    const roles = Array.isArray(user.roles) ? user.roles : [];
+    
+    // Sección base común para cualquier tipo de cliente
     let menuContent = `
         <div class="user-menu-header">
             <strong>${user.nombre}</strong>
@@ -124,19 +132,30 @@ function mostrarMenuUsuario(user) {
         </div>
         <div class="user-menu-items">
             <a href="#" onclick="verPerfil()">👤 Mi Perfil</a>
-            <a href="mis-cotizaciones.html">💰 Mis Cotizaciones</a>
             <a href="mis-eventos.html">📅 Mis Eventos</a>
-            <a href="solicitar-registro-servicio.html" class="menu-solicitar">📋 Registrar mi servicio</a>
-            <a href="mis-solicitudes-servicio.html" class="menu-solicitudes">📋 Mis solicitudes</a>`;
+            <a href="mis-cotizaciones.html">💰 Mis Cotizaciones</a>
+            <hr class="menu-divider">
+    `;
     
-    // Agregar opción de proveedor si tiene el rol
-    if (auth.hasRole('proveedor')) {
-        menuContent += '<a href="proveedor.html">🏢 Panel Proveedor</a>';
+    // CONTROL DE FLUJO: Si YA es proveedor, desbloqueamos las herramientas de venta.
+    // Si aún NO lo es, le mostramos la opción de registrar un servicio.
+    if (roles.includes('proveedor')) {
+        menuContent += `
+            <div class="menu-section-title">💼 PANEL PROVEEDOR</div>
+            <a href="proveedor.html" style="font-weight: bold; color: #7c3aed;">🏢 Ir al Panel Proveedor</a>
+            <a href="mis-solicitudes-servicio.html">📦 Mis Servicios Ofrecidos</a>
+        `;
+    } else {
+        menuContent += `
+            <a href="solicitar-registro-servicio.html" class="menu-solicitar">📋 Registrar mi servicio</a>
+            <a href="mis-solicitudes-servicio.html" class="menu-solicitudes">📋 Estado de mis solicitudes</a>
+        `;
     }
     
+    // Cierre del contenedor del menú
     menuContent += `
-            <hr>
-            <a href="#" onclick="cerrarSesion()" style="color: #dc3545;">🚪 Cerrar Sesión</a>
+            <hr class="menu-divider">
+            <a href="#" onclick="cerrarSesion()" style="color: #dc3545; font-weight: 600;">🚪 Cerrar Sesión</a>
         </div>
     `;
     
@@ -146,10 +165,11 @@ function mostrarMenuUsuario(user) {
     userMenu.innerHTML = menuContent;
     document.body.appendChild(userMenu);
     
+    // Posicionamiento dinámico del menú debajo del botón Login
     const loginBtn = document.getElementById('loginBtn');
     const rect = loginBtn.getBoundingClientRect();
     userMenu.style.top = (rect.bottom + window.scrollY + 5) + 'px';
-    userMenu.style.left = (rect.left + window.scrollX - 100) + 'px';
+    userMenu.style.left = (rect.left + window.scrollX - 120) + 'px';
     userMenu.style.display = 'block';
     
     setTimeout(() => {
@@ -163,16 +183,8 @@ function mostrarMenuUsuario(user) {
 }
 
 function verPerfil() {
-    const user = auth.getCurrentUser();
-
-    if (!user) {
-        alert("Debes iniciar sesión");
-        return;
-    }
-
     const menu = document.getElementById('userMenu');
     if (menu) menu.style.display = 'none';
-
     window.location.href = "perfil.html";
 }
 
@@ -198,7 +210,7 @@ function cerrarModal(modalId) {
     }
 }
 
-// ===== FUNCIONES DE UI =====
+// ===== FUNCIONES DE INTERFAZ DE USUARIO =====
 function toggleMenu() {
     const menu = document.getElementById('navMenu');
     const hamburger = document.getElementById('hamburger');
@@ -235,12 +247,13 @@ function initSmoothScroll() {
     });
 }
 
-// ===== FUNCIONES DEL CARRITO =====
+// ===== GESTIÓN DEL CARRITO =====
 async function actualizarBadge() {
     const badge = document.getElementById('cartBadge');
     if (!badge) return;
     
     const token = localStorage.getItem('token');
+    let total = 0;
     
     if (token) {
         try {
@@ -248,35 +261,29 @@ async function actualizarBadge() {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
-            badge.textContent = data.total || 0;
-            badge.style.display = (data.total > 0) ? 'inline-block' : 'none';
+            total = data.total || 0;
         } catch (error) {
-            console.error('Error al obtener cantidad del carrito:', error);
-            try {
-                const carrito = JSON.parse(localStorage.getItem('fiestalandia_carrito')) || [];
-                const total = carrito.reduce((sum, item) => sum + (item.cantidad || 1), 0);
-                badge.textContent = total;
-                badge.style.display = total > 0 ? 'inline-block' : 'none';
-            } catch (e) {
-                badge.style.display = 'none';
-            }
+            console.error('Error API Carrito, usando LocalStorage fallback:', error);
+            total = obtenerConteoCarritoLocal();
         }
     } else {
-        try {
-            const carrito = JSON.parse(localStorage.getItem('fiestalandia_carrito')) || [];
-            const total = carrito.reduce((sum, item) => sum + (item.cantidad || 1), 0);
-            badge.textContent = total;
-            badge.style.display = total > 0 ? 'inline-block' : 'none';
-        } catch (e) {
-            badge.style.display = 'none';
-        }
+        total = obtenerConteoCarritoLocal();
+    }
+
+    badge.textContent = total;
+    badge.style.display = total > 0 ? 'inline-block' : 'none';
+}
+
+function obtenerConteoCarritoLocal() {
+    try {
+        const carrito = JSON.parse(localStorage.getItem('fiestalandia_carrito')) || [];
+        return carrito.reduce((sum, item) => sum + (item.cantidad || 1), 0);
+    } catch (e) {
+        return 0;
     }
 }
 
-// ===== FUNCIÓN PARA AGREGAR AL CARRITO =====
 async function agregarServicioCarrito(nombre, descripcion, precio, evento_id = null, evento_nombre = null) {
-    console.log('🛒 Agregando:', nombre, 'Precio:', precio);
-    
     const token = localStorage.getItem('token');
     
     if (token) {
@@ -309,10 +316,9 @@ async function agregarServicioCarrito(nombre, descripcion, precio, evento_id = n
                     mostrarToast(data.message || 'Error al agregar', 'error');
                 }
             } else {
-                mostrarToast('Servicio no encontrado en la base de datos', 'error');
+                mostrarToast('Servicio no encontrado', 'error');
             }
         } catch (error) {
-            console.error('Error:', error);
             agregarServicioCarritoLocal(nombre, descripcion, precio, evento_id, evento_nombre);
         }
     } else {
@@ -320,23 +326,18 @@ async function agregarServicioCarrito(nombre, descripcion, precio, evento_id = n
     }
 }
 
-// ===== AGREGAR AL CARRITO LOCAL (fallback) =====
 function agregarServicioCarritoLocal(nombre, descripcion, precio, evento_id = null, evento_nombre = null) {
     const carrito = JSON.parse(localStorage.getItem('fiestalandia_carrito')) || [];
-    
-    const existente = carrito.find(item => 
-        item.nombre === nombre && 
-        (item.eventoId === evento_id || (!item.eventoId && !evento_id))
-    );
+    const existente = carrito.find(item => item.nombre === nombre && item.eventoId === evento_id);
     
     if (existente) {
         existente.cantidad += 1;
     } else {
         carrito.push({
             id: Date.now(),
-            nombre: nombre,
-            descripcion: descripcion,
-            precio: precio,
+            nombre,
+            descripcion,
+            precio,
             cantidad: 1,
             eventoId: evento_id,
             eventoNombre: evento_nombre
@@ -348,19 +349,15 @@ function agregarServicioCarritoLocal(nombre, descripcion, precio, evento_id = nu
     actualizarBadge();
 }
 
-// ===== FUNCIONES PARA TOAST =====
+// ===== NOTIFICACIONES TOAST =====
 function mostrarToast(mensaje, tipo = 'info') {
     const existente = document.querySelector('.toast');
     if (existente) existente.remove();
 
     const toast = document.createElement('div');
-    toast.classList.add('toast');
+    toast.className = `toast ${tipo}`;
     
-    if (tipo === 'success') toast.classList.add('success');
-    if (tipo === 'error') toast.classList.add('error');
-    if (tipo === 'warning') toast.classList.add('warning');
-    
-    let icono = '';
+    let icono = 'ℹ️';
     if (tipo === 'success') icono = '✅';
     if (tipo === 'error') icono = '❌';
     if (tipo === 'warning') icono = '⚠️';
@@ -368,12 +365,10 @@ function mostrarToast(mensaje, tipo = 'info') {
     toast.innerHTML = `<span class="toast-icon">${icono}</span>${mensaje}`;
     document.body.appendChild(toast);
 
-    setTimeout(() => {
-        if (toast.parentNode) toast.remove();
-    }, 2800);
+    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 2800);
 }
 
-// ===== SWITCH ENTRE FORMULARIOS LOGIN / REGISTRO =====
+// ===== CONFIGURAR INTERCAMBIO DE MODALES DE AUTH =====
 function initAuthModalSwitch() {
     const switchToRegister = document.getElementById('switchToRegister');
     const switchToLogin    = document.getElementById('switchToLogin');
@@ -384,25 +379,24 @@ function initAuthModalSwitch() {
 
     if (!switchToRegister || !switchToLogin || !formLogin || !formRegister) return;
 
-    function mostrarRegistro() {
+    switchToRegister.addEventListener('click', (e) => {
+        e.preventDefault();
         formLogin.classList.remove('active');
         formRegister.classList.add('active');
         if (modalTitle) modalTitle.textContent = '¡Crea tu cuenta!';
         if (modalSubtitle) modalSubtitle.textContent = 'Regístrate para continuar';
-    }
+    });
 
-    function mostrarLogin() {
+    switchToLogin.addEventListener('click', (e) => {
+        e.preventDefault();
         formRegister.classList.remove('active');
         formLogin.classList.add('active');
         if (modalTitle) modalTitle.textContent = '¡Bienvenido!';
         if (modalSubtitle) modalSubtitle.textContent = 'Inicia sesión para continuar';
-    }
-
-    switchToRegister.addEventListener('click', (e) => { e.preventDefault(); mostrarRegistro(); });
-    switchToLogin.addEventListener('click',    (e) => { e.preventDefault(); mostrarLogin(); });
+    });
 }
 
-// ===== HELPER: MOSTRAR ERROR INLINE =====
+// ===== CONTROL DE ERRORES INLINE =====
 function mostrarErrorCampo(id, msg) {
     const el = document.getElementById(id);
     if (el) { el.textContent = msg; el.classList.add('visible'); }
@@ -415,7 +409,7 @@ function limpiarErroresCampo(...ids) {
     });
 }
 
-// ===== CORRECCIÓN PARA EL MODAL DE LOGIN =====
+// ===== MANEJO FORMULARIO DE LOGIN =====
 function corregirModalLogin() {
     const formLogin = document.getElementById('formLogin');
     if (!formLogin) return;
@@ -437,28 +431,26 @@ function corregirModalLogin() {
         if (!valid) return;
 
         const btn = newForm.querySelector('button[type="submit"]');
-        const txtOriginal = btn.textContent;
         btn.disabled = true; btn.textContent = 'Iniciando sesión...';
 
         const result = await auth.login(email, password);
-
-        btn.disabled = false; btn.textContent = txtOriginal;
+        btn.disabled = false; btn.textContent = 'Ingresar';
 
         if (result.success) {
             mostrarToast('¡Bienvenido! 🎉', 'success');
             document.getElementById('authModal').style.display = 'none';
-            // No llamamos a actualizarBotonLogin() porque la página se va a recargar/redirigir
-            // actualizarBadge();
         } else {
             mostrarToast(result.error || 'Error al iniciar sesión', 'error');
         }
     });
 }
 
+// ===== MANEJO FORMULARIO DE REGISTRO =====
 function corregirModalRegistro() {
     const formRegister = document.getElementById('formRegister');
     if (!formRegister) return;
 
+    // Inyectar checkbox de términos si no existe
     if (!document.getElementById('regTerminos')) {
         const terminosGroup = document.createElement('div');
         terminosGroup.className = 'form-group terminos-group';
@@ -501,7 +493,6 @@ function corregirModalRegistro() {
         if (!valid) return;
 
         const btn = newForm.querySelector('button[type="submit"]');
-        const txtOriginal = btn.textContent;
         btn.disabled = true; btn.textContent = 'Registrando...';
 
         const result = await auth.register({
@@ -509,10 +500,10 @@ function corregirModalRegistro() {
             email,
             telefono: telefono.replace(/\D/g, ''),
             password,
-            rol: 'usuario'
+            rol: 'cliente' // CORREGIDO: Cambiado de 'usuario' a 'cliente' para coincidir con la DB
         });
 
-        btn.disabled = false; btn.textContent = txtOriginal;
+        btn.disabled = false; btn.textContent = 'Registrarse';
 
         if (result.success) {
             mostrarToast('¡Cuenta creada exitosamente! 🎉', 'success');
@@ -525,27 +516,14 @@ function corregirModalRegistro() {
     });
 }
 
-// ===== EVENT LISTENERS =====
-window.addEventListener('userLogin', () => {
-    actualizarBotonLogin();
-    actualizarBadge();
-});
+// ===== ESCUCHADORES DE EVENTOS GLOBALES =====
+window.addEventListener('userLogin', () => { actualizarBotonLogin(); actualizarBadge(); });
+window.addEventListener('userLogout', () => { actualizarBotonLogin(); actualizarBadge(); });
+window.addEventListener('focus', () => { actualizarBotonLogin(); });
 
-window.addEventListener('userLogout', () => {
-    actualizarBotonLogin();
-    actualizarBadge();
-});
-
-window.addEventListener('focus', () => {
-    actualizarBotonLogin();
-});
-
-// ===== INIT =====
+// ===== INICIALIZACIÓN DE LA APLICACIÓN =====
 document.addEventListener('DOMContentLoaded', async () => {
-    // PRIMERO: Verificar que el usuario no sea admin (redirige si es admin)
-    if (!checkClienteAccess()) {
-        return; // Si es admin, checkClienteAccess ya redirigió, salimos
-    }
+    if (!checkClienteAccess()) return; 
     
     console.log('Main.js iniciado - Cliente');
 
@@ -559,6 +537,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     corregirModalRegistro();
     initAuthModalSwitch();
 
+    // Eventos para cerrar modal haciendo clic fuera de él
     const authModal = document.getElementById('authModal');
     if (authModal) {
         authModal.addEventListener('click', (e) => {
@@ -578,9 +557,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// Exponer funciones globales
-window.irASubcategorias = irASubcategorias;
-window.toggleMenu = toggleMenu;
-window.verPerfil = verPerfil;
-window.cerrarSesion = cerrarSesion;
-window.agregarServicioCarrito = agregarServicioCarrito;
+// ===== EXPOSICIÓN DE MÉTODOS A WINDOW =====
+Object.assign(window, {
+    irASubcategorias,
+    toggleMenu,
+    verPerfil,
+    cerrarSesion,
+    agregarServicioCarrito
+});
