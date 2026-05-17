@@ -340,17 +340,20 @@ function actualizarBadge() {
 function actualizarBotonLogin() {
     const loginBtn = document.getElementById('loginBtn');
     const user = auth.getCurrentUser();
-    
+
     if (user && loginBtn) {
         loginBtn.innerHTML = `👤 ${user.nombre}`;
         loginBtn.classList.add('logged-in');
+
         loginBtn.onclick = (e) => {
             e.preventDefault();
             mostrarMenuUsuario(user);
         };
+
     } else if (loginBtn) {
         loginBtn.innerHTML = '🔐 Login';
         loginBtn.classList.remove('logged-in');
+
         loginBtn.onclick = (e) => {
             e.preventDefault();
             document.getElementById('authModal').style.display = 'flex';
@@ -358,63 +361,186 @@ function actualizarBotonLogin() {
     }
 }
 
+// ===== MENÚ DE USUARIO =====
 function mostrarMenuUsuario(user) {
+
+    // Eliminar menú anterior si existe
     const existingMenu = document.getElementById('userMenu');
     if (existingMenu) existingMenu.remove();
-    
+
+    // Validación segura de roles
+    const roles = Array.isArray(user.roles)
+        ? user.roles
+        : [user.rol].filter(Boolean);
+
+    // ===== MENÚ GENERAL =====
     let menuContent = `
         <div class="user-menu-header">
             <strong>${user.nombre}</strong>
             <small>${user.email}</small>
         </div>
+
         <div class="user-menu-items">
+
             <a href="perfil.html">👤 Mi Perfil</a>
-            <a href="mis-eventos.html">📅 Mis Eventos</a>
-            <a href="mis-cotizaciones.html">💰 Mis Cotizaciones</a>
-            <a href="solicitar-registro-servicio.html" class="menu-solicitar">📋 Registrar mi servicio</a>
-            <a href="mis-solicitudes-servicio.html" class="menu-solicitudes">📋 Mis solicitudes</a>
+
+            <a href="mis-eventos.html">
+                📅 Mis Eventos
+            </a>
+
+            <a href="mis-cotizaciones.html">
+                💰 Mis Cotizaciones
+            </a>
     `;
-    
-    if (user.rol === 'admin') {
+
+    // ===== FUNCIONES DE PROVEEDOR =====
+    if (roles.includes('proveedor')) {
+
         menuContent += `
-            <a href="admin.html">👑 Panel Admin</a>
+
+            <hr>
+
+            <div class="menu-section-title">
+                💼 PANEL PROVEEDOR
+            </div>
+
+            <a href="proveedor.html"
+               class="menu-proveedor">
+               🏢 Panel Proveedor
+            </a>
+
+            <a href="mis-solicitudes-servicio.html">
+                📦 Mis Servicios
+            </a>
+        `;
+
+    } else {
+
+        menuContent += `
+
+            <hr>
+
+            <a href="solicitar-registro-servicio.html"
+               class="menu-solicitar">
+
+               📋 Registrar mi servicio
+
+            </a>
+
+            <a href="mis-solicitudes-servicio.html"
+               class="menu-solicitudes">
+
+               📋 Estado de solicitudes
+
+            </a>
         `;
     }
-    
-    menuContent += `
+
+    // ===== PANEL ADMIN =====
+    if (roles.includes('admin')) {
+
+        menuContent += `
+
             <hr>
-            <a href="#" onclick="cerrarSesion()" style="color: #dc3545;">🚪 Cerrar Sesión</a>
+
+            <div class="menu-section-title">
+                👑 ADMINISTRACIÓN
+            </div>
+
+            <a href="admin.html">
+                👑 Panel Admin
+            </a>
+        `;
+    }
+
+    // ===== CERRAR MENÚ =====
+    menuContent += `
+
+            <hr>
+
+            <a href="#"
+               onclick="cerrarSesion()"
+               style="color: #dc3545; font-weight: 600;">
+
+               🚪 Cerrar Sesión
+
+            </a>
+
         </div>
     `;
-    
+
+    // ===== CREAR MENÚ =====
     const userMenu = document.createElement('div');
+
     userMenu.id = 'userMenu';
     userMenu.className = 'user-menu';
     userMenu.innerHTML = menuContent;
+
     document.body.appendChild(userMenu);
-    
+
+    // ===== POSICIÓN =====
     const loginBtn = document.getElementById('loginBtn');
+
     const rect = loginBtn.getBoundingClientRect();
-    userMenu.style.top = (rect.bottom + window.scrollY + 5) + 'px';
-    userMenu.style.left = (rect.left + window.scrollX - 100) + 'px';
+
+    userMenu.style.top =
+        (rect.bottom + window.scrollY + 5) + 'px';
+
+    userMenu.style.left =
+        (rect.left + window.scrollX - 120) + 'px';
+
     userMenu.style.display = 'block';
+
+    // ===== CERRAR AL HACER CLICK FUERA =====
+    setTimeout(() => {
+
+        document.addEventListener('click', function cerrarMenu(e) {
+
+            if (
+                !userMenu.contains(e.target) &&
+                e.target !== loginBtn
+            ) {
+
+                userMenu.remove();
+
+                document.removeEventListener(
+                    'click',
+                    cerrarMenu
+                );
+            }
+        });
+
+    }, 100);
 }
 
+// ===== PERFIL =====
 function verPerfil() {
-    const user = auth.getCurrentUser();
-    alert(`👤 ${user.nombre}\n📧 ${user.email}\n📱 ${user.telefono || 'No especificado'}`);
-    document.getElementById('userMenu').style.display = 'none';
+
+    const menu = document.getElementById('userMenu');
+
+    if (menu) menu.remove();
+
+    window.location.href = "perfil.html";
 }
 
+// ===== CERRAR SESIÓN =====
 function cerrarSesion() {
+
     auth.logout();
+
     window.location.reload();
 }
 
+// ===== MENÚ MÓVIL =====
 function toggleMenu() {
+
     const menu = document.getElementById('navMenu');
-    const hamburger = document.getElementById('hamburger');
+
+    const hamburger =
+        document.getElementById('hamburger');
+
     menu.classList.toggle('active');
+
     hamburger.classList.toggle('active');
 }
 

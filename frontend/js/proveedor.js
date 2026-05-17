@@ -1,87 +1,263 @@
 // frontend/js/proveedor.js - CÓDIGO COMPLETO E INTEGRADO
 // const API_URL = 'http://localhost:3000/api';
 
-// ===== VERIFICAR SESIÓN DE PROVEEDOR =====
+// ===== FUNCIONES DE AUTENTICACIÓN =====
+
+// Verificar acceso al panel proveedor
 function checkProveedorAuth() {
+
     const user = auth.getCurrentUser();
-    if (!user || !auth.hasRole('proveedor')) {
+    const token = localStorage.getItem('token');
+
+    // Validar sesión
+    if (!user || !token) {
         window.location.href = 'index.html';
-    } else {
-        const proveedorBtn = document.getElementById('proveedorLoginBtn');
-        if (proveedorBtn) {
-            proveedorBtn.innerHTML = `👤 ${user.nombre}`;
-            proveedorBtn.classList.add('logged-in');
-        }
-        // Carga inicial obligatoria de la pestaña por defecto
-        cargarServiciosProveedor();
+        return;
     }
+
+    // Obtener roles correctamente
+    const roles = Array.isArray(user.roles)
+        ? user.roles
+        : [user.rol].filter(Boolean);
+
+    // Verificar permisos
+    if (!roles.includes('proveedor')) {
+        mostrarToast('No tienes permisos para acceder al panel proveedor', 'error');
+
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 1200);
+
+        return;
+    }
+
+    actualizarBotonProveedor(user);
+
+    // Carga inicial obligatoria
+    cargarServiciosProveedor();
 }
 
-// ===== MENÚ DESPLEGABLE CON CAPA FLOTANTE AISLADA =====
+// ===== ACTUALIZAR BOTÓN LOGIN =====
+function actualizarBotonProveedor(user) {
+
+    const proveedorBtn =
+        document.getElementById('proveedorLoginBtn');
+
+    if (!proveedorBtn) return;
+
+    proveedorBtn.innerHTML = `👤 ${escapeHtml(user.nombre)}`;
+
+    proveedorBtn.classList.add('logged-in');
+
+    proveedorBtn.onclick = (e) => {
+        e.preventDefault();
+
+        mostrarMenuProveedor(user);
+    };
+}
+
+// ===== MENÚ DESPLEGABLE =====
 function initProveedorMenu() {
-    const loginBtn = document.getElementById('proveedorLoginBtn');
-    if (loginBtn) {
-        loginBtn.onclick = (e) => {
-            e.preventDefault();
-            const user = auth.getCurrentUser();
-            if (user) {
-                mostrarMenuProveedor(user);
-            }
-        };
-    }
+
+    const loginBtn =
+        document.getElementById('proveedorLoginBtn');
+
+    if (!loginBtn) return;
+
+    loginBtn.addEventListener('click', (e) => {
+
+        e.preventDefault();
+
+        const user = auth.getCurrentUser();
+
+        if (user) {
+            mostrarMenuProveedor(user);
+        }
+    });
 }
 
+// ===== MOSTRAR MENÚ =====
 function mostrarMenuProveedor(user) {
-    const existingMenu = document.getElementById('userMenu');
-    if (existingMenu) existingMenu.remove();
 
-    const menuContent = `
+    // Eliminar menú existente
+    const existingMenu =
+        document.getElementById('userMenu');
+
+    if (existingMenu) {
+        existingMenu.remove();
+    }
+
+    // Roles seguros
+    const roles = Array.isArray(user.roles)
+        ? user.roles
+        : [user.rol].filter(Boolean);
+
+    // ===== CONTENIDO DEL MENÚ =====
+    let menuContent = `
+
         <div class="user-menu-header">
+
             <strong>${escapeHtml(user.nombre)}</strong>
+
             <small>${escapeHtml(user.email)}</small>
+
         </div>
+
         <div class="user-menu-items">
-            <a href="perfil.html">👤 Mi Perfil</a>
-            <a href="mis-solicitudes-servicio.html">📅 Mis Eventos</a>
-            <a href="cotizaciones.html">💰 Mis Cotizaciones</a>
-            <a href="proveedor.html" style="color: #7c3aed; background: #f3e8ff; font-weight: 600;">🏢 Panel Proveedor</a>
-            <a href="#" onclick="proveedorLogout()" class="btn-logout" style="text-align: center; margin-top: 8px; border-radius: 8px; display: block;">🚪 Cerrar Sesión</a>
+
+            <a href="perfil.html">
+                👤 Mi Perfil
+            </a>
+
+            <a href="mis-eventos.html">
+                📅 Mis Eventos
+            </a>
+
+            <a href="mis-cotizaciones.html">
+                💰 Mis Cotizaciones
+            </a>
+    `;
+
+    // ===== SECCIÓN PROVEEDOR =====
+    if (roles.includes('proveedor')) {
+
+        menuContent += `
+
+            <hr class="menu-divider">
+
+            <div class="menu-section-title">
+                💼 PANEL PROVEEDOR
+            </div>
+
+            <a href="proveedor.html"
+               class="menu-proveedor">
+
+               🏢 Panel Proveedor
+
+            </a>
+
+            <a href="mis-solicitudes-servicio.html">
+
+                📦 Mis Servicios
+
+            </a>
+        `;
+    }
+
+    // ===== SECCIÓN ADMIN =====
+    if (roles.includes('admin')) {
+
+        menuContent += `
+
+            <hr class="menu-divider">
+
+            <div class="menu-section-title">
+                👑 ADMINISTRACIÓN
+            </div>
+
+            <a href="admin.html">
+
+                👑 Panel Admin
+
+            </a>
+        `;
+    }
+
+    // ===== CERRAR SESIÓN =====
+    menuContent += `
+
+            <hr class="menu-divider">
+
+            <a href="#"
+               onclick="proveedorLogout()"
+               class="btn-logout"
+               style="
+                    color:#dc3545;
+                    font-weight:600;
+                    text-align:center;
+                    margin-top:8px;
+                    border-radius:8px;
+                    display:block;
+               ">
+
+               🚪 Cerrar Sesión
+
+            </a>
+
         </div>
     `;
 
+    // ===== CREAR MENÚ =====
     const userMenu = document.createElement('div');
+
     userMenu.id = 'userMenu';
-    userMenu.className = 'user-menu'; // Activa los estilos de tu archivo CSS
+
+    userMenu.className = 'user-menu';
+
     userMenu.innerHTML = menuContent;
-    
-    // Inyección aislada directo al body para romper cualquier flujo heredado del header
+
     document.body.appendChild(userMenu);
 
-    const loginBtn = document.getElementById('proveedorLoginBtn');
-    const rect = loginBtn.getBoundingClientRect();
+    // ===== POSICIÓN =====
+    const loginBtn =
+        document.getElementById('proveedorLoginBtn');
 
-    // Posicionamiento absoluto exacto debajo del botón verde
+    const rect =
+        loginBtn.getBoundingClientRect();
+
     userMenu.style.position = 'absolute';
-    userMenu.style.top = (rect.bottom + window.scrollY + 6) + 'px';
-    userMenu.style.left = (rect.left + window.scrollX - 40) + 'px';
+
+    userMenu.style.top =
+        (rect.bottom + window.scrollY + 8) + 'px';
+
+    userMenu.style.left =
+        (rect.left + window.scrollX - 80) + 'px';
+
     userMenu.style.display = 'block';
+
     userMenu.style.zIndex = '9999';
 
+    // ===== CERRAR AL HACER CLICK FUERA =====
     setTimeout(() => {
-        document.addEventListener('click', function cerrarMenu(e) {
-            if (!userMenu.contains(e.target) && e.target !== loginBtn) {
-                userMenu.style.display = 'none';
-                document.removeEventListener('click', cerrarMenu);
+
+        document.addEventListener(
+            'click',
+            function cerrarMenu(e) {
+
+                if (
+                    !userMenu.contains(e.target) &&
+                    e.target !== loginBtn
+                ) {
+
+                    userMenu.remove();
+
+                    document.removeEventListener(
+                        'click',
+                        cerrarMenu
+                    );
+                }
             }
-        });
+        );
+
     }, 100);
 }
 
+// ===== CERRAR SESIÓN =====
 function proveedorLogout() {
-    auth.logout();
-    window.location.href = 'index.html';
-}
 
+    auth.logout();
+
+    localStorage.removeItem('token');
+
+    mostrarToast(
+        'Sesión cerrada correctamente',
+        'success'
+    );
+
+    setTimeout(() => {
+        window.location.href = 'index.html';
+    }, 700);
+}
 // ===== PESTAÑA 1: CARGAR Y MOSTRAR SERVICIOS =====
 async function cargarServiciosProveedor() {
     const tbody = document.getElementById('serviciosTableBody');
