@@ -126,7 +126,7 @@ function mostrarMenuProveedor(user) {
             <hr class="menu-divider">
 
             <div class="menu-section-title">
-                💼 PANEL PROVEEDOR
+                PANEL PROVEEDOR
             </div>
 
             <a href="proveedor.html"
