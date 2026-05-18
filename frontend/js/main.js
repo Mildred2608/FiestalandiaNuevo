@@ -141,7 +141,7 @@ function mostrarMenuUsuario(user) {
     // Si aún NO lo es, le mostramos la opción de registrar un servicio.
     if (roles.includes('proveedor')) {
         menuContent += `
-            <div class="menu-section-title">💼 PANEL PROVEEDOR</div>
+            <div class="menu-section-title"> PANEL PROVEEDOR</div>
             <a href="proveedor.html" style="font-weight: bold; color: #7c3aed;">🏢 Ir al Panel Proveedor</a>
             <a href="mis-solicitudes-servicio.html">📦 Mis Servicios Ofrecidos</a>
         `;

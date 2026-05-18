@@ -556,7 +556,7 @@ async function enviarSolicitudPago(event) {
 async function solicitarCotizacion() {
     const user = auth.getCurrentUser();
     if (!user) {
-        mostrarToast('🔐 Inicia sesión para solicitar una cotización', 'warning');
+        mostrarToast(' Inicia sesión para solicitar una cotización', 'warning');
         document.getElementById('authModal').style.display = 'flex';
         return;
     }
@@ -658,7 +658,7 @@ function actualizarBotonLogin() {
             mostrarMenuUsuario(user);
         };
     } else if (loginBtn) {
-        loginBtn.innerHTML = '🔐 Login';
+        loginBtn.innerHTML = ' Login';
         loginBtn.classList.remove('logged-in');
         loginBtn.onclick = (e) => {
             e.preventDefault();
