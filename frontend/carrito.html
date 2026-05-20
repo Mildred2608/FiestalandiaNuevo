@@ -7,6 +7,7 @@
   <meta name="description" content="Revisa los servicios seleccionados para tu evento. Fiestalandia.">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/carrito.css">
+  <link rel="stylesheet" href="css/global-states.css">
 </head>
 
 <body>
@@ -40,7 +41,7 @@
 <main class="container">
 
   <!-- Carrito vacío -->
-  <div id="carritoVacio" class="carrito-empty" style="display:none;">
+  <div id="carritoVacio" class="carrito-empty" style="display: none;">
     <div class="empty-icon">🛒</div>
     <h3>Tu carrito está vacío</h3>
     <p>Agrega servicios desde nuestro catálogo para comenzar a armar tu evento ideal.</p>
@@ -48,10 +49,10 @@
   </div>
 
   <!-- Carrito con items -->
-  <div id="carritoContenido" style="display:none;">
+  <div id="carritoContenido" style="display: none;">
 
     <div class="carrito-items" id="carritoItems">
-      <!-- Items se renderizan dinámicamente -->
+      <!-- Los elementos dinámicos se inyectan aquí con la estructura .carrito-evento-seccion -->
     </div>
 
     <div class="carrito-resumen">
@@ -67,8 +68,8 @@
         <div id="pagoEventoContainer" class="pago-evento">
             <label for="eventoAPagar">Pagar evento:</label>
             <select id="eventoAPagar"></select>
-            <button id="btnPagarEvento" class="btn-pagar">Pagar evento</button>
-            <div id="pagoEventoTotal" class="total-evento" style="margin-top: 10px; font-weight: 700;">Total evento seleccionado: $0</div>
+            <button id="btnPagarEvento" class="btn-pagar">💳 Pagar evento</button>
+            <div id="pagoEventoTotal" class="total-evento">Total evento seleccionado: $0</div>
         </div>
 
         <div class="resumen-total">
@@ -77,7 +78,7 @@
         </div>
 
         <div class="resumen-actions">
-          <button class="btn-vaciar" onclick="vaciarCarrito()"> Vaciar carrito</button>
+          <button class="btn-vaciar" onclick="vaciarCarrito()">Vaciar carrito</button>
           <button class="btn-cotizar" onclick="solicitarCotizacion()">📩 Solicitar cotización</button>
         </div>
       </div>
@@ -89,8 +90,8 @@
     <a href="index.html" class="btn-back">← Regresar al inicio</a>
   </div>
 
-  <!-- Modal de pago -->
-  <div class="modal" id="modalPagoEvento" style="display:none;">
+  <!-- Modal de pago flotante -->
+  <div class="modal" id="modalPagoEvento" style="display: none;">
     <div class="modal-content">
       <span id="closeModalPago" class="modal-close">&times;</span>
       <h2>Pago con tarjeta</h2>
@@ -133,18 +134,8 @@
       <ul>
         <li><a href="index.html">Inicio</a></li>
         <li><a href="index.html#servicios">Servicios</a></li>
-        <li><a href="decoracion.html">Decoración</a></li>
         <li><a href="index.html#contacto">Contacto</a></li>
       </ul>
-    </div>
-    <div class="footer-social">
-      <h4>Redes sociales</h4>
-      <div class="footer-social-icons">
-        <a href="#" class="footer-social-icon" title="Facebook">📘</a>
-        <a href="#" class="footer-social-icon" title="Instagram">📷</a>
-        <a href="#" class="footer-social-icon" title="TikTok">🎵</a>
-        <a href="#" class="footer-social-icon" title="WhatsApp">💬</a>
-      </div>
     </div>
   </div>
   <div class="footer-bottom">
@@ -152,8 +143,9 @@
   </div>
 </footer>
 
-<!-- Primero auth.js, luego carrito.js (NO main.js) -->
+<!-- Carga correcta de tus scripts de control -->
 <script src="js/auth.js"></script>
+<script src="js/global-handlers.js"></script>
 <script src="js/carrito.js"></script>
 
 </body>

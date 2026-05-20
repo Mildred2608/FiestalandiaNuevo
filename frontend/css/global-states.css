@@ -1,0 +1,261 @@
+/* frontend/css/global-states.css */
+/* ===== CLASES DE ESTADO GLOBAL ===== */
+/* Este archivo contiene clases reutilizables para controlar visibilidad y estados */
+
+/* ===== VISIBILIDAD ===== */
+.hidden {
+    display: none !important;
+}
+
+.visible {
+    display: block !important;
+}
+
+.visible-flex {
+    display: flex !important;
+}
+
+.visible-grid {
+    display: grid !important;
+}
+
+.visible-inline-block {
+    display: inline-block !important;
+}
+
+/* ===== MODALES ===== */
+.modal--hidden {
+    display: none !important;
+}
+
+.modal--visible {
+    display: flex !important;
+}
+
+/* ===== OPACIDAD ===== */
+.transparent {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.opaque {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* ===== COLORES DE BOTONES ===== */
+.btn-primary {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #2563eb;
+}
+
+.btn-primary:active {
+    background-color: #1d4ed8;
+}
+
+.btn-danger {
+    background-color: #dc2626;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-danger:hover {
+    background-color: #b91c1c;
+}
+
+.btn-danger:active {
+    background-color: #991b1b;
+}
+
+.btn-success {
+    background-color: #16a34a;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-success:hover {
+    background-color: #15803d;
+}
+
+.btn-secondary {
+    background-color: #9ca3af;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background-color: #6b7280;
+}
+
+.btn-logout {
+    background-color: #ef4444;
+    color: white;
+}
+
+.btn-logout:hover {
+    background-color: #dc2626;
+}
+
+/* ===== ESTADOS DE CARGA ===== */
+.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: ' (cargando...)';
+}
+
+.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+/* ===== ANIMACIONES ===== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+.fade-out {
+    animation: fadeOut 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.slide-down {
+    animation: slideDown 0.3s ease-in;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(10px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.slide-up {
+    animation: slideUp 0.3s ease-in;
+}
+
+/* ===== FLEX UTILITIES ===== */
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.flex-column {
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===== SPACING ===== */
+.m-0 {
+    margin: 0;
+}
+
+.mt-1 {
+    margin-top: 0.25rem;
+}
+
+.mt-2 {
+    margin-top: 0.5rem;
+}
+
+.mt-4 {
+    margin-top: 1rem;
+}
+
+.mb-1 {
+    margin-bottom: 0.25rem;
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem;
+}
+
+.mb-4 {
+    margin-bottom: 1rem;
+}
+
+.p-0 {
+    padding: 0;
+}
+
+.p-2 {
+    padding: 0.5rem;
+}
+
+.p-4 {
+    padding: 1rem;
+}
+
+/* ===== PAGO EVENTO ===== */
+.total-evento {
+    margin-top: 10px;
+    font-weight: 700;
+}
+

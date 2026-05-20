@@ -37,6 +37,23 @@
   align-items: start;
 }
 
+/* Subsecciones creadas dinámicamente desde el JS */
+.carrito-evento-seccion {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.carrito-evento-seccion h3 {
+  color: #1f2937;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border-left: 4px solid #7c3aed;
+  padding-left: 10px;
+  margin-bottom: 4px;
+}
+
 /* Cart items */
 .carrito-items {
   display: flex;
@@ -240,25 +257,6 @@
   box-shadow: 0 8px 25px rgba(124,58,237,0.35);
 }
 
-.btn-pagar {
-  width: 100%;
-  padding: 14px;
-  border: none;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #7c3aed, #ec4899);
-  color: white;
-  font-weight: 700;
-  font-size: 1rem;
-  cursor: pointer;
-  font-family: 'Poppins', sans-serif;
-  transition: all 0.3s ease;
-}
-
-.btn-pagar:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(124,58,237,0.35);
-}
-
 .btn-vaciar {
   width: 100%;
   padding: 12px;
@@ -279,7 +277,7 @@
   background: #fef2f2;
 }
 
-/* Back button (reuse from decoracion) */
+/* Back button */
 .back-btn-container {
   text-align: center;
   margin-top: 40px;
@@ -301,6 +299,192 @@
 .btn-back:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(124,58,237,0.35);
+}
+
+/* Contenedor de la sección de pago */
+.pago-evento {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+/* Texto de "Pagar evento:" */
+.pago-evento label {
+  display: block;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #4b5563;
+  margin-bottom: 8px;
+}
+
+/* Selector desplegable de Eventos */
+#eventoAPagar {
+  width: 100%;
+  padding: 12px 16px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1f2937;
+  background-color: #ffffff;
+  border: 2px solid #e5e7eb;
+  border-radius: 14px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+  margin-bottom: 16px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%237c3aed' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px;
+}
+
+#eventoAPagar:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+}
+
+.total-evento {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-align: right;
+  margin-top: 10px;
+}
+
+/* DISEÑO PREMIUM COMPLETO DEL BOTÓN PAGAR EVENTO */
+.btn-pagar {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #7c3aed, #ec4899);
+  color: white;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.25);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-pagar:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4), 0 4px 10px rgba(236, 72, 153, 0.2);
+  filter: brightness(1.05);
+}
+
+.btn-pagar:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.2);
+}
+
+/* Modales e Inputs Flotantes de la Tarjeta */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex; /* Manejado mediante display flex en el script para centrar */
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 450px;
+  position: relative;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 1.6rem;
+  cursor: pointer;
+  color: #9ca3af;
+  transition: color 0.2s;
+}
+
+.modal-close:hover {
+  color: #ef4444;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-group label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #374151;
+  font-family: 'Poppins', sans-serif;
+}
+
+.form-group input {
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  outline: none;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.modal-btn {
+  width: 100%;
+  padding: 14px;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.modal-btn:hover {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
 }
 
 /* Responsive */
